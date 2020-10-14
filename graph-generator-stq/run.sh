@@ -1,0 +1,11 @@
+./dag_gen_stq      10    3     10 v10e3        > v10e3.stat
+./dag_gen_stq     100   10    100 v100e10      > v100e10.stat
+./dag_gen_stq     200   20    200 v200e20      > v200e20.stat
+./dag_gen_stq     500   10    500 v500e10      > v500e10.stat
+./dag_gen_stq    1000   30   1000 v1000e30     > v1000e30.stat
+./dag_gen_stq    5000   50   5000 v5000e50     > v5000e50.stat
+./dag_gen_stq  100000  100  10000 v100000e100  > v100000e100.stat
+./dag_gen_stq  500000   50  50000 v500000e50   > v500000e50.stat
+./dag_gen_stq  500000 1000  75000 v500000e1000 > v500000e100.stat
+./dag_gen_stq 1000000  100 100000 v1000000e100 > v1000000e100.stat
+./dag_gen_stq 1000000  200 200000 v1000000e200 > v1000000e200.stat
