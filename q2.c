@@ -46,15 +46,24 @@ int main(int argc, char *argv[]) {
     // Ciclo per contare gli archi per allocare la giusta memoria 
 
     for(j=0; j<num_vertex; j++) {
+        
         fscanf(fp, "%i: ", &i);
+        
         do {
             if(k !=0) ungetc(c, fp);
             fscanf(fp, "%i ", &i);
             c = fgetc(fp);
             k++;
         } while(c != 35);
+        
         rows[j].edge_num = k;
         rows[j].edges_pointer = (int *) calloc (rows[j].edge_num, sizeof (int));
+        
+        if (rows[j].edges_pointer == NULL ) {
+            printf ("Not enough room for the edges of the vertex %i.\n", j );
+            return 0;
+        }
+        
         k = 0;
     }
 
