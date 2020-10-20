@@ -1,3 +1,5 @@
 .idea/
 grail/
 **/.DS_Store
+cmake-build-debug/
+
