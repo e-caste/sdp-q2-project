@@ -33,6 +33,16 @@ void print_list(edge *head) {
     }
 }
 
+void free_list(edge *head) {
+    edge *tmp;
+
+    while(head != NULL) {
+        tmp = head;
+        head = head -> next_num;
+        free(tmp);
+    }
+}
+
 typedef struct row_graph {
     int edge_num;
     edge *edges_pointer;
@@ -114,7 +124,7 @@ int main(int argc, char *argv[]) {
     // Deallocazione di tutte le risorse
 
     for(i=0; i<num_vertex; i++) {
-        free(rows[i].edges_pointer);
+        free_list(rows[i].edges_pointer);
     }
 
     free(rows);
