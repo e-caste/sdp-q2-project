@@ -1,5 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
+#include <unistd.h>
+
+#define N 5
 
 typedef struct edge_list {
     int num;
@@ -48,12 +52,82 @@ typedef struct row_graph {
     edge *edges_pointer;
 } row_g;
 
+typedef struct thread_args {
+    int id;
+    int total_vertex;
+    char *filename;
+    row_g *graph;
+} t_args;
+
+void *scanFile(void *args) {
+    t_args *my_data;
+    my_data = (t_args *) args;
+    FILE *fp;
+    int j, i, k, c;
+
+    fp = fopen(my_data -> filename, "r");
+    if (fp == NULL) {
+        fprintf(stderr, "Unable to open file %s for reading, thread number %i.\n", my_data -> filename, my_data -> id );
+        exit(1);
+    }
+
+
+    int inf, sup;
+    inf = (my_data -> id) * (my_data -> total_vertex / N);
+    sup = inf + (my_data -> total_vertex / N);
+
+    if(my_data->id == N-1) sup = my_data->total_vertex;
+
+    //printf("Thread n. %i con inf: %i e sup: %i\n", my_data->id, inf, sup-1);
+
+    // Salta righe
+
+    fscanf(fp, "%*[^\n]\n");
+
+    for(j=0; j<inf; j++) {
+        fscanf(fp, "%*[^\n]\n");
+    }
+
+    for(j=inf; j<sup; j++) {
+        fscanf(fp, "%i: ", &i);
+        edge *head;
+        head = malloc(sizeof(edge));
+        do {
+            i = -1;
+            if(k !=0) ungetc(c, fp);
+            fscanf(fp, "%i ", &i);
+            if(i != -1) {
+                if(k==0) {
+                    create_list(head, i);
+                } else {
+                    push(head, i);
+                }
+            }
+            c = fgetc(fp);
+            k++;
+        } while(c != 35);
+        if(i==-1) {
+            my_data -> graph[j].edges_pointer = NULL;
+            my_data -> graph[j].edge_num = 0;
+        } else {
+            my_data -> graph[j].edges_pointer = head;
+            my_data -> graph[j].edge_num = k;
+        }
+        k = 0;
+    }
+
+    pthread_exit((void *) 0);
+
+}
+
 int main(int argc, char *argv[]) {
 
     FILE *fp;
     unsigned int num_vertex;
-    int i, j, c=0, k=0;
+    int i, j, c=0, k=0, err_code=0;
     row_g *rows;
+    pthread_t threads[N];
+    t_args args[N];
 
     // Controllo sugli argomenti
 
@@ -81,37 +155,33 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    // Ciclo for per inserire gli archi
+    fclose(fp);
 
-    for(j=0; j<num_vertex; j++) {
-        fscanf(fp, "%i: ", &i);
-        edge *head;
-        head = malloc(sizeof(edge));
-        do {
-            i = -1;
-            if(k !=0) ungetc(c, fp);
-            fscanf(fp, "%i ", &i);
-            if(i != -1) {
-                if(k==0) {
-                    create_list(head, i);
-                } else {
-                    push(head, i);
-                }
-            }
-            c = fgetc(fp);
-            k++;
-        } while(c != 35);
-        if(i==-1) {
-            rows[j].edges_pointer = NULL;
-            rows[j].edge_num = 0;
-        } else {
-            rows[j].edges_pointer = head;
-            rows[j].edge_num = k;
-        }
-        k = 0;
+    // Creazione thread
+    for(j=0; j<N; j++) {
+        args[j].filename = argv[1];
+        args[j].graph = rows;
+        args[j].total_vertex = num_vertex;
     }
 
-    //fclose(fp);
+    for(i=0; i<N; i++) {
+        args[i].id = i;
+        err_code = pthread_create(&threads[i], NULL, scanFile, (void *)&args[i]);
+        if(err_code) {
+            printf ("Errore numero %i nella creazione del thread %i.\n", err_code, i);
+            return 0;
+        }
+    }
+
+    // Aspettare che i thread finiscano
+
+    for(j=0; j<N; j++) {
+        err_code = pthread_join(threads[j], NULL);
+        if(err_code) {
+            printf ("Errore numero %i nel joining del thread %i.\n", err_code, j);
+            return 0;
+        }
+    }
 
     // Stampa di prova
 
