@@ -1,20 +1,48 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define L     100
+typedef struct edge_list {
+    int num;
+    struct edge_list *next_num;
+} edge;
+
+void create_list(edge *head, int val) {
+    edge *current = head;
+    current -> num = val;
+    current -> next_num = NULL;
+}
+
+void push(edge *head, int val) {
+    edge *current = head;
+
+    while(current -> next_num != NULL) {
+        current = current -> next_num;
+    }
+
+    current -> next_num = (edge *) malloc(sizeof(edge));
+    current -> next_num -> num = val;  
+    current -> next_num -> next_num = NULL;
+}
+
+void print_list(edge *head) {
+    edge *current = head;
+
+    while(current != NULL) {
+        printf("%i ", current -> num);
+        current = current -> next_num;
+    }
+}
 
 typedef struct row_graph {
     int edge_num;
-    int *edges_pointer;
+    edge *edges_pointer;
 } row_g;
 
 int main(int argc, char *argv[]) {
 
     FILE *fp;
-    char name[L];
     unsigned int num_vertex;
     int i, j, c=0, k=0;
-    char buffer[100];
     row_g *rows;
 
     // Controllo sugli argomenti
@@ -29,7 +57,7 @@ int main(int argc, char *argv[]) {
     fp = fopen(argv[1], "r");
 
     if (fp == NULL) {
-        fprintf(stderr, "Unable to open file %s for reading.\n", name );
+        fprintf(stderr, "Unable to open file %s for reading.\n", argv[1] );
         exit(1);
     }
 
@@ -43,67 +71,43 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    // Ciclo per contare gli archi per allocare la giusta memoria 
-
-    for(j=0; j<num_vertex; j++) {
-        
-        fscanf(fp, "%i: ", &i);
-        
-        do {
-            if(k !=0) ungetc(c, fp);
-            fscanf(fp, "%i ", &i);
-            c = fgetc(fp);
-            k++;
-        } while(c != 35);
-        
-        rows[j].edge_num = k;
-        rows[j].edges_pointer = (int *) calloc (rows[j].edge_num, sizeof (int));
-        
-        if (rows[j].edges_pointer == NULL ) {
-            printf ("Not enough room for the edges of the vertex %i.\n", j );
-            return 0;
-        }
-        
-        k = 0;
-    }
-
-    // Chiusura e apertura del file per poter rileggerlo dall'inizio
-
-    fclose(fp);
-    fp = fopen(argv[1], "r");
-
-    if (fp == NULL) {
-        fprintf(stderr, "Unable to open file %s for reading.\n", name );
-        exit(1);
-    }
-
-    // Per saltare la prima riga
-
-    fscanf(fp,"%i\n", &num_vertex);
-
     // Ciclo for per inserire gli archi
 
     for(j=0; j<num_vertex; j++) {
         fscanf(fp, "%i: ", &i);
+        edge *head;
+        head = malloc(sizeof(edge));
         do {
+            i = -1;
             if(k !=0) ungetc(c, fp);
             fscanf(fp, "%i ", &i);
-            rows[j].edges_pointer[k] = i;
+            if(i != -1) {
+                if(k==0) {
+                    create_list(head, i);
+                } else {
+                    push(head, i);
+                }
+            }
             c = fgetc(fp);
             k++;
         } while(c != 35);
+        if(i==-1) {
+            rows[j].edges_pointer = NULL;
+            rows[j].edge_num = 0;
+        } else {
+            rows[j].edges_pointer = head;
+            rows[j].edge_num = k;
+        }
         k = 0;
     }
 
-    fclose(fp);
+    //fclose(fp);
 
     // Stampa di prova
 
     for(i=0; i<num_vertex; i++) {
         printf("%i : ", i);
-        for(j=0; j<rows[i].edge_num; j++) {
-            printf("%i ", rows[i].edges_pointer[j]);
-        }
+        print_list(rows[i].edges_pointer);
         printf("\n");
     }
 
