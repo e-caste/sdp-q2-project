@@ -55,6 +55,7 @@ typedef struct row_graph {
 typedef struct thread_args {
     int id;
     int total_vertex;
+    int size_file;
     char *filename;
     row_g *graph;
 } t_args;
@@ -63,7 +64,8 @@ void *scanFile(void *args) {
     t_args *my_data;
     my_data = (t_args *) args;
     FILE *fp;
-    int j, i, k, c;
+    int j, i, k, c, pos;
+    int sup, inf;
 
     fp = fopen(my_data -> filename, "r");
     if (fp == NULL) {
@@ -71,22 +73,39 @@ void *scanFile(void *args) {
         exit(1);
     }
 
+    if (my_data->id == N-1) sup = my_data->total_vertex;
 
-    int inf, sup;
-    inf = (my_data -> id) * (my_data -> total_vertex / N);
-    sup = inf + (my_data -> total_vertex / N);
+    else {
+        fseek(fp, my_data->size_file*(my_data->id+1)/N, SEEK_SET);
+        while(i != 10) {
+            i = getc(fp);
+        }
 
-    if(my_data->id == N-1) sup = my_data->total_vertex;
+        i=0;
+
+        fscanf(fp, "%i", &sup);
+    }
+
+
+    if (my_data->id == 0) {
+        fseek(fp, 0L, SEEK_SET);
+        fscanf(fp, "%*[^\n]\n");
+        inf = 0;
+    } else {
+        fseek(fp, my_data->size_file*my_data->id/N, SEEK_SET);
+
+        while(i != 10) {
+            i = getc(fp);
+        }
+
+        pos = ftell(fp);
+
+        fscanf(fp, "%i", &inf);
+
+        fseek(fp, pos, SEEK_SET);
+    }    
 
     //printf("Thread n. %i con inf: %i e sup: %i\n", my_data->id, inf, sup-1);
-
-    // Salta righe
-
-    fscanf(fp, "%*[^\n]\n");
-
-    for(j=0; j<inf; j++) {
-        fscanf(fp, "%*[^\n]\n");
-    }
 
     for(j=inf; j<sup; j++) {
         fscanf(fp, "%i: ", &i);
@@ -124,7 +143,7 @@ int main(int argc, char *argv[]) {
 
     FILE *fp;
     unsigned int num_vertex;
-    int i, j, c=0, k=0, err_code=0;
+    int i, j, size, c=0, k=0, err_code=0;
     row_g *rows;
     pthread_t threads[N];
     t_args args[N];
@@ -155,6 +174,11 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    // Prendere grandezza file per dividerlo per fseek
+
+    fseek(fp, 0L, SEEK_END);
+    size = ftell(fp);
+
     fclose(fp);
 
     // Creazione thread
@@ -162,6 +186,7 @@ int main(int argc, char *argv[]) {
         args[j].filename = argv[1];
         args[j].graph = rows;
         args[j].total_vertex = num_vertex;
+        args[j].size_file = size;
     }
 
     for(i=0; i<N; i++) {
@@ -185,11 +210,11 @@ int main(int argc, char *argv[]) {
 
     // Stampa di prova
 
-    for(i=0; i<num_vertex; i++) {
+    /*for(i=0; i<num_vertex; i++) {
         printf("%i : ", i);
         print_list(rows[i].edges_pointer);
         printf("\n");
-    }
+    }*/
 
     // Deallocazione di tutte le risorse
 
