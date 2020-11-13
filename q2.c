@@ -6,16 +6,13 @@
 
 #define N 4
 
-//Ottimizzazione delle memoria: sostituire int con short se possibile
+// TODO: https://en.wikipedia.org/wiki/C_data_types
+//      Ottimizzazione delle memoria: sostituire int con short se possibile
+//      Quanti nodi al massimo? unsigned int: [0, 65,535] ; unsigned long int: [0, 4,294,967,295]
 
 typedef struct edge_list {
     int num;            //valore del vertice
     struct edge_list *next_num;
-
-    //index construction
-    short int lbl_start;    //array nel caso di più labels
-    short int lbl_end;    
-    bool visited; 
 } edge;
 
 void create_list(edge *head, int val) {
@@ -58,7 +55,19 @@ void free_list(edge *head) {
 typedef struct row_graph {
     int edge_num;       //numero totali di vertici in quella direzione
     edge *edges_pointer;
+
+    //3.1 index construction
+    short int lbl_start;
+    short int lbl_end;  
+    bool visited;
 } row_g;
+
+// 3.1 multiple index construction
+// typedef struct row_label {
+//     int* lbl_start;
+//     int* lbl_end;    
+//     bool* visited;
+// } row_l;
 
 typedef struct thread_args {
     int id;
@@ -162,47 +171,52 @@ void *scanFile(void *args) {
 
 }
 
-void RandomizedVisit(edge* root, int lbl_num, row_g* graph, int* rank_root, int num_vertex){
-    int rank_children_min = num_vertex; 
+void RandomizedVisit(int node_num, short int lbl_num, row_g* graph, int* rank_root, int num_vertex){
+    int rank_children_min = num_vertex;
 
-    printf("RandomVisited-start: root: %i, lbl: %i, rank_root: %i \n", root->num, lbl_num, *rank_root );
+    //printf("RandomVisited-begin: node: %i\n", node_num);
 
-    if(root->visited)
+    if(graph[node_num].visited)
         return;
 
-    if(graph[root->num].edge_num >= 1)
-        RandomizedVisit(graph[root->num].edges_pointer, lbl_num, graph, rank_root, num_vertex);    
+    //Per tutti i figli del nodo, richiamo la funzione
+    //TODO Random Order
+    for(edge* next=graph[node_num].edges_pointer; next != NULL; next = next->next_num)
+        RandomizedVisit(next->num, lbl_num, graph, rank_root, num_vertex);    
     
-    root->visited = true;
-    for(edge* e = graph[root->num].edges_pointer; e != NULL; e = e->next_num)   //inizialmente la radice non ha figli
-        if(e->lbl_start < rank_children_min)
-            rank_children_min = e->lbl_start;
-    
-    
+    graph[node_num].visited = true;
+    for(edge* next=graph[node_num].edges_pointer; next != NULL; next = next->next_num)
+        if(graph[next->num].lbl_start < rank_children_min)
+            rank_children_min = graph[next->num].lbl_start;
+        
     if(*rank_root < rank_children_min)
-        root->lbl_start = *rank_root;
+        graph[node_num].lbl_start = *rank_root;
     else 
-        root->lbl_start =  rank_children_min;
+        graph[node_num].lbl_start =  rank_children_min;
     
-    root->lbl_end = *rank_root;
+    graph[node_num].lbl_end = *rank_root;
 
     *rank_root = *rank_root + 1 ;
 
-    printf("RandomVisited-end: root: %i, lbl: %i, start: %i, end: %i \n", root->num, lbl_num, root->lbl_start, root->lbl_end );
+    printf("RandomVisited-end: node: %i, [%i, %i]\n", node_num, graph[node_num].lbl_start, graph[node_num].lbl_end);
 }
 
-void RandomizedLabeling(row_g * graph, int lbl_num, int num_vertex){
+void RandomizedLabeling(row_g * graph, short int lbl_num, int num_vertex){
     int i, rank_node, j ;
     for(i=0; i<lbl_num; i++){
         rank_node = 1;
         //devo cercare le radici.
         //E' considerato radice ogni nodo con almeno un figlio.
-        for(j=0; j<num_vertex; j++){
+        for(j=0; j<num_vertex; j++){    //TODO Random Order
             if(graph[j].edge_num >= 1)
-                RandomizedVisit(graph[j].edges_pointer , lbl_num, graph, &rank_node, num_vertex);
+                RandomizedVisit(j, lbl_num, graph, &rank_node, num_vertex);
         }
     }
 }
+
+// args[1]: file1 (input .gra)
+// args[2]: n (label number)
+// args[3]: file2 (.que)
 
 int main(int argc, char *argv[]) {
 
@@ -278,10 +292,13 @@ int main(int argc, char *argv[]) {
     for(i=0; i<num_vertex; i++) {
         printf("%i : ", i);
         print_list(rows[i].edges_pointer);
-        printf(" -----> num_edge: %i\n", rows[i].edge_num);
-        //printf("\n");
+        //printf(" -----> num_edge: %i\n", rows[i].edge_num);
+        printf("\n");
     }
 
+    // TODO
+    // Allocazione struct per labels
+    // labels procederrano di pari ordine con l'indice rows.
     RandomizedLabeling(rows, 1, num_vertex);
 
     // Deallocazione di tutte le risorse
