@@ -3,6 +3,8 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <time.h>
+#include <string.h>
 
 #define N 4
 
@@ -167,17 +169,48 @@ void *scanFile(void *args) {
 }
 
 void RandomizedVisit(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex){
-    int rank_children_min = num_vertex;
-
+    int rank_children_min = num_vertex, i, j, children = graph[node_num].edge_num, node;
+    bool stop = false;
+    bool random_visited[children];
+    int next_node[children];
+    
+    memset(random_visited, 0, children * sizeof(bool));
+    
     //printf("RandomVisited-begin: node: %i\n", node_num);
 
     if(labels[node_num].visited[lbl_num])
         return;
 
     //Per tutti i figli del nodo, richiamo la funzione
-    //TODO Random Order
-    for(edge* next=graph[node_num].edges_pointer; next != NULL; next = next->next_num)
-        RandomizedVisit(next->num, lbl_num, labels, graph, rank_root, num_vertex);
+    if(children > 0){
+        i=0;
+        for(edge* next=graph[node_num].edges_pointer; next != NULL; next = next->next_num){
+            next_node[i] = next->num;
+            i++;
+        }
+
+        while(!stop){
+            do{
+                node = rand() % children; //da 0 a children - 1
+            }while(random_visited[node]);
+
+            random_visited[node] = true;
+
+            RandomizedVisit(next_node[node], lbl_num, labels, graph, rank_root, num_vertex);
+
+            stop = true;
+            for(j=0; j < children; j++){
+                if (!random_visited[j]){
+                    stop = false;
+                    break;
+                }
+            }
+        }
+
+        // memset(random_visited, 0, num_vertex * sizeof(bool));
+        // stop=false;
+    }    
+    
     labels[node_num].visited[lbl_num] = true;
     
     //cerco minimo tra i figli del nodo
@@ -197,16 +230,45 @@ void RandomizedVisit(int node_num, int lbl_num, row_l* labels, row_g* graph, int
     //printf("RandomVisited-end: node: %i, lbl: %i, [%i, %i]\n", node_num, lbl_num, labels[node_num].lbl_start[lbl_num], labels[node_num].lbl_end[lbl_num]);
 }
 
+// TODO
+// Scegliere le radici in modo completamente random va bene? 
+// Devo considerare il caso in cui due iterazioni successive sono completamente uguali ?
 void RandomizedLabeling(row_g * graph, row_l * labels, int num_label, int num_vertex){
-    int i, rank_node, j ;
+    int i, rank_node, j, node ;
+    bool stop = false;
+    bool random_visited[num_vertex];
+
+    memset(random_visited, 0, num_vertex * sizeof(bool));
+
+    //inizializzazione per valori random
+    srand(time(NULL));
+
     for(i=0; i<num_label; i++){
         rank_node = 1;
-        //devo cercare le radici.
-        //E' considerato radice ogni nodo con almeno un figlio.
-        for(j=0; j<num_vertex; j++){    //TODO Random Order
-            if(graph[j].edge_num >= 1)
-                RandomizedVisit(j, i, labels, graph, &rank_node, num_vertex);
+
+        while(!stop){
+            
+            do{
+                node = rand() % num_vertex; //da 0 a num_vertex - 1
+            }while(random_visited[node]);
+
+            random_visited[node] = true;
+
+            //devo cercare le radici.
+            //E' considerato radice ogni nodo con almeno un figlio.
+            if(graph[node].edge_num >= 1)
+                RandomizedVisit(node, i, labels, graph, &rank_node, num_vertex);
+
+            stop = true;
+            for(j=0; j < num_vertex; j++){
+                if (!random_visited[j]){
+                    stop = false;
+                    break;
+                }
+            }
         }
+        memset(random_visited, 0, num_vertex * sizeof(bool));
+        stop=false;
     }
 }
 
@@ -313,12 +375,9 @@ int main(int argc, char *argv[]) {
         }
 
         //Inizializzazione (Non è detto che tutto sia azzerato!)
-        for(j=0; j<d; j++){
-            labels[i].lbl_start[j] = 0;
-            labels[i].lbl_end[j] = 0;
-            labels[i].visited[j] = false;
-        }
-
+        memset(labels[i].lbl_start, 0, d * sizeof(int));
+        memset(labels[i].lbl_end, 0, d * sizeof(int));
+        memset(labels[i].visited, 0, d * sizeof(bool));
     }
 
     RandomizedLabeling(rows, labels, d, num_vertex);
