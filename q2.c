@@ -35,14 +35,6 @@ void push(edge *head, int val) {
     current -> next_num -> next_num = NULL;
 }
 
-void fake_push(edge *head, int val) {
-    edge *next = head -> next_num;
-
-    head -> next_num = (edge *) malloc(sizeof(edge));
-    head -> next_num -> num = val;  
-    head -> next_num -> next_num = next;
-}
-
 void print_list(edge *head) {
     edge *current = head;
 
@@ -64,7 +56,7 @@ void free_list(edge *head) {
 
 typedef struct row_graph {
     int edge_num;   //numero totali di vertici in quella direzione
-    int not_root;
+    int not_root;   //TODO convertire in bool. memset per tutto a zero
     edge *edges_pointer;
 } row_g;
 
@@ -81,8 +73,19 @@ typedef struct thread_args {
     int size_file;
     char *filename;
     row_g *graph;
-    edge *roots;
+    int *roots;
+    int *roots_num;
+    int *root_index;
+    pthread_mutex_t *roots_mutex;
 } t_args;
+
+// Scopo di "scanFile" : Leggere file1
+//ogni thread leggerà da inf a sup.
+//Inf e Sup sono il numero di riga del file di input 0, 1, ..., 10,...
+//Nel seguente codice, si sta per dividere il file da leggere
+//in N parti, così che ogni thread legga in parallelo
+//durante la lettura del grafo, si memorizzano alcune informazioni
+//necessarie per la creazione successiva delle labels (roots_num)
 
 void *scanFile(void *args) {
     t_args *my_data;
@@ -90,17 +93,13 @@ void *scanFile(void *args) {
     FILE *fp;
     int j, i, k, c, pos;
     int sup, inf;
+    bool already_setted_not_root;
 
     fp = fopen(my_data -> filename, "r");
     if (fp == NULL) {
         fprintf(stderr, "Unable to open file %s for reading, thread number %i.\n", my_data -> filename, my_data -> id );
         exit(1);
     }
-
-    //ogni thread leggerà da inf a sup. 
-    //Inf e Sup sono il numero di riga del file di input 0, 1, ..., 10,...
-    //Nel seguente codice, si sta per dividere il file da leggere
-    //in N parti, così che ogni thread legga in parallelo
 
     //Definizione estremo superiore
     if (my_data->id == N-1) 
@@ -153,13 +152,24 @@ void *scanFile(void *args) {
             if(k !=0) //alla prima iterazione k==0 
                 ungetc(c, fp);    //Poichè prima ho letto un carattere che non era "#" (altrimenti usciva dal ciclo) devo tornare indietro!!
             int res = fscanf(fp, "%i ", &i);      // leggo sia il valore che lo spazio. Se ci fosse un "#" non legge nulla, perchè si aspetta un %i
-            if(i != -1) { // i vertici non possono essre negativi, meglio testare "res"
+            if(i != -1) { // i vertici non possono essere negativi però meglio testare "res" TODO
+
+                if(my_data->graph[i].not_root)  // default == 0 == false;
+                    already_setted_not_root = true;
+                else
+                    already_setted_not_root = false;
+
                 if(k==0) {
                     create_list(head, i);
-                    my_data -> graph[i].not_root = 1;
                 } else {
                     push(head, i);
-                    my_data -> graph[i].not_root = 1;
+                }
+                my_data -> graph[i].not_root = 1;   //se era a uno lo rimetto a 1
+
+                if ((!already_setted_not_root) && (my_data->graph[i].not_root)){
+                    pthread_mutex_lock(my_data->roots_mutex);
+                        *my_data->roots_num = (*(my_data->roots_num) - 1);
+                    pthread_mutex_unlock(my_data->roots_mutex);
                 }
             }
             c = fgetc(fp);              //prendo carattere successivo
@@ -183,12 +193,12 @@ void *scanFile(void *args) {
 }
 
 void RandomizedVisit(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex){
-    int rank_children_min = num_vertex, i, j, children = graph[node_num].edge_num, node;
+    int rank_children_min = num_vertex, i, j, children_num = graph[node_num].edge_num, node;
     bool stop = false;
-    bool random_visited[children];
-    int next_node[children];
+    bool random_visited[children_num];
+    int next_node[children_num];
     
-    memset(random_visited, 0, children * sizeof(bool));
+    memset(random_visited, 0, children_num * sizeof(bool));
     
     //printf("RandomVisited-begin: node: %i\n", node_num);
 
@@ -196,7 +206,7 @@ void RandomizedVisit(int node_num, int lbl_num, row_l* labels, row_g* graph, int
         return;
 
     //Per tutti i figli del nodo, richiamo la funzione
-    if(children > 0){
+    if(children_num > 0){
         i=0;
         for(edge* next=graph[node_num].edges_pointer; next != NULL; next = next->next_num){
             next_node[i] = next->num;
@@ -205,7 +215,7 @@ void RandomizedVisit(int node_num, int lbl_num, row_l* labels, row_g* graph, int
 
         while(!stop){
             do{
-                node = rand() % children; //da 0 a children - 1
+                node = rand() % children_num; //da 0 a children - 1
             }while(random_visited[node]);
 
             random_visited[node] = true;
@@ -213,7 +223,7 @@ void RandomizedVisit(int node_num, int lbl_num, row_l* labels, row_g* graph, int
             RandomizedVisit(next_node[node], lbl_num, labels, graph, rank_root, num_vertex);
 
             stop = true;
-            for(j=0; j < children; j++){
+            for(j=0; j < children_num; j++){
                 if (!random_visited[j]){
                     stop = false;
                     break;
@@ -270,6 +280,7 @@ void RandomizedLabeling(row_g * graph, row_l * labels, int num_label, int num_ve
 
             //devo cercare le radici.
             //E' considerato radice ogni nodo con almeno un figlio.
+            //TODO: ERRORE!!! è considerato radice ogni nodo senza genitori!
             if(graph[node].edge_num >= 1)
                 RandomizedVisit(node, i, labels, graph, &rank_node, num_vertex);
 
@@ -287,29 +298,42 @@ void RandomizedLabeling(row_g * graph, row_l * labels, int num_label, int num_ve
 }
 
 
+//Scopo di "scanRoots": inizializzare l'array di roots
+//Questa è una funzione parallela, quindi i thread si
+//dividono il grafo da leggere con lo stesso meccanismo
+//usato anche in scanFile.
+//Tale array verrà successivamente randomizzato ed
+//utilizzato per creare le labels
+
 void *scanRoots(void *args) {
     t_args *my_data;
     my_data = (t_args *) args;
-    int sup, inf, i;
+    int sup, inf, i, j;
 
-    if (my_data->id == N-1) sup = my_data->total_vertex - 1;
-
+    //Definition of 'Sup' and 'Inf' so that each thread
+    //can read in parallel the graph
+    //see scanFile for more details
+    if (my_data->id == N-1)
+        sup = my_data->total_vertex - 1;
     else
         sup = ((my_data->total_vertex)/N)*(my_data->id+1);
 
-
-    if (my_data->id == 0) {
+    if (my_data->id == 0)
         inf = 0;
-    } else {
+    else
         inf = ((my_data->total_vertex)/N)*(my_data->id);
-    }    
 
     /*printf("Sono il thread %i con inf %i e sup %i.\n", my_data->id, inf, sup-1);
     fflush(stdout);*/
 
-    for(i=sup; i>inf; i--) {
-        if(my_data->graph[i].not_root == 0) {
-            fake_push(my_data->roots, i);
+    for(i=inf; i<sup; i++) {
+        if(!my_data->graph[i].not_root) {  //if (is root)
+            pthread_mutex_lock(my_data->roots_mutex);
+                j = (*(my_data->root_index));
+                my_data->roots[j] = i;
+                *my_data->root_index = j + 1;
+            pthread_mutex_unlock(my_data->roots_mutex);
+
         }
     }
 
@@ -328,16 +352,24 @@ int main(int argc, char *argv[]) {
     unsigned int num_vertex;
     int i, j, size, c=0, k=0, err_code=0, d;
     row_g *rows;
-    row_l *labels;
     pthread_t threads[N];
     t_args args[N];
-    edge* roots;
-    
+    int *roots;
+    int roots_num, root_index;
+    pthread_mutex_t *roots_mutex;
+    row_l *labels;
 
     // Controllo sugli argomenti
 
     if (argc != 3) {
         fprintf(stderr, "For the moment, enter only 'file1' and 'n' as arguments!\n");
+        exit(1);
+    }
+
+    d = atoi(argv[2]);
+
+    if (d <=0 ){
+        fprintf(stderr, "Please insert valid value for labels number!\n");
         exit(1);
     }
 
@@ -357,7 +389,7 @@ int main(int argc, char *argv[]) {
     rows = (row_g *) malloc (num_vertex * sizeof (row_g));  //array di liste
     if (rows == NULL ) {
         printf ("Not enough room for this size graph\n" );
-        return 0;
+        exit(1);
     }
 
     // Prendere grandezza file per dividerlo per fseek
@@ -367,29 +399,38 @@ int main(int argc, char *argv[]) {
 
     fclose(fp);
 
-    roots = malloc(sizeof(edge));
+    // Ottengo roots_num come num_vertex - not_roots.
+    // in pratica quando scorro per leggere il file
+    // se incontro una 'non radice', decremento il contatore -> richiede protezione
+    roots_num = num_vertex;
 
-    if (roots == NULL ) {
-        printf ("Not enough room for this size graph\n" );
-        return 0;
+    roots_mutex = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
+    if (roots_mutex == NULL ) {
+        printf ("Error in creating mutex protection for roots counter \n" );
+        exit(1);
     }
-    create_list(roots, 0);
+
+    if(pthread_mutex_init(roots_mutex, NULL) != 0){
+        printf ("Error in initializing mutex protection for roots counter \n" );
+        exit(1);
+    }
 
     // Creazione thread
     for(j=0; j<N; j++) {
         args[j].filename = argv[1];
         args[j].graph = rows;
-        args[j].total_vertex = num_vertex;  //facoltativo?
+        args[j].total_vertex = num_vertex;          //facoltativo? TODO
         args[j].size_file = size;
-        args[j].roots = roots;
+        args[j].roots_num = &roots_num;             //puntatore alla variabile 'condivisa'
+        args[j].roots_mutex = roots_mutex;          //protezione per la variabile 'condivisa'
     }
 
-    for(i=0; i<N; i++) {    //eventualmente si può unire il for.
+    for(i=0; i<N; i++) {    //eventualmente si può unire il for.    TODO
         args[i].id = i;
         err_code = pthread_create(&threads[i], NULL, scanFile, (void *)&args[i]);
         if(err_code) {
             printf ("Errore numero %i nella creazione del thread %i.\n", err_code, i);
-            return 0;
+            exit(1);
         }
     }
 
@@ -399,39 +440,11 @@ int main(int argc, char *argv[]) {
         err_code = pthread_join(threads[j], NULL);
         if(err_code) {
             printf ("Errore numero %i nel joining del thread %i.\n", err_code, j);
-            return 0;
+            exit(1);
         }
     }
 
-
-    // Creazione thread per lettura radici
-
-    for(i=0; i<N; i++) {
-        args[i].id = i;
-        err_code = pthread_create(&threads[i], NULL, scanRoots, (void *)&args[i]);
-        if(err_code) {
-            printf ("Errore numero %i nella creazione del thread %i.\n", err_code, i);
-            return 0;
-        }
-    }
-
-    // Aspettare che i thread finiscano
-
-    for(j=0; j<N; j++) {
-        err_code = pthread_join(threads[j], NULL);
-        if(err_code) {
-            printf ("Errore numero %i nel joining del thread %i.\n", err_code, j);
-            return 0;
-        }
-    }
-
-    // Stampa di prova radici
-    
-    /*printf("Le radici sono: ");
-    print_list(roots);
-    printf("\n");*/
-
-    // Stampa di prova
+    // Stampa di prova grafo
 
     for(i=0; i<num_vertex; i++) {
         printf("%i : ", i);
@@ -440,14 +453,54 @@ int main(int argc, char *argv[]) {
         printf("\n");
     }
 
+    //Inizializzazione array Roots
+
+    roots = (int *) malloc(roots_num * sizeof(int));
+    if (roots == NULL ) {
+        printf ("Error in creating roots struct\n" );
+        exit(1);
+    }
+
+    root_index = 0;     //variabile *condivisa* per inizializzare parallelamente Roots
+
+    // Creazione thread per lettura radici
+    for(i=0; i<N; i++) {
+        args[i].id = i;
+        args[i].roots = roots;
+        args[i].root_index = &root_index;
+        err_code = pthread_create(&threads[i], NULL, scanRoots, (void *)&args[i]);
+        if(err_code) {
+            printf ("Errore numero %i nella creazione del thread %i.\n", err_code, i);
+            exit(1);
+        }
+    }
+
+    // Aspettare che i thread finiscano
+
+    for(j=0; j<N; j++) {
+        err_code = pthread_join(threads[j], NULL);
+        if(err_code) {
+            printf ("Errore numero %i nel joining del thread %i.\n", err_code, j);
+            exit(1);
+        }
+    }
+
+
+    // Stampa di prova radici
+    printf("roots: ");
+    for(i=0; i<roots_num; i++){
+        printf("%i ", roots[i]);
+    }
+    printf("\n");
+
+
     // Allocazione struct per labels
     // labels procederrano di pari ordine con l'indice rows (Indice del nodo).
 
-    d = atoi(argv[2]);
     labels = (row_l *) malloc (num_vertex * sizeof (row_l));
     if (labels == NULL ) {
         printf ("Not enough room for this size labels\n" );
-        return -1;
+        exit(1);
     }
 
     for(i=0; i<num_vertex; i++){
@@ -456,7 +509,7 @@ int main(int argc, char *argv[]) {
         labels[i].visited = (bool *) malloc (d * sizeof (bool));
         if ((labels[i].lbl_start == NULL ) || (labels[i].lbl_end == NULL ) || (labels[i].visited == NULL )) {
             printf ("Not enough room for this size labels\n" );
-            return -1;
+            exit(1);
         }
 
         //Inizializzazione (Non è detto che tutto sia azzerato!)
@@ -478,21 +531,29 @@ int main(int argc, char *argv[]) {
 
     // Deallocazione di tutte le risorse
 
-    free_list(roots);
-
     for(i=0; i<num_vertex; i++) {
         free_list(rows[i].edges_pointer);
     }
+
+    pthread_mutex_destroy(roots_mutex);
+    free(roots_mutex);
+    free(roots);
 
     for(i=0; i<num_vertex; i++){
         free(labels[i].lbl_start);
         free(labels[i].lbl_end);
         free(labels[i].visited);
     }
-
     free(labels);
 
     free(rows);
 
     return 0;
 }
+
+
+
+
+
+// comando per compilare
+// gcc -o q2 q2.c -lpthread
