@@ -7,9 +7,9 @@
 #ifdef _WIN32
     SYSTEM_INFO sysinfo;
     GetSystemInfo(&sysinfo);
-    #define N sysinfo.dwNumberOfProcessors
+    #define NUM_THREADS sysinfo.dwNumberOfProcessors
 #else
-    #define N sysconf(_SC_NPROCESSORS_ONLN)
+    #define NUM_THREADS sysconf(_SC_NPROCESSORS_ONLN)
 #endif
 
 typedef struct edge_list {
@@ -90,10 +90,10 @@ void *scanFile(void *args) {
         exit(1);
     }
 
-    if (my_data->id == N-1) sup = my_data->total_vertex;
+    if (my_data->id == NUM_THREADS - 1) sup = my_data->total_vertex;
 
     else {
-        fseek(fp, my_data->size_file*(my_data->id+1)/N, SEEK_SET);
+        fseek(fp, my_data->size_file * (my_data->id+1) / NUM_THREADS, SEEK_SET);
         while(i != 10) {
             i = getc(fp);
         }
@@ -109,7 +109,7 @@ void *scanFile(void *args) {
         fscanf(fp, "%*[^\n]\n");
         inf = 0;
     } else {
-        fseek(fp, my_data->size_file*my_data->id/N, SEEK_SET);
+        fseek(fp, my_data->size_file * my_data->id / NUM_THREADS, SEEK_SET);
 
         while(i != 10) {
             i = getc(fp);
@@ -167,16 +167,16 @@ void *scanRoots(void *args) {
     my_data = (t_args *) args;
     int sup, inf, i;
 
-    if (my_data->id == N-1) sup = my_data->total_vertex - 1;
+    if (my_data->id == NUM_THREADS - 1) sup = my_data->total_vertex - 1;
 
     else
-        sup = ((my_data->total_vertex)/N)*(my_data->id+1);
+        sup = ((my_data->total_vertex) / NUM_THREADS) * (my_data->id + 1);
 
 
     if (my_data->id == 0) {
         inf = 0;
     } else {
-        inf = ((my_data->total_vertex)/N)*(my_data->id);
+        inf = ((my_data->total_vertex) / NUM_THREADS) * (my_data->id);
     }    
 
     /*printf("Sono il thread %i con inf %i e sup %i.\n", my_data->id, inf, sup-1);
@@ -200,8 +200,8 @@ int main(int argc, char *argv[]) {
     unsigned int num_vertex;
     int i, j, size, c=0, k=0, err_code=0;
     row_g *rows;
-    pthread_t threads[N];
-    t_args args[N];
+    pthread_t threads[NUM_THREADS];
+    t_args args[NUM_THREADS];
     edge* roots;
 
 
@@ -247,7 +247,7 @@ int main(int argc, char *argv[]) {
     create_list(roots, 0);
 
     // Creazione thread
-    for(j=0; j<N; j++) {
+    for(j=0; j < NUM_THREADS; j++) {
         args[j].filename = argv[1];
         args[j].graph = rows;
         args[j].total_vertex = num_vertex;
@@ -255,7 +255,7 @@ int main(int argc, char *argv[]) {
         args[j].roots = roots;
     }
 
-    for(i=0; i<N; i++) {
+    for(i=0; i < NUM_THREADS; i++) {
         args[i].id = i;
         err_code = pthread_create(&threads[i], NULL, scanFile, (void *)&args[i]);
         if(err_code) {
@@ -266,7 +266,7 @@ int main(int argc, char *argv[]) {
 
     // Aspettare che i thread finiscano
 
-    for(j=0; j<N; j++) {
+    for(j=0; j < NUM_THREADS; j++) {
         err_code = pthread_join(threads[j], NULL);
         if(err_code) {
             printf ("Errore numero %i nel joining del thread %i.\n", err_code, j);
@@ -277,7 +277,7 @@ int main(int argc, char *argv[]) {
 
     // Creazione thread per lettura radici
 
-    for(i=0; i<N; i++) {
+    for(i=0; i < NUM_THREADS; i++) {
         args[i].id = i;
         err_code = pthread_create(&threads[i], NULL, scanRoots, (void *)&args[i]);
         if(err_code) {
@@ -288,7 +288,7 @@ int main(int argc, char *argv[]) {
 
     // Aspettare che i thread finiscano
 
-    for(j=0; j<N; j++) {
+    for(j=0; j < NUM_THREADS; j++) {
         err_code = pthread_join(threads[j], NULL);
         if(err_code) {
             printf ("Errore numero %i nel joining del thread %i.\n", err_code, j);
