@@ -35,6 +35,14 @@ void push(edge *head, int val) {
     current -> next_num -> next_num = NULL;
 }
 
+void fake_push(edge *head, int val) {
+    edge *next = head -> next_num;
+
+    head -> next_num = (edge *) malloc(sizeof(edge));
+    head -> next_num -> num = val;  
+    head -> next_num -> next_num = next;
+}
+
 void print_list(edge *head) {
     edge *current = head;
 
@@ -55,7 +63,8 @@ void free_list(edge *head) {
 }
 
 typedef struct row_graph {
-    int edge_num;       //numero totali di vertici in quella direzione
+    int edge_num;   //numero totali di vertici in quella direzione
+    int not_root;
     edge *edges_pointer;
 } row_g;
 
@@ -72,6 +81,7 @@ typedef struct thread_args {
     int size_file;
     char *filename;
     row_g *graph;
+    edge *roots;
 } t_args;
 
 void *scanFile(void *args) {
@@ -146,8 +156,10 @@ void *scanFile(void *args) {
             if(i != -1) { // i vertici non possono essre negativi, meglio testare "res"
                 if(k==0) {
                     create_list(head, i);
+                    my_data -> graph[i].not_root = 1;
                 } else {
                     push(head, i);
+                    my_data -> graph[i].not_root = 1;
                 }
             }
             c = fgetc(fp);              //prendo carattere successivo
@@ -163,6 +175,8 @@ void *scanFile(void *args) {
         }
         k = 0;  //vertice successivo
     }
+
+    //printf("Thread n. %i e ho finito\n", my_data->id);
 
     pthread_exit((void *) 0);
 
@@ -272,10 +286,42 @@ void RandomizedLabeling(row_g * graph, row_l * labels, int num_label, int num_ve
     }
 }
 
+
+void *scanRoots(void *args) {
+    t_args *my_data;
+    my_data = (t_args *) args;
+    int sup, inf, i;
+
+    if (my_data->id == N-1) sup = my_data->total_vertex - 1;
+
+    else
+        sup = ((my_data->total_vertex)/N)*(my_data->id+1);
+
+
+    if (my_data->id == 0) {
+        inf = 0;
+    } else {
+        inf = ((my_data->total_vertex)/N)*(my_data->id);
+    }    
+
+    /*printf("Sono il thread %i con inf %i e sup %i.\n", my_data->id, inf, sup-1);
+    fflush(stdout);*/
+
+    for(i=sup; i>inf; i--) {
+        if(my_data->graph[i].not_root == 0) {
+            fake_push(my_data->roots, i);
+        }
+    }
+
+    /*printf("Sono il thread %i e ho finito.\n", my_data->id);
+    fflush(stdout);*/
+
+    pthread_exit((void *) 0);
+}
+
 // args[1]: file1 (input .gra)
 // args[2]: n (label number)
 // args[3]: file2 (.que)
-
 int main(int argc, char *argv[]) {
 
     FILE *fp;
@@ -285,6 +331,8 @@ int main(int argc, char *argv[]) {
     row_l *labels;
     pthread_t threads[N];
     t_args args[N];
+    edge* roots;
+    
 
     // Controllo sugli argomenti
 
@@ -319,12 +367,21 @@ int main(int argc, char *argv[]) {
 
     fclose(fp);
 
+    roots = malloc(sizeof(edge));
+
+    if (roots == NULL ) {
+        printf ("Not enough room for this size graph\n" );
+        return 0;
+    }
+    create_list(roots, 0);
+
     // Creazione thread
     for(j=0; j<N; j++) {
         args[j].filename = argv[1];
         args[j].graph = rows;
         args[j].total_vertex = num_vertex;  //facoltativo?
         args[j].size_file = size;
+        args[j].roots = roots;
     }
 
     for(i=0; i<N; i++) {    //eventualmente si può unire il for.
@@ -345,6 +402,34 @@ int main(int argc, char *argv[]) {
             return 0;
         }
     }
+
+
+    // Creazione thread per lettura radici
+
+    for(i=0; i<N; i++) {
+        args[i].id = i;
+        err_code = pthread_create(&threads[i], NULL, scanRoots, (void *)&args[i]);
+        if(err_code) {
+            printf ("Errore numero %i nella creazione del thread %i.\n", err_code, i);
+            return 0;
+        }
+    }
+
+    // Aspettare che i thread finiscano
+
+    for(j=0; j<N; j++) {
+        err_code = pthread_join(threads[j], NULL);
+        if(err_code) {
+            printf ("Errore numero %i nel joining del thread %i.\n", err_code, j);
+            return 0;
+        }
+    }
+
+    // Stampa di prova radici
+    
+    /*printf("Le radici sono: ");
+    print_list(roots);
+    printf("\n");*/
 
     // Stampa di prova
 
@@ -392,6 +477,8 @@ int main(int argc, char *argv[]) {
     }
 
     // Deallocazione di tutte le risorse
+
+    free_list(roots);
 
     for(i=0; i<num_vertex; i++) {
         free_list(rows[i].edges_pointer);
