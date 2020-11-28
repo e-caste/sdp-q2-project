@@ -4,7 +4,13 @@
 #include <unistd.h>
 #include <string.h>
 
-#define N 4
+#ifdef _WIN32
+    SYSTEM_INFO sysinfo;
+    GetSystemInfo(&sysinfo);
+    #define N sysinfo.dwNumberOfProcessors
+#else
+    #define N sysconf(_SC_NPROCESSORS_ONLN)
+#endif
 
 typedef struct edge_list {
     int num;
@@ -197,7 +203,7 @@ int main(int argc, char *argv[]) {
     pthread_t threads[N];
     t_args args[N];
     edge* roots;
-    
+
 
     // Controllo sugli argomenti
 
