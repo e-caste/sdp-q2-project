@@ -93,6 +93,21 @@ typedef struct thread_args {
 //durante la lettura del grafo, si memorizzano alcune informazioni
 //necessarie per la creazione successiva delle labels (roots_num)
 
+void swap (int *a, int *b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void randomize(int *array, int n) {
+    //srand(time(NULL));
+    for(int i=n-1; i>0; i--) {
+        int j = rand() % (i+1);
+        swap(&array[i], &array[j]);
+    }
+
+}
+
 void *scanFile(void *args) {
     t_args *my_data;
     my_data = (t_args *) args;
@@ -199,6 +214,7 @@ void *scanFile(void *args) {
 }
 
 void RandomizedVisit(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex){
+
     int rank_children_min = num_vertex, i, j, children_num = graph[node_num].edge_num, node;
     bool stop = false;
     bool random_visited[children_num];
@@ -263,43 +279,56 @@ void RandomizedVisit(int node_num, int lbl_num, row_l* labels, row_g* graph, int
 // TODO
 // Scegliere le radici in modo completamente random va bene? 
 // Devo considerare il caso in cui due iterazioni successive sono completamente uguali ?
-void RandomizedLabeling(row_g * graph, row_l * labels, int num_label, int num_vertex){
+void RandomizedLabeling(row_g * graph, row_l * labels, int num_label, int num_vertex, int * roots, int num_roots){
     int i, rank_node, j, node ;
     bool stop = false;
     bool random_visited[num_vertex];
 
     memset(random_visited, 0, num_vertex * sizeof(bool));
 
+    //Inizializzazione indici
+    int *indexes = malloc(num_roots*sizeof(int));
+    if(indexes == NULL) {
+        printf ("Not enough room for these indexes\n" );
+        exit(1);
+    }
+
+    for(i=0; i<num_roots; i++) {
+        indexes[i] = i;
+    }
+
     //inizializzazione per valori random
     srand(time(NULL));
 
     for(i=0; i<num_label; i++){
+        randomize(indexes, num_roots);
         rank_node = 1;
 
-        while(!stop){
+        /*while(!stop){
             
             do{
-                node = rand() % num_vertex; //da 0 a num_vertex - 1
+                node = roots[i]; //da 0 a num_vertex - 1
             }while(random_visited[node]);
 
-            random_visited[node] = true;
+            random_visited[node] = true;*/
 
             //devo cercare le radici.
             //E' considerato radice ogni nodo con almeno un figlio.
             //TODO: ERRORE!!! è considerato radice ogni nodo senza genitori!
-            if(graph[node].edge_num >= 1)
-                RandomizedVisit(node, i, labels, graph, &rank_node, num_vertex);
+            for(int j=0; j<num_roots; j++) {
+                RandomizedVisit(roots[indexes[j]], i, labels, graph, &rank_node, num_vertex);
+            }
 
-            stop = true;
+            /*stop = true;
             for(j=0; j < num_vertex; j++){
                 if (!random_visited[j]){
                     stop = false;
                     break;
                 }
             }
-        }
-        memset(random_visited, 0, num_vertex * sizeof(bool));
-        stop=false;
+        }*/
+        /*memset(random_visited, 0, num_vertex * sizeof(bool));
+        stop=false;*/
     }
 }
 
@@ -524,8 +553,8 @@ int main(int argc, char *argv[]) {
         memset(labels[i].visited, 0, d * sizeof(bool));
     }
 
-    RandomizedLabeling(rows, labels, d, num_vertex);
-
+    RandomizedLabeling(rows, labels, d, num_vertex, roots, roots_num);
+    
     //Stampa delle labels
     for(i=0; i<num_vertex; i++){
         printf("Node: %i ", i);
