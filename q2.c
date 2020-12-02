@@ -175,10 +175,7 @@ void *scanFile(void *args) {
             int res = fscanf(fp, "%i ", &i);      // leggo sia il valore che lo spazio. Se ci fosse un "#" non legge nulla, perchè si aspetta un %i
             if(i != -1) { // i vertici non possono essere negativi però meglio testare "res" TODO
 
-                if(my_data->graph[i].not_root)  // default == 0 == false;
-                    not_root_is_set = true;
-                else
-                    not_root_is_set = false;
+                not_root_is_set = my_data->graph[i].not_root ? true : false;  // default == 0 == false;
 
                 if(k==0) {
                     create_list(head, i);
