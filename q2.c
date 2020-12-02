@@ -6,13 +6,7 @@
 #include <time.h>
 #include <string.h>
 
-#ifdef _WIN32
-    SYSTEM_INFO sysinfo;
-    GetSystemInfo(&sysinfo);
-    #define NUM_THREADS sysinfo.dwNumberOfProcessors
-#else
-    #define NUM_THREADS sysconf(_SC_NPROCESSORS_ONLN)
-#endif
+#define NUM_THREADS sysconf(_SC_NPROCESSORS_ONLN)
 
 // TODO: https://en.wikipedia.org/wiki/C_data_types
 //      Ottimizzazione delle memoria: sostituire int con short se possibile
