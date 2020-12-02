@@ -114,7 +114,7 @@ void *scanFile(void *args) {
     FILE *fp;
     int j, i, k, c, pos;
     int sup, inf;
-    bool already_setted_not_root;
+    bool not_root_is_set;
 
     fp = fopen(my_data -> filename, "r");
     if (fp == NULL) {
@@ -176,9 +176,9 @@ void *scanFile(void *args) {
             if(i != -1) { // i vertici non possono essere negativi però meglio testare "res" TODO
 
                 if(my_data->graph[i].not_root)  // default == 0 == false;
-                    already_setted_not_root = true;
+                    not_root_is_set = true;
                 else
-                    already_setted_not_root = false;
+                    not_root_is_set = false;
 
                 if(k==0) {
                     create_list(head, i);
@@ -187,7 +187,7 @@ void *scanFile(void *args) {
                 }
                 my_data -> graph[i].not_root = 1;   //se era a uno lo rimetto a 1
 
-                if ((!already_setted_not_root) && (my_data->graph[i].not_root)){
+                if ((!not_root_is_set) && (my_data->graph[i].not_root)){
                     pthread_mutex_lock(my_data->roots_mutex);
                         *my_data->roots_num = (*(my_data->roots_num) - 1);
                     pthread_mutex_unlock(my_data->roots_mutex);
