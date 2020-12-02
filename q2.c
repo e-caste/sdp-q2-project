@@ -220,7 +220,7 @@ void RandomizedVisit(int node_num, int lbl_num, row_l* labels, row_g* graph, int
     bool random_visited[children_num];
     int next_node[children_num];
     
-    memset(random_visited, 0, children_num * sizeof(bool));
+    memset(random_visited, false, children_num * sizeof(bool));
     
     //printf("RandomVisited-begin: node: %i\n", node_num);
 
