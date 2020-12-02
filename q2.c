@@ -100,12 +100,11 @@ void swap (int *a, int *b) {
 }
 
 void randomize(int *array, int n) {
-    //srand(time(NULL));
     for(int i=n-1; i>0; i--) {
         int j = rand() % (i+1);
-        swap(&array[i], &array[j]);
+        if (i != j)
+            swap(&array[i], &array[j]);
     }
-
 }
 
 void *scanFile(void *args) {
