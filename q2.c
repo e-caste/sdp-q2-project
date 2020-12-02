@@ -131,7 +131,8 @@ void *scanFile(void *args) {
         //prendendo un carattere alla volta e "scartandolo"
         //quando trovo la nuova riga come primo intero avrò il SUP
         //NOTA: questa un'ottima strategia in quanto abbiamo righe non omogenee
-        fseek(fp, my_data->size_file*(my_data->id+1)/NUM_THREADS, SEEK_SET); // 1Gb / 4Thread = 250Mb ciascuno * id+1
+        // sup for id=0 is inf for id=1, they are contiguous so the whole file is guaranteed to be read
+        fseek(fp, (long) my_data->size_file*(my_data->id+1)/NUM_THREADS, SEEK_SET); // 1Gb / 4Thread = 250Mb ciascuno * id+1
         while(i != 10) {
             i = getc(fp);
         }
@@ -147,7 +148,7 @@ void *scanFile(void *args) {
         fscanf(fp, "%*[^\n]\n");    // salto la prima riga (contiene il numero di vertici totale)
         inf = 0;
     } else {
-        fseek(fp, my_data->size_file*my_data->id/NUM_THREADS, SEEK_SET); // 1Gb / 4Thread = 250Mb ciascuno * id
+        fseek(fp, (long) my_data->size_file*my_data->id/NUM_THREADS, SEEK_SET); // 1Gb / 4Thread = 250Mb ciascuno * id
 
         while(i != 10) {    
             i = getc(fp);
