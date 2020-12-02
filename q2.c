@@ -62,7 +62,7 @@ void free_list(edge *head) {
 
 typedef struct row_graph {
     int edge_num;   //numero totali di vertici in quella direzione
-    int not_root;   //TODO convertire in bool. memset per tutto a zero
+    bool not_root;   //memset per tutto a zero
     edge *edges_pointer;
 } row_g;
 
@@ -182,7 +182,7 @@ void *scanFile(void *args) {
                 } else {
                     push(head, i);
                 }
-                my_data -> graph[i].not_root = 1;   //se era a uno lo rimetto a 1
+                my_data -> graph[i].not_root = true;   //se era a uno lo rimetto a 1
 
                 if ((!not_root_is_set) && (my_data->graph[i].not_root)){
                     pthread_mutex_lock(my_data->roots_mutex);
