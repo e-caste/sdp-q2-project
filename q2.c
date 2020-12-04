@@ -1,3 +1,4 @@
+#define _GNU_SOURCE  // allow usage of asprintf on GNU/Linux
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
