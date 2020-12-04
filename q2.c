@@ -374,6 +374,48 @@ long long unsigned compute_delta_microseconds(struct timespec start, struct time
     return (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
 }
 
+// asprintf automatically allocates the needed memory - see https://stackoverflow.com/a/23842944
+char* get_human_readable_time(uint64_t microseconds) {
+    long us, ms, s, m, h;
+    char* result;
+    if (microseconds <= 0)
+        return "0 microseconds";
+    else if (microseconds > 0 && microseconds < 1000) {
+        asprintf(&result, "%llu microseconds", microseconds);
+        return result;
+    }
+    else if (microseconds >= 1000 && microseconds < 1000000) {
+        ms = (long) microseconds / 1000;
+        us = (long) microseconds - (ms * 1000);
+        asprintf(&result, "%ld milliseconds, %ld microseconds", ms, us);
+        return result;
+    }
+    else if (microseconds >= 1000000 && microseconds < 60000000) {
+        s = (long) microseconds / 1000000;
+        ms = (long) microseconds / 1000;
+        us = (long) microseconds - (s * 1000000 + ms * 1000);
+        asprintf(&result, "%ld seconds, %ld milliseconds, %ld microseconds", s, ms, us);
+        return result;
+    }
+    else if (microseconds >= 60000000 && microseconds < 3600000000) {
+        m = (long) microseconds / 60000000;
+        s = (long) microseconds / 1000000;
+        ms = (long) microseconds / 1000;
+        us = (long) microseconds - (m * 60000000 + s * 1000000 + ms * 1000);
+        asprintf(&result, "%ld minutes, %ld seconds, %ld milliseconds, %ld microseconds", m, s, ms, us);
+        return result;
+    }
+    else {
+        h = (long) microseconds / 3600000000;
+        m = (long) microseconds / 60000000;
+        s = (long) microseconds / 1000000;
+        ms = (long) microseconds / 1000;
+        us = (long) microseconds - (h * 3600000000 + m * 60000000 + s * 1000000 + ms * 1000);
+        asprintf(&result, "%ld hours, %ld minutes, %ld seconds, %ld milliseconds, %ld microseconds", h, m, s, ms, us);
+        return result;
+    }
+}
+
 // args[1]: file1 (input .gra)
 // args[2]: n (label number)
 // args[3]: file2 (.que)
@@ -480,7 +522,7 @@ int main(int argc, char *argv[]) {
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &file1_read);
     delta_microseconds = compute_delta_microseconds(start, file1_read);
-    fprintf(stdout, "Read input file %s (file1) in approximately %llu microseconds.\n", argv[1], delta_microseconds);
+    fprintf(stdout, "Read input file %s (file1) in approximately %s.\n", argv[1], get_human_readable_time(delta_microseconds));
 
     // Stampa di prova grafo
 
@@ -561,7 +603,7 @@ int main(int argc, char *argv[]) {
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &labels_generation_finished);
     delta_microseconds = compute_delta_microseconds(start, labels_generation_finished);
-    fprintf(stdout, "Generated %s labels in approximately %llu microseconds.\n", argv[2], delta_microseconds);
+    fprintf(stdout, "Generated %s labels in approximately %s.\n", argv[2], get_human_readable_time(delta_microseconds));
     
     //Stampa delle labels
     for(i=0; i<num_vertex; i++){
