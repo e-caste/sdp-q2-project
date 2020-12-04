@@ -378,42 +378,24 @@ long long unsigned compute_delta_microseconds(struct timespec start, struct time
 char* get_human_readable_time(uint64_t microseconds) {
     long us, ms, s, m, h;
     char* result;
+    h = (long) microseconds / 3600000000;
+    m = (long) microseconds / 60000000;
+    s = (long) microseconds / 1000000;
+    ms = (long) microseconds / 1000;
+    us = (long) microseconds - (h * 3600000000 + m * 60000000 + s * 1000000 + ms * 1000);
     if (microseconds <= 0)
-        return "0 microseconds";
-    else if (microseconds > 0 && microseconds < 1000) {
+        asprintf(&result, "less than 0 microseconds");
+    else if (microseconds > 0 && microseconds < 1000)
         asprintf(&result, "%llu microseconds", microseconds);
-        return result;
-    }
-    else if (microseconds >= 1000 && microseconds < 1000000) {
-        ms = (long) microseconds / 1000;
-        us = (long) microseconds - (ms * 1000);
+    else if (microseconds >= 1000 && microseconds < 1000000)
         asprintf(&result, "%ld milliseconds, %ld microseconds", ms, us);
-        return result;
-    }
-    else if (microseconds >= 1000000 && microseconds < 60000000) {
-        s = (long) microseconds / 1000000;
-        ms = (long) microseconds / 1000;
-        us = (long) microseconds - (s * 1000000 + ms * 1000);
+    else if (microseconds >= 1000000 && microseconds < 60000000)
         asprintf(&result, "%ld seconds, %ld milliseconds, %ld microseconds", s, ms, us);
-        return result;
-    }
-    else if (microseconds >= 60000000 && microseconds < 3600000000) {
-        m = (long) microseconds / 60000000;
-        s = (long) microseconds / 1000000;
-        ms = (long) microseconds / 1000;
-        us = (long) microseconds - (m * 60000000 + s * 1000000 + ms * 1000);
+    else if (microseconds >= 60000000 && microseconds < 3600000000)
         asprintf(&result, "%ld minutes, %ld seconds, %ld milliseconds, %ld microseconds", m, s, ms, us);
-        return result;
-    }
-    else {
-        h = (long) microseconds / 3600000000;
-        m = (long) microseconds / 60000000;
-        s = (long) microseconds / 1000000;
-        ms = (long) microseconds / 1000;
-        us = (long) microseconds - (h * 3600000000 + m * 60000000 + s * 1000000 + ms * 1000);
+    else
         asprintf(&result, "%ld hours, %ld minutes, %ld seconds, %ld milliseconds, %ld microseconds", h, m, s, ms, us);
-        return result;
-    }
+    return result;
 }
 
 // args[1]: file1 (input .gra)
