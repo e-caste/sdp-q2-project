@@ -369,6 +369,11 @@ void *scanRoots(void *args) {
     pthread_exit((void *) 0);
 }
 
+// see https://stackoverflow.com/a/10192994
+long long unsigned compute_delta_microseconds(struct timespec start, struct timespec end) {
+    return (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+}
+
 // args[1]: file1 (input .gra)
 // args[2]: n (label number)
 // args[3]: file2 (.que)
@@ -384,6 +389,8 @@ int main(int argc, char *argv[]) {
     int roots_num, root_index;
     pthread_mutex_t *roots_mutex;
     row_l *labels;
+    struct timespec start, file1_read, file2_read, labels_generation_finished, reachability_queries_finished;
+    uint64_t delta_microseconds;
 
     // Controllo sugli argomenti
 
@@ -401,6 +408,7 @@ int main(int argc, char *argv[]) {
 
     // Apertura file1
 
+    clock_gettime(CLOCK_MONOTONIC_RAW, &start);
     fp = fopen(argv[1], "r");
 
     if (fp == NULL) {
@@ -470,6 +478,10 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    clock_gettime(CLOCK_MONOTONIC_RAW, &file1_read);
+    delta_microseconds = compute_delta_microseconds(start, file1_read);
+    fprintf(stdout, "Read input file %s (file1) in approximately %llu microseconds.\n", argv[1], delta_microseconds);
+
     // Stampa di prova grafo
 
     for(i=0; i<num_vertex; i++) {
@@ -481,6 +493,7 @@ int main(int argc, char *argv[]) {
 
     //Inizializzazione array Roots
 
+    clock_gettime(CLOCK_MONOTONIC_RAW, &start);
     roots = (int *) malloc(roots_num * sizeof(int));
     if (roots == NULL ) {
         printf ("Error in creating roots struct\n" );
@@ -545,6 +558,10 @@ int main(int argc, char *argv[]) {
     }
 
     RandomizedLabeling(rows, labels, d, num_vertex, roots, roots_num);
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &labels_generation_finished);
+    delta_microseconds = compute_delta_microseconds(start, labels_generation_finished);
+    fprintf(stdout, "Generated %s labels in approximately %llu microseconds.\n", argv[2], delta_microseconds);
     
     //Stampa delle labels
     for(i=0; i<num_vertex; i++){
