@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include <string.h>
+#include <sys/resource.h>
 
 #define NUM_THREADS sysconf(_SC_NPROCESSORS_ONLN)
 
@@ -415,6 +416,7 @@ int main(int argc, char *argv[]) {
     row_l *labels;
     struct timespec start, file1_read, file2_read, labels_generation_finished, reachability_queries_finished;
     uint64_t delta_microseconds;
+    struct rusage memory;
     char* stats;
 
     // Controllo sugli argomenti
@@ -615,7 +617,10 @@ int main(int argc, char *argv[]) {
     free(labels);
     free(rows);
 
-    fprintf(stdout, "\n%s", stats);
+    getrusage(RUSAGE_SELF, &memory);
+    asprintf(&stats, "%sMaximum memory usage: %ld\n", stats, memory.ru_maxrss);
+
+    fprintf(stdout, "\n\n------------STATISTICS------------\n%s", stats);
 
     return 0;
 }
