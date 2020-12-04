@@ -376,7 +376,7 @@ long long unsigned compute_delta_microseconds(struct timespec start, struct time
 }
 
 // asprintf automatically allocates the needed memory - see https://stackoverflow.com/a/23842944
-char* get_human_readable_time(uint64_t microseconds) {
+char* get_human_readable_time(long long unsigned microseconds) {
     long us, ms, s, m, h;
     char* result;
     h = (long) microseconds / 3600000000;
@@ -415,7 +415,7 @@ int main(int argc, char *argv[]) {
     pthread_mutex_t *roots_mutex;
     row_l *labels;
     struct timespec start, file1_read, file2_read, labels_generation_finished, reachability_queries_finished;
-    uint64_t delta_microseconds;
+    long long unsigned delta_microseconds;
     struct rusage memory;
     char* stats;
 
