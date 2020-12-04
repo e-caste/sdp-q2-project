@@ -415,6 +415,7 @@ int main(int argc, char *argv[]) {
     row_l *labels;
     struct timespec start, file1_read, file2_read, labels_generation_finished, reachability_queries_finished;
     uint64_t delta_microseconds;
+    char* stats;
 
     // Controllo sugli argomenti
 
@@ -504,7 +505,7 @@ int main(int argc, char *argv[]) {
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &file1_read);
     delta_microseconds = compute_delta_microseconds(start, file1_read);
-    fprintf(stdout, "Read input file %s (file1) in approximately %s.\n", argv[1], get_human_readable_time(delta_microseconds));
+    asprintf(&stats, "Read input file %s (file1) in approximately %s.\n", argv[1], get_human_readable_time(delta_microseconds));
 
     // Stampa di prova grafo
 
@@ -585,7 +586,7 @@ int main(int argc, char *argv[]) {
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &labels_generation_finished);
     delta_microseconds = compute_delta_microseconds(start, labels_generation_finished);
-    fprintf(stdout, "Generated %s labels in approximately %s.\n", argv[2], get_human_readable_time(delta_microseconds));
+    asprintf(&stats, "%sGenerated %s labels in approximately %s.\n", stats, argv[2], get_human_readable_time(delta_microseconds));
     
     //Stampa delle labels
     for(i=0; i<num_vertex; i++){
@@ -612,8 +613,9 @@ int main(int argc, char *argv[]) {
         free(labels[i].visited);
     }
     free(labels);
-
     free(rows);
+
+    fprintf(stdout, "\n%s", stats);
 
     return 0;
 }
