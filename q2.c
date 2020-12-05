@@ -599,7 +599,7 @@ int main(int argc, char *argv[]) {
         //Inizializzazione (Non è detto che tutto sia azzerato!)
         memset(labels[i].lbl_start, 0, d * sizeof(int));
         memset(labels[i].lbl_end, 0, d * sizeof(int));
-        memset(labels[i].visited, 0, d * sizeof(bool));
+        memset(labels[i].visited, false, d * sizeof(bool));
     }
 
     RandomizedLabeling(rows, labels, d, num_vertex, roots, roots_num);
