@@ -1,14 +1,6 @@
-#define _GNU_SOURCE  // allow usage of asprintf on GNU/Linux
-#include <stdio.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <stdbool.h>
-#include <time.h>
-#include <string.h>
-#include <sys/resource.h>
 #include "q2.h"
 
+#define _GNU_SOURCE  // allow usage of asprintf on GNU/Linux
 #define NUM_THREADS sysconf(_SC_NPROCESSORS_ONLN)
 
 // see https://iq.opengenus.org/detect-operating-system-in-c/
@@ -398,7 +390,7 @@ void *scanRoots(void *args) {
     if (my_data->id == NUM_THREADS-1)
         sup = my_data->total_vertex - 1;
     else
-        sup = ((my_data->total_vertex) / NUM_THREADS) * (my_data->id + 1);
+        sup = ((my_data->total_vertex) / NUM_THREADS) * (my_data->id + 1);  //TODO cast to long ? 
 
     if (my_data->id == 0)
         inf = 0;
@@ -691,7 +683,7 @@ int main(int argc, char *argv[]) {
 
     fprintf(stdout, "Creazione delle labels...\n");
     RandomizedLabelingInit(rows, labels, d, num_vertex, roots, roots_num);
-    RandomizedLabeling(rows, labels, d, num_vertex, roots, roots_num);
+    //RandomizedLabeling(rows, labels, d, num_vertex, roots, roots_num);
     fprintf(stdout, "Fine creazione delle labels...\n");
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &labels_generation_finished);
