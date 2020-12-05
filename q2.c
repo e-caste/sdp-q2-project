@@ -7,6 +7,7 @@
 #include <time.h>
 #include <string.h>
 #include <sys/resource.h>
+#include "q2.h"
 
 #define NUM_THREADS sysconf(_SC_NPROCESSORS_ONLN)
 
@@ -21,6 +22,8 @@
 // TODO: https://en.wikipedia.org/wiki/C_data_types
 //      Ottimizzazione delle memoria: sostituire int con short se possibile
 //      Quanti nodi al massimo? unsigned int: [0, 65,535] ; unsigned long int: [0, 4,294,967,295]
+
+// TODO: dividere q2.c in più file (es: main.c, read.c, label.c, query.c)
 
 typedef struct edge_list {
     int num;            //valore del vertice
@@ -84,19 +87,26 @@ typedef struct thread_args {
     char *filename;
     row_g *graph;
     int *roots;
-    int *roots_num;
-    int *root_index;
+    int *roots_num;             //During DAG reading we count the number of roots (with protection)
+    int *root_index;            //Shared Index to initialize roots array in parallel way
     pthread_mutex_t *roots_mutex;
 } t_args;
 
-// Scopo di "scanFile" : Leggere file1
-//ogni thread leggerà da inf a sup.
-//Inf e Sup sono il numero di riga del file di input 0, 1, ..., 10,...
-//Nel seguente codice, si sta per dividere il file da leggere
-//in N parti, così che ogni thread legga in parallelo
-//durante la lettura del grafo, si memorizzano alcune informazioni
-//necessarie per la creazione successiva delle labels (roots_num)
+typedef struct thread_labels_args {
+    int lbl_num;
+    int rank_node;
+    row_l *labels;
 
+    row_g *graph;
+    int vertex_num;
+
+    int *roots;
+    int roots_num;
+    int * indexes;          //For doing random roots
+} t_lbl_args;               //TODO to reduce space allocation, we can reuse thread_struct with extra field
+
+
+//Swap e randomize sono funzioni di utilità per randomizzare Roots
 void swap (int *a, int *b) {
     int temp = *a;
     *a = *b;
@@ -110,6 +120,14 @@ void randomize(int *array, int n) {
             swap(&array[i], &array[j]);
     }
 }
+
+// Scopo di "scanFile" : Leggere file1
+//ogni thread leggerà da inf a sup.
+//Inf e Sup sono il numero di riga del file di input 0, 1, ..., 10,...
+//Nel seguente codice, si sta per dividere il file da leggere
+//in N parti, così che ogni thread legga in parallelo
+//durante la lettura del grafo, si memorizzano alcune informazioni
+//necessarie per la creazione successiva delle labels (roots_num)
 
 void *scanFile(void *args) {
     t_args *my_data;
@@ -216,12 +234,9 @@ void *scanFile(void *args) {
 
 void RandomizedVisit(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex){
 
-    int rank_children_min = num_vertex, i, j, children_num = graph[node_num].edge_num, node;
-    bool stop = false;
-    bool random_visited[children_num];
+    int rank_children_min = num_vertex, i,children_num = graph[node_num].edge_num;
     int next_node[children_num];
-    
-    memset(random_visited, false, children_num * sizeof(bool));
+    int *indexes = NULL;
     
     //printf("RandomVisited-begin: node: %i\n", node_num);
 
@@ -236,26 +251,22 @@ void RandomizedVisit(int node_num, int lbl_num, row_l* labels, row_g* graph, int
             i++;
         }
 
-        while(!stop){
-            do{
-                node = rand() % children_num; //da 0 a children - 1
-            }while(random_visited[node]);
-
-            random_visited[node] = true;
-
-            RandomizedVisit(next_node[node], lbl_num, labels, graph, rank_root, num_vertex);
-
-            stop = true;
-            for(j=0; j < children_num; j++){
-                if (!random_visited[j]){
-                    stop = false;
-                    break;
-                }
-            }
+        // mi preparo a randomizzare la visita dei figli del nodo X
+        indexes = (int*) malloc(children_num * sizeof(int));
+        if(indexes == NULL) {
+            printf ("RandomizedVisit: Not enough room for these indexes\n" );
+            exit(1);
         }
 
-        // memset(random_visited, 0, num_vertex * sizeof(bool));
-        // stop=false;
+        for(i=0; i<children_num; i++) {
+            indexes[i] = i;
+        }
+
+        randomize(indexes, children_num);
+
+        for(int j=0; j<children_num; j++) {
+            RandomizedVisit(next_node[indexes[j]], lbl_num, labels, graph, rank_root, num_vertex);
+        }
     }    
     
     labels[node_num].visited[lbl_num] = true;
@@ -277,15 +288,8 @@ void RandomizedVisit(int node_num, int lbl_num, row_l* labels, row_g* graph, int
     //printf("RandomVisited-end: node: %i, lbl: %i, [%i, %i]\n", node_num, lbl_num, labels[node_num].lbl_start[lbl_num], labels[node_num].lbl_end[lbl_num]);
 }
 
-// TODO
-// Scegliere le radici in modo completamente random va bene? 
-// Devo considerare il caso in cui due iterazioni successive sono completamente uguali ?
 void RandomizedLabeling(row_g * graph, row_l * labels, int num_label, int num_vertex, int * roots, int num_roots){
-    int i, rank_node, j, node ;
-    bool stop = false;
-    bool random_visited[num_vertex];
-
-    memset(random_visited, 0, num_vertex * sizeof(bool));
+    int i, rank_node ;
 
     //Inizializzazione indici
     int *indexes = malloc(num_roots*sizeof(int));
@@ -302,37 +306,79 @@ void RandomizedLabeling(row_g * graph, row_l * labels, int num_label, int num_ve
     srand(time(NULL));
 
     for(i=0; i<num_label; i++){
-        randomize(indexes, num_roots);
         rank_node = 1;
 
-        /*while(!stop){
-            
-            do{
-                node = roots[i]; //da 0 a num_vertex - 1
-            }while(random_visited[node]);
+        //Le radici sono gia' state cercate nel main.
+        randomize(indexes, num_roots);
 
-            random_visited[node] = true;*/
-
-            //devo cercare le radici.
-            //E' considerato radice ogni nodo con almeno un figlio.
-            //TODO: ERRORE!!! è considerato radice ogni nodo senza genitori!
-            for(int j=0; j<num_roots; j++) {
-                RandomizedVisit(roots[indexes[j]], i, labels, graph, &rank_node, num_vertex);
-            }
-
-            /*stop = true;
-            for(j=0; j < num_vertex; j++){
-                if (!random_visited[j]){
-                    stop = false;
-                    break;
-                }
-            }
-        }*/
-        /*memset(random_visited, 0, num_vertex * sizeof(bool));
-        stop=false;*/
+        for(int j=0; j<num_roots; j++) {
+            RandomizedVisit(roots[indexes[j]], i, labels, graph, &rank_node, num_vertex);
+        }
     }
 }
 
+void* RandomizedLabelingParallel(void* args) {
+    t_lbl_args* my_data;
+    my_data = (t_lbl_args*) args;
+
+    for(int j=0; j< my_data->roots_num; j++) {
+        RandomizedVisit(my_data->roots[my_data->indexes[j]], my_data->lbl_num, my_data->labels, my_data->graph, &my_data->rank_node, my_data->vertex_num);
+    }
+
+    pthread_exit((void *) 0);
+}
+
+// La funzione RandomizedLabelingInit prepara la struttura data per ogni
+// thread - uno per label per il momento - e avvia i thread
+// volendo questa init si può spostare nel main (TODO ?)
+void RandomizedLabelingInit(row_g * graph, row_l * labels, int label_num, int vertex_num, int * roots, int roots_num){
+    int i, j, err_code ;
+    pthread_t threads_lbl[label_num];   //1 thread for each label
+    t_lbl_args args_lbl[label_num];
+
+    //inizializzazione per valori random
+    srand(time(NULL));
+
+    for(i=0; i<label_num; i++){
+        args_lbl[i].rank_node = 1;
+
+        //Inizializzazione indici
+        args_lbl[i].indexes = (int *) malloc(roots_num*sizeof(int));
+        if(args_lbl[i].indexes == NULL) {
+            printf ("RandomizedLabelingInit: Not enough room for these indexes\n" );
+            exit(1);
+        }
+
+        for(j=0; j<roots_num; j++) {
+            args_lbl[i].indexes[j] = j;
+        }
+
+        //Le radici sono gia' state cercate nel main.
+        randomize(args_lbl[i].indexes, roots_num);
+
+        args_lbl[i].lbl_num = i;
+        args_lbl[i].labels = labels;    //it's a pointer so it can modify the object.
+                                        //TODO volendo potrei passare direttamente: labels[lbl_num]
+        args_lbl[i].graph = graph;
+        args_lbl[i].vertex_num = vertex_num;
+        args_lbl[i].roots = roots;
+        args_lbl[i].roots_num = roots_num;
+
+        err_code = pthread_create(&threads_lbl[i], NULL, RandomizedLabelingParallel, (void *)&args_lbl[i]);
+        if(err_code) {
+            printf ("RandomizedLabelingInit: Error number %i in creating thread %i.\n", err_code, i);
+            exit(1);
+        }
+    }
+
+    for(i=0; i<label_num; i++) {
+        err_code = pthread_join(threads_lbl[i], NULL);
+        if(err_code) {
+            printf ("RandomizedLabelingInit: Error number %i in joining thread for  %i.\n", err_code, i);
+            exit(1);
+        }
+    }
+}
 
 //Scopo di "scanRoots": inizializzare l'array di roots
 //Questa è una funzione parallela, quindi i thread si
@@ -539,6 +585,8 @@ int main(int argc, char *argv[]) {
         args[j].roots_mutex = roots_mutex;          //protezione per la variabile 'condivisa'
     }
 
+    printf("Inizio a leggere il file...\n");
+
     for(i=0; i<NUM_THREADS; i++) {    //eventualmente si può unire il for.    TODO
         args[i].id = i;
         err_code = pthread_create(&threads[i], NULL, scanFile, (void *)&args[i]);
@@ -562,6 +610,7 @@ int main(int argc, char *argv[]) {
     delta_microseconds = compute_delta_microseconds(start, file1_read);
     asprintf(&stats, "Read input file %s (file1) in %s.\n", argv[1], get_human_readable_time(delta_microseconds));
     asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
+    fprintf(stdout, "Fine lettura file...\n");
 
     // Stampa di prova grafo
 
@@ -572,6 +621,7 @@ int main(int argc, char *argv[]) {
         printf("\n");
     }
 
+    fprintf(stdout, "Ricerca delle radici ...\n");
     //Inizializzazione array Roots
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &start);
@@ -584,6 +634,7 @@ int main(int argc, char *argv[]) {
     root_index = 0;     //variabile *condivisa* per inizializzare parallelamente Roots
 
     // Creazione thread per lettura radici
+    //E' considerata radice ogni nodo senza genitori (not_root = false)
     for(i=0; i<NUM_THREADS; i++) {
         args[i].id = i;
         args[i].roots = roots;
@@ -604,7 +655,7 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
     }
-
+    fprintf(stdout, "Fine ricerca delle radici ...\n");
 
     // Stampa di prova radici
     printf("roots: ");
@@ -638,13 +689,16 @@ int main(int argc, char *argv[]) {
         memset(labels[i].visited, false, d * sizeof(bool));
     }
 
+    fprintf(stdout, "Creazione delle labels...\n");
+    RandomizedLabelingInit(rows, labels, d, num_vertex, roots, roots_num);
     RandomizedLabeling(rows, labels, d, num_vertex, roots, roots_num);
+    fprintf(stdout, "Fine creazione delle labels...\n");
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &labels_generation_finished);
     delta_microseconds = compute_delta_microseconds(start, labels_generation_finished);
     asprintf(&stats, "%sGenerated %s labels in %s.\n", stats, argv[2], get_human_readable_time(delta_microseconds));
     asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
-    
+
     //Stampa delle labels
     for(i=0; i<num_vertex; i++){
         printf("Node: %i ", i);
