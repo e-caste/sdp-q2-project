@@ -400,6 +400,23 @@ char* get_human_readable_time(long long unsigned microseconds) {
     return result;
 }
 
+char* get_human_readable_memory_usage(long unsigned kilobytes) {
+    long unsigned kb, mb, gb;
+    char* result;
+    gb = (long unsigned) kilobytes / (1024 * 1024);
+    mb = (long unsigned) kilobytes / 1024;
+    kb = (long unsigned) kilobytes - (gb * 1024 * 1024 + mb * 1024);
+    if (kilobytes <= 0)
+        asprintf(&result, "less than 0 KB");
+    else if (kilobytes > 0 && kilobytes < 1024)
+        asprintf(&result, "%lu KB", kilobytes);
+    else if (kilobytes >= 1024 && kilobytes < 1024 * 1024)
+        asprintf(&result, "%lu MB %lu KB", mb, kb);
+    else
+        asprintf(&result, "%lu GB %lu MB %lu KB", gb, mb, kb);
+    return result;
+}
+
 // args[1]: file1 (input .gra)
 // args[2]: n (label number)
 // args[3]: file2 (.que)
@@ -619,7 +636,7 @@ int main(int argc, char *argv[]) {
     free(rows);
 
     getrusage(RUSAGE_SELF, &memory);
-    asprintf(&stats, "%sMaximum memory usage: %ld\n", stats, memory.ru_maxrss);
+    asprintf(&stats, "%sMaximum memory usage: %s\n", stats, get_human_readable_memory_usage(memory.ru_maxrss));
 
     fprintf(stdout, "\n\n------------STATISTICS------------\n%s", stats);
 
