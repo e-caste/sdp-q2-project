@@ -1,16 +1,12 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <stdbool.h>
-#include <time.h>
-#include <string.h>
+#include "q2.h"
 
 #define NUM_THREADS sysconf(_SC_NPROCESSORS_ONLN)
 
 // TODO: https://en.wikipedia.org/wiki/C_data_types
 //      Ottimizzazione delle memoria: sostituire int con short se possibile
 //      Quanti nodi al massimo? unsigned int: [0, 65,535] ; unsigned long int: [0, 4,294,967,295]
+
+// TODO: dividere q2.c in più file (es: main.c, read.c, label.c, query.c)
 
 typedef struct edge_list {
     int num;            //valore del vertice
@@ -221,12 +217,9 @@ void *scanFile(void *args) {
 
 void RandomizedVisit(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex){
 
-    int rank_children_min = num_vertex, i, j, children_num = graph[node_num].edge_num, node;
-    bool stop = false;
-    bool random_visited[children_num];
+    int rank_children_min = num_vertex, i,children_num = graph[node_num].edge_num;
     int next_node[children_num];
-    
-    memset(random_visited, false, children_num * sizeof(bool));
+    int *indexes = NULL;
     
     //printf("RandomVisited-begin: node: %i\n", node_num);
 
@@ -241,26 +234,22 @@ void RandomizedVisit(int node_num, int lbl_num, row_l* labels, row_g* graph, int
             i++;
         }
 
-        while(!stop){
-            do{
-                node = rand() % children_num; //da 0 a children - 1
-            }while(random_visited[node]);
-
-            random_visited[node] = true;
-
-            RandomizedVisit(next_node[node], lbl_num, labels, graph, rank_root, num_vertex);
-
-            stop = true;
-            for(j=0; j < children_num; j++){
-                if (!random_visited[j]){
-                    stop = false;
-                    break;
-                }
-            }
+        // mi preparo a randomizzare la visita dei figli del nodo X
+        indexes = (int*) malloc(children_num * sizeof(int));
+        if(indexes == NULL) {
+            printf ("RandomizedVisit: Not enough room for these indexes\n" );
+            exit(1);
         }
 
-        // memset(random_visited, 0, num_vertex * sizeof(bool));
-        // stop=false;
+        for(i=0; i<children_num; i++) {
+            indexes[i] = i;
+        }
+
+        randomize(indexes, children_num);
+
+        for(int j=0; j<children_num; j++) {
+            RandomizedVisit(next_node[indexes[j]], lbl_num, labels, graph, rank_root, num_vertex);
+        }
     }    
     
     labels[node_num].visited[lbl_num] = true;
@@ -322,8 +311,9 @@ void* RandomizedLabelingParallel(void* args) {
     pthread_exit((void *) 0);
 }
 
-// La funzione RandomizedLabelingInit prepara la struttura data per ogni 
+// La funzione RandomizedLabelingInit prepara la struttura data per ogni
 // thread - uno per label per il momento - e avvia i thread
+// volendo questa init si può spostare nel main (TODO ?)
 void RandomizedLabelingInit(row_g * graph, row_l * labels, int label_num, int vertex_num, int * roots, int roots_num){
     int i, j, err_code ;
     pthread_t threads_lbl[label_num];   //1 thread for each label
