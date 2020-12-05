@@ -426,6 +426,32 @@ char* get_human_readable_memory_usage(long unsigned kilobytes) {
     return result;
 }
 
+// see https://www.tutorialspoint.com/how-to-get-memory-usage-at-runtime-using-cplusplus
+// and https://man7.org/linux/man-pages/man5/proc.5.html
+// and https://en.wikipedia.org/wiki/Resident_set_size
+char* get_rss_virt_mem(void) {
+    FILE *stat;
+    long unsigned rss, virt;
+    char* result;
+    stat = fopen("/proc/self/stat", "r");
+    if (stat == NULL) {
+        // assuming on UNIX but not GNU/Linux
+        return "";
+    }
+    fscanf(stat,
+           "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %*u %*u %*d %*d %*d %*d %*d %*d %*u %lu %ld",
+           &virt, &rss);
+    fclose(stat);
+    virt = (long unsigned) virt / 1024;
+    rss = (long unsigned) rss * sysconf(_SC_PAGESIZE) / 1024;
+    asprintf(&result,
+             "Currently used memory (RAM): %s\n"
+             "Currently used virtual memory (included pages): %s\n",
+             get_human_readable_memory_usage(rss),
+             get_human_readable_memory_usage(virt));
+    return result;
+}
+
 // args[1]: file1 (input .gra)
 // args[2]: n (label number)
 // args[3]: file2 (.que)
@@ -535,6 +561,7 @@ int main(int argc, char *argv[]) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &file1_read);
     delta_microseconds = compute_delta_microseconds(start, file1_read);
     asprintf(&stats, "Read input file %s (file1) in %s.\n", argv[1], get_human_readable_time(delta_microseconds));
+    asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
 
     // Stampa di prova grafo
 
@@ -616,6 +643,7 @@ int main(int argc, char *argv[]) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &labels_generation_finished);
     delta_microseconds = compute_delta_microseconds(start, labels_generation_finished);
     asprintf(&stats, "%sGenerated %s labels in %s.\n", stats, argv[2], get_human_readable_time(delta_microseconds));
+    asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
     
     //Stampa delle labels
     for(i=0; i<num_vertex; i++){
@@ -646,6 +674,7 @@ int main(int argc, char *argv[]) {
 
     getrusage(RUSAGE_SELF, &memory);
     asprintf(&stats, "%sMaximum memory usage: %s\n", stats, get_human_readable_memory_usage(memory.ru_maxrss));
+    asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
 
     fprintf(stdout, "\n\n------------STATISTICS------------\n%s", stats);
 
