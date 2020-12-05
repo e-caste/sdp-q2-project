@@ -10,6 +10,14 @@
 
 #define NUM_THREADS sysconf(_SC_NPROCESSORS_ONLN)
 
+// see https://iq.opengenus.org/detect-operating-system-in-c/
+// used to print the used memory correctly on macOS and GNU/Linux
+#ifdef __APPLE__
+    #define MEM_SIZE 1024
+#else
+    #define MEM_SIZE 1
+#endif
+
 // TODO: https://en.wikipedia.org/wiki/C_data_types
 //      Ottimizzazione delle memoria: sostituire int con short se possibile
 //      Quanti nodi al massimo? unsigned int: [0, 65,535] ; unsigned long int: [0, 4,294,967,295]
@@ -403,6 +411,7 @@ char* get_human_readable_time(long long unsigned microseconds) {
 char* get_human_readable_memory_usage(long unsigned kilobytes) {
     long unsigned kb, mb, gb;
     char* result;
+    kilobytes = kilobytes / MEM_SIZE;
     gb = (long unsigned) kilobytes / (1024 * 1024);
     mb = (long unsigned) kilobytes / 1024;
     kb = (long unsigned) kilobytes - (gb * 1024 * 1024 + mb * 1024);
