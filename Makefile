@@ -7,7 +7,7 @@ EXECUTABLE = q2
 all: $(SOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE) : $(OBJECTS)
-	$(CC) $(OBJECTS) -o $@
+	$(CC) $(OBJECTS) -o $@ -lpthread
 
 .c.o:
 	$(CC) $(CFLAGS) $< -o $@
