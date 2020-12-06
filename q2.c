@@ -1,12 +1,4 @@
 #define _GNU_SOURCE  // allow usage of asprintf on GNU/Linux
-#include <stdio.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <stdbool.h>
-#include <time.h>
-#include <string.h>
-#include <sys/resource.h>
 #include "q2.h"
 
 #define NUM_THREADS sysconf(_SC_NPROCESSORS_ONLN)
@@ -30,9 +22,21 @@ typedef struct edge_list {
     struct edge_list *next_num;
 } edge;
 
+typedef struct el_list_query {
+    int num[2];            //valore del vertice
+    struct el_list_query *next_num;
+} el_query;
+
 void create_list(edge *head, int val) {
     edge *current = head;
     current -> num = val;
+    current -> next_num = NULL;
+}
+
+void create_list_query(el_query *head, int val1, int val2) {
+    el_query *current = head;
+    current -> num[0] = val1;
+    current -> num[1] = val2;
     current -> next_num = NULL;
 }
 
@@ -48,6 +52,19 @@ void push(edge *head, int val) {
     current -> next_num -> next_num = NULL;
 }
 
+void push_query(el_query *head, int val1, int val2) {
+    el_query *current = head;
+
+    while(current -> next_num != NULL) {
+        current = current -> next_num;
+    }
+
+    current -> next_num = (el_query *) malloc(sizeof(el_query));
+    current -> next_num -> num[0] = val1;
+    current -> next_num -> num[1] = val2;
+    current -> next_num -> next_num = NULL;
+}
+
 void print_list(edge *head) {
     edge *current = head;
 
@@ -57,8 +74,27 @@ void print_list(edge *head) {
     }
 }
 
+void print_list_query(el_query *head) {
+    el_query *current = head;
+
+    while(current != NULL) {
+        printf("%i %i\n", current -> num[0], current -> num[1]);
+        current = current -> next_num;
+    }
+}
+
 void free_list(edge *head) {
     edge *tmp;
+
+    while(head != NULL) {
+        tmp = head;
+        head = head -> next_num;
+        free(tmp);
+    }
+}
+
+void free_list_query(el_query *head) {
+    el_query *tmp;
 
     while(head != NULL) {
         tmp = head;
@@ -197,20 +233,22 @@ void *scanFile(void *args) {
             int res = fscanf(fp, "%i ", &i);      // leggo sia il valore che lo spazio. Se ci fosse un "#" non legge nulla, perchè si aspetta un %i
             if(i != -1) { // i vertici non possono essere negativi però meglio testare "res" TODO
 
-                not_root_is_set = my_data->graph[i].not_root ? true : false;  // default == 0 == false;
+                //not_root_is_set = my_data->graph[i].not_root ? true : false;  // default == 0 == false;
 
                 if(k==0) {
                     create_list(head, i);
                 } else {
                     push(head, i);
                 }
-                my_data -> graph[i].not_root = true;   //se era a uno lo rimetto a 1
+                //my_data -> graph[i].not_root = true;   //se era a uno lo rimetto a 1
 
-                if ((!not_root_is_set) && (my_data->graph[i].not_root)){
-                    pthread_mutex_lock(my_data->roots_mutex);
-                        *my_data->roots_num = (*(my_data->roots_num) - 1);
-                    pthread_mutex_unlock(my_data->roots_mutex);
-                }
+                pthread_mutex_lock(my_data->roots_mutex);
+                    not_root_is_set = my_data->graph[i].not_root ? true : false;  // default == 0 == false;
+                    my_data -> graph[i].not_root = true;   //se era a uno lo rimetto a 1
+                    if ((!not_root_is_set) && (my_data->graph[i].not_root)){
+                            *my_data->roots_num = (*(my_data->roots_num) - 1);
+                    }
+                pthread_mutex_unlock(my_data->roots_mutex);
             }
             c = fgetc(fp);              //prendo carattere successivo
             k++;
@@ -425,6 +463,42 @@ void *scanRoots(void *args) {
     pthread_exit((void *) 0);
 }
 
+bool dfs_search(row_g *graph, int node1, int node2, bool *visited) {
+    if(node1 == node2)
+        return true;
+    if(visited[node1])
+        return false;
+
+    int children_num = graph[node1].edge_num;
+    bool reachable = false;
+    
+    if(children_num > 0) {
+
+        int children[children_num];
+        int i=0;
+
+        for(edge* next=graph[node1].edges_pointer; next != NULL; next = next->next_num){
+            if(next -> num == node2) {
+                return true;
+            }
+            children[i] = next->num;
+            i++;
+        }
+
+        for(i=0; i<children_num; i++) {
+            reachable = dfs_search(graph, children[i], node2, visited);
+            if(reachable) {
+                return true;
+            }
+        }
+
+    }
+
+    visited[node1] = true;
+
+    return reachable;
+}
+
 // see https://stackoverflow.com/a/10192994
 long long unsigned compute_delta_microseconds(struct timespec start, struct timespec end) {
     return (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
@@ -503,7 +577,7 @@ char* get_rss_virt_mem(void) {
 // args[3]: file2 (.que)
 int main(int argc, char *argv[]) {
 
-    FILE *fp;
+    FILE *fp, *fp_query;
     unsigned int num_vertex;
     int i, j, size, c=0, k=0, err_code=0, d;
     row_g *rows;
@@ -520,8 +594,8 @@ int main(int argc, char *argv[]) {
 
     // Controllo sugli argomenti
 
-    if (argc != 3) {
-        fprintf(stderr, "For the moment, enter only 'file1' and 'n' as arguments!\n");
+    if (argc != 4) {
+        fprintf(stderr, "Enter only 'file1', 'n' and 'file2' as arguments!\n");
         exit(1);
     }
 
@@ -691,7 +765,7 @@ int main(int argc, char *argv[]) {
 
     fprintf(stdout, "Creazione delle labels...\n");
     RandomizedLabelingInit(rows, labels, d, num_vertex, roots, roots_num);
-    RandomizedLabeling(rows, labels, d, num_vertex, roots, roots_num);
+    //RandomizedLabeling(rows, labels, d, num_vertex, roots, roots_num);
     fprintf(stdout, "Fine creazione delle labels...\n");
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &labels_generation_finished);
@@ -707,6 +781,74 @@ int main(int argc, char *argv[]) {
         }
         printf("\n");
     }
+
+    // Lettura query
+    fp_query = fopen(argv[3], "r");
+    if (fp_query == NULL) {
+        fprintf(stderr, "Unable to open file %s for reading.\n", argv[3] );
+        exit(1);
+    }
+
+    int a, b, num_query=0;
+    el_query *head_query = malloc(sizeof(el_query));
+
+    while (fscanf(fp_query, "%i %i  \n", &a, &b) != -1) {
+        if(num_query != 0) {
+            push_query(head_query, a, b);
+            num_query++;
+        } else {
+            create_list_query(head_query, a, b);
+            num_query++;
+        }
+    }
+
+    fclose(fp_query);
+    
+    //print_list_query(head_query);
+
+    printf("Numero Query: %i\n", num_query);
+
+    // Risoluzione query
+
+    FILE *fp_res_query;
+    fp_res_query = fopen("res_query.txt", "w");
+
+    if (fp_res_query == NULL) {
+        fprintf(stderr, "Unable to open file for store the result of the query.\n");
+        exit(1);
+    }
+
+    int node1, node2;
+    bool dfs;
+    bool reachable;
+    bool visited[num_vertex];
+
+    for(el_query* next=head_query; next != NULL; next = next->next_num) {
+        dfs = true;
+        node1 = next -> num[0];
+        node2 = next -> num[1];
+
+        for(i=0; i<d; i++) {
+            if (labels[node1].lbl_start[i]>labels[node2].lbl_start[i] ||
+                labels[node1].lbl_end[i]<labels[node2].lbl_end[i]) {
+                fprintf(fp_res_query, "%i %i 0\n", node1, node2);
+                dfs = false;
+                break;
+            }
+        }
+
+        if(dfs) {
+            memset(visited, false, num_vertex * sizeof(bool));
+            reachable = dfs_search(rows, node1, node2, visited);
+            if(reachable) {
+                fprintf(fp_res_query, "%i %i 1\n", node1, node2);
+            } else {
+                fprintf(fp_res_query, "%i %i 0\n", node1, node2);
+            }
+        }
+    }
+
+    fclose(fp_res_query);
 
     // Deallocazione di tutte le risorse
 
@@ -725,6 +867,7 @@ int main(int argc, char *argv[]) {
     }
     free(labels);
     free(rows);
+    free_list_query(head_query);
 
     getrusage(RUSAGE_SELF, &memory);
     asprintf(&stats, "%sMaximum memory usage: %s\n", stats, get_human_readable_memory_usage(memory.ru_maxrss));
