@@ -13,4 +13,4 @@ $(EXECUTABLE) : $(OBJECTS)
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	-rm -f *.o q2
+	-rm -f *.o q2 res_query.txt

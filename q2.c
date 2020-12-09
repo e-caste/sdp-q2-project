@@ -359,8 +359,19 @@ void* RandomizedLabelingParallel(void* args) {
     t_lbl_args* my_data;
     my_data = (t_lbl_args*) args;
 
+    int indexes[my_data->roots_num];
+    
+    //Randomizzazione radici (ogni thread il suo)
+    //Le radici sono gia' state cercate nel main.
+
+    for(int i=0; i<my_data->roots_num; i++) {
+        indexes[i] = i;
+    }
+    
+    randomize(indexes, my_data->roots_num);
+
     for(int j=0; j< my_data->roots_num; j++) {
-        RandomizedVisit(my_data->roots[my_data->indexes[j]], my_data->lbl_num, my_data->labels, my_data->graph, &my_data->rank_node, my_data->vertex_num);
+        RandomizedVisit(my_data->roots[indexes[j]], my_data->lbl_num, my_data->labels, my_data->graph, &my_data->rank_node, my_data->vertex_num);
     }
 
     pthread_exit((void *) 0);
@@ -379,20 +390,6 @@ void RandomizedLabelingInit(row_g * graph, row_l * labels, int label_num, int ve
 
     for(i=0; i<label_num; i++){
         args_lbl[i].rank_node = 1;
-
-        //Inizializzazione indici
-        args_lbl[i].indexes = (int *) malloc(roots_num*sizeof(int));
-        if(args_lbl[i].indexes == NULL) {
-            printf ("RandomizedLabelingInit: Not enough room for these indexes\n" );
-            exit(1);
-        }
-
-        for(j=0; j<roots_num; j++) {
-            args_lbl[i].indexes[j] = j;
-        }
-
-        //Le radici sono gia' state cercate nel main.
-        randomize(args_lbl[i].indexes, roots_num);
 
         args_lbl[i].lbl_num = i;
         args_lbl[i].labels = labels;    //it's a pointer so it can modify the object.
@@ -436,15 +433,12 @@ void *scanRoots(void *args) {
     if (my_data->id == NUM_THREADS-1)
         sup = my_data->total_vertex - 1;
     else
-        sup = ((my_data->total_vertex) / NUM_THREADS) * (my_data->id + 1);
+        sup = ((my_data->total_vertex) / NUM_THREADS) * (my_data->id + 1);      //TODO e' necessario cast(int)?
 
     if (my_data->id == 0)
         inf = 0;
     else
         inf = ((my_data->total_vertex)/NUM_THREADS)*(my_data->id);
-
-    /*printf("Sono il thread %i con inf %i e sup %i.\n", my_data->id, inf, sup-1);
-    fflush(stdout);*/
 
     for(i=inf; i<sup; i++) {
         if(!my_data->graph[i].not_root) {  //if (is root)
@@ -456,9 +450,6 @@ void *scanRoots(void *args) {
 
         }
     }
-
-    /*printf("Sono il thread %i e ho finito.\n", my_data->id);
-    fflush(stdout);*/
 
     pthread_exit((void *) 0);
 }
