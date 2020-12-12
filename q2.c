@@ -108,6 +108,7 @@ typedef struct row_graph {
     int edge_num;   //numero totali di vertici in quella direzione
     bool not_root;   //memset per tutto a zero
     edge *edges_pointer;
+    pthread_mutex_t *node_mutex;
 } row_g;
 
 // 3.1 multiple index construction
@@ -139,9 +140,19 @@ typedef struct thread_labels_args {
 
     int *roots;
     int roots_num;
-    int * indexes;          //For doing random roots
+    int *indexes;           //For doing random roots visit
 } t_lbl_args;               //TODO to reduce space allocation, we can reuse thread_struct with extra field
 
+typedef struct thread_child_args {
+    int id;
+    int node;
+    int lbl_num;
+    row_l *labels;
+    row_g *graph;
+    int vertex_num;
+    int *rank_node;
+    int rank_children_min;
+} t_child_args;
 
 //Swap e randomize sono funzioni di utilità per randomizzare Roots
 void swap (int *a, int *b) {
@@ -262,6 +273,16 @@ void *scanFile(void *args) {
             my_data -> graph[j].edges_pointer = head;
             my_data -> graph[j].edge_num = k;
         }
+        my_data->graph[j].node_mutex = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
+        if (my_data->graph[j].node_mutex == NULL ) {
+            printf ("Error in creating mutex protection for node\n" );
+            exit(1);
+        }
+
+        if(pthread_mutex_init(my_data->graph[j].node_mutex, NULL) != 0){
+            printf ("Error in initializing mutex protection for node\n" );
+            exit(1);
+        }
         k = 0;  //vertice successivo
     }
 
@@ -271,8 +292,8 @@ void *scanFile(void *args) {
 
 }
 
-void RandomizedVisit(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex){
-
+// Funziona (RICORSIVA) che richiama tutti i figli di un nodo per costruire le labels
+void RandomizedVisitRecursive(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex){
     int rank_children_min = num_vertex, i,children_num = graph[node_num].edge_num;
     int next_node[children_num];
     int *indexes = NULL;
@@ -304,7 +325,7 @@ void RandomizedVisit(int node_num, int lbl_num, row_l* labels, row_g* graph, int
         randomize(indexes, children_num);
 
         for(int j=0; j<children_num; j++) {
-            RandomizedVisit(next_node[indexes[j]], lbl_num, labels, graph, rank_root, num_vertex);
+            RandomizedVisitRecursive(next_node[indexes[j]], lbl_num, labels, graph, rank_root, num_vertex);
         }
     }    
     
@@ -327,6 +348,7 @@ void RandomizedVisit(int node_num, int lbl_num, row_l* labels, row_g* graph, int
     //printf("RandomVisited-end: node: %i, lbl: %i, [%i, %i]\n", node_num, lbl_num, labels[node_num].lbl_start[lbl_num], labels[node_num].lbl_end[lbl_num]);
 }
 
+// Funzione (SEQUENZIALE) per creare N Labels e avviare la ricerca per ogni radice 
 void RandomizedLabeling(row_g * graph, row_l * labels, int num_label, int num_vertex, int * roots, int num_roots){
     int i, rank_node ;
 
@@ -351,28 +373,135 @@ void RandomizedLabeling(row_g * graph, row_l * labels, int num_label, int num_ve
         randomize(indexes, num_roots);
 
         for(int j=0; j<num_roots; j++) {
-            RandomizedVisit(roots[indexes[j]], i, labels, graph, &rank_node, num_vertex);
+            RandomizedVisitRecursive(roots[indexes[j]], i, labels, graph, &rank_node, num_vertex);
         }
     }
+}
+
+//INIZIO FUNZIONI PARALLELE (PAR 3.1)
+void* RandomizedVisitParallel(void* args) {
+    t_child_args* my_data;
+    my_data = (t_child_args*) args;
+    
+    //Un Thread alla volta. (Nodi condivisi richiedono protezione)
+    pthread_mutex_lock(my_data->graph[my_data->node].node_mutex);
+        if(my_data->labels[my_data->node].visited[my_data->lbl_num]){
+            //printf("RandomizedVisitParallel: %i già visitato, termino\n", my_data->node);
+            pthread_mutex_unlock(my_data->graph[my_data->node].node_mutex);
+            pthread_exit((void *) 0);
+        }
+
+        if(my_data->graph[my_data->node].edge_num > 0){ //Il nodo ha altri figli
+            pthread_mutex_unlock(my_data->graph[my_data->node].node_mutex);
+            RandomizedVisitParallelInit(my_data->node, my_data->lbl_num, my_data->labels, my_data->graph, my_data-> rank_node, my_data->vertex_num);
+        }else{ 
+            //NON HO ALTRI FIGLI (SONO FOGLIA)
+            my_data->labels[my_data->node].visited[my_data->lbl_num] = true;
+
+            //cerco minimo tra i figli del nodo
+            for(edge* next= my_data->graph[my_data->node].edges_pointer; next != NULL; next = next->next_num)
+                if(my_data->labels[next->num].lbl_start[my_data->lbl_num] < my_data->rank_children_min )
+                    my_data->rank_children_min = my_data->labels[next->num].lbl_start[my_data->lbl_num];
+            
+            if(*my_data->rank_node < my_data->rank_children_min)
+                my_data->labels[my_data->node].lbl_start[my_data->lbl_num] = *my_data->rank_node;
+            else 
+                my_data->labels[my_data->node].lbl_start[my_data->lbl_num] = my_data->rank_children_min;
+            
+            my_data->labels[my_data->node].lbl_end[my_data->lbl_num] = *my_data->rank_node;
+
+            *my_data->rank_node = *my_data->rank_node + 1 ;
+            pthread_mutex_unlock(my_data->graph[my_data->node].node_mutex);
+        }
+        //printf("RandomizedVisitParallel: Sono nodo: %i, lbl[%i]: [%i, %i]\n", my_data->node, my_data->lbl_num, my_data->labels[my_data->node].lbl_start[my_data->lbl_num], my_data->labels[my_data->node].lbl_end[my_data->lbl_num]);
+    pthread_exit((void *) 0);
+}
+
+void RandomizedVisitParallelInit(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex){
+    int rank_children_min = num_vertex, i,children_num = graph[node_num].edge_num, err_code;
+    int next_node[children_num];
+    int indexes[children_num];
+    pthread_t threads_child[children_num];   //1 thread for each children of the node
+    t_child_args args_child[children_num];
+
+    //printf("Sono il nodo: %i\n", node_num);
+    //Per tutti i figli del nodo, richiamo la funzione
+    if(children_num > 0){
+        i=0;
+        for(edge* next=graph[node_num].edges_pointer; next != NULL; next = next->next_num){
+            next_node[i] = next->num; //figli del nodo
+            indexes[i] = i; //i=0; i<children_num;i++
+            i++;
+        }
+
+        if(children_num > 1)
+            randomize(indexes, children_num);
+
+        for(i=0; i<children_num; i++) {
+            args_child[i].node = next_node[indexes[i]];
+            args_child[i].lbl_num = lbl_num;
+            args_child[i].labels = labels;
+            args_child[i].graph = graph;
+            args_child[i].vertex_num = num_vertex;
+            args_child[i].rank_node = rank_root;
+            args_child[i].rank_children_min = num_vertex;
+            err_code = pthread_create(&threads_child[i], NULL, RandomizedVisitParallel, (void *)&args_child[i]);
+            if(err_code) {
+                printf ("RandomizedVisitInit: Error number %i in creating thread %i.\n", err_code, i);
+                exit(1);
+            }
+        }
+
+        for(i=0; i<children_num; i++) { //il nodo deve aspettare tutti i suoi figli
+            err_code = pthread_join(threads_child[i], NULL);
+            if(err_code) {
+                printf ("RandomizedVisitInit: Error number %i in joining thread for  %i.\n", err_code, i);
+                exit(1);
+            }
+        }
+    }
+
+    //un po' di duplicazione del codice...
+    pthread_mutex_lock(graph[node_num].node_mutex);
+        if(labels[node_num].visited[lbl_num]){
+            //printf("RandomizedVisitInit: %i già visitato, termino\n", node_num);
+            pthread_mutex_unlock(graph[node_num].node_mutex);
+            return;
+        }
+
+        labels[node_num].visited[lbl_num] = true;
+
+        //cerco minimo tra i figli del nodo
+        for(edge* next=graph[node_num].edges_pointer; next != NULL; next = next->next_num)
+            if(labels[next->num].lbl_start[lbl_num] < rank_children_min)
+                rank_children_min = labels[next->num].lbl_start[lbl_num];
+            
+        if(*rank_root < rank_children_min)
+            labels[node_num].lbl_start[lbl_num] = *rank_root;
+        else 
+            labels[node_num].lbl_start[lbl_num] =  rank_children_min;
+        
+        labels[node_num].lbl_end[lbl_num] = *rank_root;
+
+        *rank_root = *rank_root + 1 ;
+        //printf("RandomizedVisitInit: Sono nodo: %i, lbl[%i]: [%i, %i]\n", node_num, lbl_num, labels[node_num].lbl_start[lbl_num], labels[node_num].lbl_end[lbl_num]);
+    pthread_mutex_unlock(graph[node_num].node_mutex);
 }
 
 void* RandomizedLabelingParallel(void* args) {
     t_lbl_args* my_data;
     my_data = (t_lbl_args*) args;
-
     int indexes[my_data->roots_num];
     
     //Randomizzazione radici (ogni thread il suo)
     //Le radici sono gia' state cercate nel main.
 
-    for(int i=0; i<my_data->roots_num; i++) {
-        indexes[i] = i;
-    }
-    
+    memcpy(indexes, my_data->indexes, my_data->roots_num*sizeof(int));
     randomize(indexes, my_data->roots_num);
 
-    for(int j=0; j< my_data->roots_num; j++) {
-        RandomizedVisit(my_data->roots[indexes[j]], my_data->lbl_num, my_data->labels, my_data->graph, &my_data->rank_node, my_data->vertex_num);
+    for(int j=0; j< my_data->roots_num; j++) { //TODO Parallelizzazione
+        RandomizedVisitParallelInit(my_data->roots[indexes[j]], my_data->lbl_num, my_data->labels, my_data->graph, &my_data->rank_node, my_data->vertex_num);
+        //RandomizedVisitRecursive(my_data->roots[indexes[j]], my_data->lbl_num, my_data->labels, my_data->graph, &my_data->rank_node, my_data->vertex_num);
     }
 
     pthread_exit((void *) 0);
@@ -380,11 +509,15 @@ void* RandomizedLabelingParallel(void* args) {
 
 // La funzione RandomizedLabelingInit prepara la struttura data per ogni
 // thread - uno per label per il momento - e avvia i thread
-// volendo questa init si può spostare nel main (TODO ?)
-void RandomizedLabelingInit(row_g * graph, row_l * labels, int label_num, int vertex_num, int * roots, int roots_num){
-    int i, j, err_code ;
+void RandomizedLabelingParallelInit(row_g * graph, row_l * labels, int label_num, int vertex_num, int * roots, int roots_num){
+    int i, err_code ;
     pthread_t threads_lbl[label_num];   //1 thread for each label
     t_lbl_args args_lbl[label_num];
+    int indexes[roots_num];
+
+    for(i=0; i<roots_num; i++){
+        indexes[i] = i;
+    }
 
     //inizializzazione per valori random
     srand(time(NULL));
@@ -399,6 +532,7 @@ void RandomizedLabelingInit(row_g * graph, row_l * labels, int label_num, int ve
         args_lbl[i].vertex_num = vertex_num;
         args_lbl[i].roots = roots;
         args_lbl[i].roots_num = roots_num;
+        args_lbl[i].indexes = indexes;  //struttura condivisa. -> no protezione xk lavoro su una copia
 
         err_code = pthread_create(&threads_lbl[i], NULL, RandomizedLabelingParallel, (void *)&args_lbl[i]);
         if(err_code) {
@@ -680,12 +814,12 @@ int main(int argc, char *argv[]) {
 
     // Stampa di prova grafo
 
-    for(i=0; i<num_vertex; i++) {
-        printf("%i : ", i);
-        print_list(rows[i].edges_pointer);
-        //printf(" -----> num_edge: %i\n", rows[i].edge_num);
-        printf("\n");
-    }
+    // for(i=0; i<num_vertex; i++) {
+    //     printf("%i : ", i);
+    //     print_list(rows[i].edges_pointer);
+    //     //printf(" -----> num_edge: %i\n", rows[i].edge_num);
+    //     printf("\n");
+    // }
 
     fprintf(stdout, "Ricerca delle radici ...\n");
     //Inizializzazione array Roots
@@ -724,11 +858,11 @@ int main(int argc, char *argv[]) {
     fprintf(stdout, "Fine ricerca delle radici ...\n");
 
     // Stampa di prova radici
-    printf("roots: ");
-    for(i=0; i<roots_num; i++){
-        printf("%i ", roots[i]);
-    }
-    printf("\n");
+    // printf("roots: ");
+    // for(i=0; i<roots_num; i++){
+    //     printf("%i ", roots[i]);
+    // }
+    // printf("\n");
 
 
     // Allocazione struct per labels
@@ -756,7 +890,7 @@ int main(int argc, char *argv[]) {
     }
 
     fprintf(stdout, "Creazione delle labels...\n");
-    RandomizedLabelingInit(rows, labels, d, num_vertex, roots, roots_num);
+    RandomizedLabelingParallelInit(rows, labels, d, num_vertex, roots, roots_num);
     //RandomizedLabeling(rows, labels, d, num_vertex, roots, roots_num);
     fprintf(stdout, "Fine creazione delle labels...\n");
 
@@ -802,50 +936,52 @@ int main(int argc, char *argv[]) {
 
     // Risoluzione query
 
-    FILE *fp_res_query;
-    fp_res_query = fopen("res_query.txt", "w");
+    // FILE *fp_res_query;
+    // fp_res_query = fopen("res_query.txt", "w");
 
-    if (fp_res_query == NULL) {
-        fprintf(stderr, "Unable to open file for store the result of the query.\n");
-        exit(1);
-    }
+    // if (fp_res_query == NULL) {
+    //     fprintf(stderr, "Unable to open file for store the result of the query.\n");
+    //     exit(1);
+    // }
 
-    int node1, node2;
-    bool dfs;
-    bool reachable;
-    bool visited[num_vertex];
+    // int node1, node2;
+    // bool dfs;
+    // bool reachable;
+    // bool visited[num_vertex];
 
-    for(el_query* next=head_query; next != NULL; next = next->next_num) {
-        dfs = true;
-        node1 = next -> num[0];
-        node2 = next -> num[1];
+    // for(el_query* next=head_query; next != NULL; next = next->next_num) {
+    //     dfs = true;
+    //     node1 = next -> num[0];
+    //     node2 = next -> num[1];
 
-        for(i=0; i<d; i++) {
-            if (labels[node1].lbl_start[i]>labels[node2].lbl_start[i] ||
-                labels[node1].lbl_end[i]<labels[node2].lbl_end[i]) {
-                fprintf(fp_res_query, "%i %i 0\n", node1, node2);
-                dfs = false;
-                break;
-            }
-        }
+    //     for(i=0; i<d; i++) {
+    //         if (labels[node1].lbl_start[i]>labels[node2].lbl_start[i] ||
+    //             labels[node1].lbl_end[i]<labels[node2].lbl_end[i]) {
+    //             fprintf(fp_res_query, "%i %i 0\n", node1, node2);
+    //             dfs = false;
+    //             break;
+    //         }
+    //     }
 
-        if(dfs) {
-            memset(visited, false, num_vertex * sizeof(bool));
-            reachable = dfs_search(rows, node1, node2, visited);
-            if(reachable) {
-                fprintf(fp_res_query, "%i %i 1\n", node1, node2);
-            } else {
-                fprintf(fp_res_query, "%i %i 0\n", node1, node2);
-            }
-        }
-    }
+    //     if(dfs) {
+    //         memset(visited, false, num_vertex * sizeof(bool));
+    //         reachable = dfs_search(rows, node1, node2, visited);
+    //         if(reachable) {
+    //             fprintf(fp_res_query, "%i %i 1\n", node1, node2);
+    //         } else {
+    //             fprintf(fp_res_query, "%i %i 0\n", node1, node2);
+    //         }
+    //     }
+    // }
 
-    fclose(fp_res_query);
+    // fclose(fp_res_query);
 
     // Deallocazione di tutte le risorse
 
     for(i=0; i<num_vertex; i++) {
         free_list(rows[i].edges_pointer);
+        pthread_mutex_destroy(rows[i].node_mutex);
+        free(rows[i].node_mutex);
     }
 
     pthread_mutex_destroy(roots_mutex);
