@@ -582,6 +582,11 @@ int main(int argc, char *argv[]) {
     long long unsigned delta_microseconds;
     struct rusage memory;
     char* stats;
+    // needed for reachability query
+    int node1, node2;
+    bool dfs;
+    bool reachable;
+    bool *visited;
 
     // Controllo sugli argomenti
 
@@ -809,10 +814,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    int node1, node2;
-    bool dfs;
-    bool reachable;
-    bool visited[num_vertex];
+    visited = (bool *) malloc(num_vertex * sizeof(bool));
 
     for(el_query* next=head_query; next != NULL; next = next->next_num) {
         dfs = true;
