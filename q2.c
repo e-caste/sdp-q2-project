@@ -547,7 +547,7 @@ char* get_rss_virt_mem(void) {
     stat = fopen("/proc/self/stat", "r");
     if (stat == NULL) {
         // assuming on UNIX but not GNU/Linux
-        return "";
+        return "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
     }
     fscanf(stat,
            "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %*u %*u %*d %*d %*d %*d %*d %*d %*u %lu %ld",
@@ -557,7 +557,7 @@ char* get_rss_virt_mem(void) {
     rss = (long unsigned) rss * sysconf(_SC_PAGESIZE) / 1024;
     asprintf(&result,
              "Currently used memory (RAM): %s\n"
-             "Currently used virtual memory (included pages): %s\n",
+             "Currently used virtual memory (included pages): %s\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n",
              get_human_readable_memory_usage(rss),
              get_human_readable_memory_usage(virt));
     return result;
@@ -873,13 +873,14 @@ int main(int argc, char *argv[]) {
     free(rows);
     free_list_query(head_query);
 
-    getrusage(RUSAGE_SELF, &memory);
-    asprintf(&stats, "%sMaximum memory usage: %s\n", stats, get_human_readable_memory_usage(memory.ru_maxrss));
-    asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
-
     clock_gettime(CLOCK_MONOTONIC_RAW, &program_finished);
     delta_microseconds = compute_delta_microseconds(program_start, program_finished);
     asprintf(&stats, "%sTotal program duration: %s.\n", stats, get_human_readable_time(delta_microseconds));
+
+    asprintf(&stats, "%sThreads used: %ld.\n", stats, NUM_THREADS);
+
+    getrusage(RUSAGE_SELF, &memory);
+    asprintf(&stats, "%sMaximum memory usage: %s\n", stats, get_human_readable_memory_usage(memory.ru_maxrss));
 
     fprintf(stdout, "\n\n------------STATISTICS------------\n%s", stats);
 
