@@ -563,9 +563,9 @@ char* get_rss_virt_mem(void) {
     return result;
 }
 
-// args[1]: file1 (input .gra)
-// args[2]: n (label number)
-// args[3]: file2 (.que)
+// argv[1]: file1 (input .gra)
+// argv[2]: n (label number)
+// argv[3]: file2 (.que)
 int main(int argc, char *argv[]) {
 
     FILE *fp, *fp_query;
@@ -779,6 +779,8 @@ int main(int argc, char *argv[]) {
         printf("\n");
     }
 
+    clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
+
     // Lettura query
     fp_query = fopen(argv[3], "r");
     if (fp_query == NULL) {
@@ -800,6 +802,11 @@ int main(int argc, char *argv[]) {
     }
 
     fclose(fp_query);
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &file2_read);
+    delta_microseconds = compute_delta_microseconds(section_start, file2_read);
+    asprintf(&stats, "%sRead query file %s (file2) in %s.\n", stats, argv[3], get_human_readable_time(delta_microseconds));
+    asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
     
     //print_list_query(head_query);
 
