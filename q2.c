@@ -578,7 +578,7 @@ int main(int argc, char *argv[]) {
     int roots_num, root_index;
     pthread_mutex_t *roots_mutex;
     row_l *labels;
-    struct timespec start, file1_read, file2_read, labels_generation_finished, reachability_queries_finished;
+    struct timespec program_start, section_start, file1_read, file2_read, labels_generation_finished, reachability_queries_finished, program_finished;
     long long unsigned delta_microseconds;
     struct rusage memory;
     char* stats;
@@ -604,7 +604,8 @@ int main(int argc, char *argv[]) {
 
     // Apertura file1
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &program_start);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
     fp = fopen(argv[1], "r");
 
     if (fp == NULL) {
@@ -677,7 +678,7 @@ int main(int argc, char *argv[]) {
     }
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &file1_read);
-    delta_microseconds = compute_delta_microseconds(start, file1_read);
+    delta_microseconds = compute_delta_microseconds(section_start, file1_read);
     asprintf(&stats, "Read input file %s (file1) in %s.\n", argv[1], get_human_readable_time(delta_microseconds));
     asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
     fprintf(stdout, "Fine lettura file...\n");
@@ -694,7 +695,7 @@ int main(int argc, char *argv[]) {
     fprintf(stdout, "Ricerca delle radici ...\n");
     //Inizializzazione array Roots
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
     roots = (int *) malloc(roots_num * sizeof(int));
     if (roots == NULL ) {
         printf ("Error in creating roots struct\n" );
@@ -765,7 +766,7 @@ int main(int argc, char *argv[]) {
     fprintf(stdout, "Fine creazione delle labels...\n");
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &labels_generation_finished);
-    delta_microseconds = compute_delta_microseconds(start, labels_generation_finished);
+    delta_microseconds = compute_delta_microseconds(section_start, labels_generation_finished);
     asprintf(&stats, "%sGenerated %s labels in %s.\n", stats, argv[2], get_human_readable_time(delta_microseconds));
     asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
 
@@ -861,6 +862,10 @@ int main(int argc, char *argv[]) {
     getrusage(RUSAGE_SELF, &memory);
     asprintf(&stats, "%sMaximum memory usage: %s\n", stats, get_human_readable_memory_usage(memory.ru_maxrss));
     asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &program_finished);
+    delta_microseconds = compute_delta_microseconds(program_start, program_finished);
+    asprintf(&stats, "%sTotal program duration: %s.\n", stats, get_human_readable_time(delta_microseconds));
 
     fprintf(stdout, "\n\n------------STATISTICS------------\n%s", stats);
 
