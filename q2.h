@@ -31,5 +31,5 @@
  * KB = kilobytes
  * GB = gigabytes, MB = megabytes
 */
-#define KB_IN_GB 1024 * 1024
+#define KB_IN_GB 1048576  // = 1024 * 1024
 #define KB_IN_MB 1024
