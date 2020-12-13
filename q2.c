@@ -497,25 +497,25 @@ long long unsigned compute_delta_microseconds(struct timespec start, struct time
 
 // asprintf automatically allocates the needed memory - see https://stackoverflow.com/a/23842944
 char* get_human_readable_time(long long unsigned microseconds) {
-    long us, ms, s, m, h;
+    long long unsigned us, ms, s, m, h;
     char* result;
-    h = (long) microseconds / 3600000000;
-    m = (long) microseconds / 60000000 - (h * 3600000000);
-    s = (long) microseconds / 1000000 - (h * 3600000000 + m * 60000000);
-    ms = (long) microseconds / 1000 - (h * 3600000000 + m * 60000000 + s * 1000000);
-    us = (long) microseconds - (h * 3600000000 + m * 60000000 + s * 1000000 + ms * 1000);
+    h = (long long unsigned) microseconds / 3600000000;
+    m = (long long unsigned) (microseconds - (h * 3600000000)) / 60000000;
+    s = (long long unsigned) (microseconds - (h * 3600000000 + m * 60000000)) / 1000000;
+    ms = (long long unsigned) (microseconds - (h * 3600000000 + m * 60000000 + s * 1000000)) / 1000;
+    us = (long long unsigned) microseconds - (h * 3600000000 + m * 60000000 + s * 1000000 + ms * 1000);
     if (microseconds <= 0)
         asprintf(&result, "less than 0 microseconds");
     else if (microseconds > 0 && microseconds < 1000)
         asprintf(&result, "%llu microseconds", microseconds);
     else if (microseconds >= 1000 && microseconds < 1000000)
-        asprintf(&result, "%ld milliseconds, %ld microseconds", ms, us);
+        asprintf(&result, "%llu milliseconds, %llu microseconds", ms, us);
     else if (microseconds >= 1000000 && microseconds < 60000000)
-        asprintf(&result, "%ld seconds, %ld milliseconds, %ld microseconds", s, ms, us);
+        asprintf(&result, "%llu seconds, %llu milliseconds, %llu microseconds", s, ms, us);
     else if (microseconds >= 60000000 && microseconds < 3600000000)
-        asprintf(&result, "%ld minutes, %ld seconds, %ld milliseconds, %ld microseconds", m, s, ms, us);
+        asprintf(&result, "%llu minutes, %llu seconds, %llu milliseconds, %llu microseconds", m, s, ms, us);
     else
-        asprintf(&result, "%ld hours, %ld minutes, %ld seconds, %ld milliseconds, %ld microseconds", h, m, s, ms, us);
+        asprintf(&result, "%llu hours, %llu minutes, %llu seconds, %llu milliseconds, %llu microseconds", h, m, s, ms, us);
     return result;
 }
 
@@ -524,7 +524,7 @@ char* get_human_readable_memory_usage(long unsigned kilobytes) {
     char* result;
     kilobytes = kilobytes / MEM_SIZE;
     gb = (long unsigned) kilobytes / (1024 * 1024);
-    mb = (long unsigned) kilobytes / 1024 - (gb * 1024 * 1024);
+    mb = (long unsigned) (kilobytes - (gb * 1024 * 1024)) / 1024;
     kb = (long unsigned) kilobytes - (gb * 1024 * 1024 + mb * 1024);
     if (kilobytes <= 0)
         asprintf(&result, "less than 0 KB");
