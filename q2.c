@@ -500,9 +500,9 @@ char* get_human_readable_time(long long unsigned microseconds) {
     long us, ms, s, m, h;
     char* result;
     h = (long) microseconds / 3600000000;
-    m = (long) microseconds / 60000000;
-    s = (long) microseconds / 1000000;
-    ms = (long) microseconds / 1000;
+    m = (long) microseconds / 60000000 - (h * 3600000000);
+    s = (long) microseconds / 1000000 - (h * 3600000000 + m * 60000000);
+    ms = (long) microseconds / 1000 - (h * 3600000000 + m * 60000000 + s * 1000000);
     us = (long) microseconds - (h * 3600000000 + m * 60000000 + s * 1000000 + ms * 1000);
     if (microseconds <= 0)
         asprintf(&result, "less than 0 microseconds");
@@ -524,7 +524,7 @@ char* get_human_readable_memory_usage(long unsigned kilobytes) {
     char* result;
     kilobytes = kilobytes / MEM_SIZE;
     gb = (long unsigned) kilobytes / (1024 * 1024);
-    mb = (long unsigned) kilobytes / 1024;
+    mb = (long unsigned) kilobytes / 1024 - (gb * 1024 * 1024);
     kb = (long unsigned) kilobytes - (gb * 1024 * 1024 + mb * 1024);
     if (kilobytes <= 0)
         asprintf(&result, "less than 0 KB");
