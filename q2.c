@@ -831,11 +831,7 @@ int main(int argc, char *argv[]) {
         if(dfs) {
             memset(visited, false, num_vertex * sizeof(bool));
             reachable = dfs_search(rows, node1, node2, visited);
-            if(reachable) {
-                fprintf(fp_res_query, "%i %i 1\n", node1, node2);
-            } else {
-                fprintf(fp_res_query, "%i %i 0\n", node1, node2);
-            }
+            fprintf(fp_res_query, "%i %i %d\n", node1, node2, reachable ? 1 : 0);
         }
     }
 
