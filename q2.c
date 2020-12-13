@@ -499,20 +499,20 @@ long long unsigned compute_delta_microseconds(struct timespec start, struct time
 char* get_human_readable_time(long long unsigned microseconds) {
     long long unsigned us, ms, s, m, h;
     char* result;
-    h = (long long unsigned) microseconds / 3600000000;
-    m = (long long unsigned) (microseconds - (h * 3600000000)) / 60000000;
-    s = (long long unsigned) (microseconds - (h * 3600000000 + m * 60000000)) / 1000000;
-    ms = (long long unsigned) (microseconds - (h * 3600000000 + m * 60000000 + s * 1000000)) / 1000;
-    us = (long long unsigned) microseconds - (h * 3600000000 + m * 60000000 + s * 1000000 + ms * 1000);
+    h = (long long unsigned) microseconds / US_IN_H;
+    m = (long long unsigned) (microseconds - (h * US_IN_H)) / US_IN_M;
+    s = (long long unsigned) (microseconds - (h * US_IN_H + m * US_IN_M)) / US_IN_S;
+    ms = (long long unsigned) (microseconds - (h * US_IN_H + m * US_IN_M + s * US_IN_S)) / US_IN_MS;
+    us = (long long unsigned) microseconds - (h * US_IN_H + m * US_IN_M + s * US_IN_S + ms * US_IN_MS);
     if (microseconds <= 0)
         asprintf(&result, "less than 0 microseconds");
-    else if (microseconds > 0 && microseconds < 1000)
+    else if (microseconds > 0 && microseconds < US_IN_MS)
         asprintf(&result, "%llu microseconds", microseconds);
-    else if (microseconds >= 1000 && microseconds < 1000000)
+    else if (microseconds >= US_IN_MS && microseconds < US_IN_S)
         asprintf(&result, "%llu milliseconds, %llu microseconds", ms, us);
-    else if (microseconds >= 1000000 && microseconds < 60000000)
+    else if (microseconds >= US_IN_S && microseconds < US_IN_M)
         asprintf(&result, "%llu seconds, %llu milliseconds, %llu microseconds", s, ms, us);
-    else if (microseconds >= 60000000 && microseconds < 3600000000)
+    else if (microseconds >= US_IN_M && microseconds < US_IN_H)
         asprintf(&result, "%llu minutes, %llu seconds, %llu milliseconds, %llu microseconds", m, s, ms, us);
     else
         asprintf(&result, "%llu hours, %llu minutes, %llu seconds, %llu milliseconds, %llu microseconds", h, m, s, ms, us);
