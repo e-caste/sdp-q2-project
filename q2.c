@@ -812,6 +812,8 @@ int main(int argc, char *argv[]) {
 
     printf("Numero Query: %i\n", num_query);
 
+    clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
+
     // Risoluzione query
 
     FILE *fp_res_query;
@@ -846,6 +848,11 @@ int main(int argc, char *argv[]) {
     }
 
     fclose(fp_res_query);
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &reachability_queries_finished);
+    delta_microseconds = compute_delta_microseconds(section_start, reachability_queries_finished);
+    asprintf(&stats, "%sTested %d reachability queries in %s.\n", stats, num_query, get_human_readable_time(delta_microseconds));
+    asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
 
     // Deallocazione di tutte le risorse
 
