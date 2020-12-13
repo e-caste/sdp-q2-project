@@ -25,3 +25,11 @@
 #define US_IN_M 60000000
 #define US_IN_S 1000000
 #define US_IN_MS 1000
+
+/*
+ * used in get_human_readable_memory_usage
+ * KB = kilobytes
+ * GB = gigabytes, MB = megabytes
+*/
+#define KB_IN_GB 1024 * 1024
+#define KB_IN_MB 1024

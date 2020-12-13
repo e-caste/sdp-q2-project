@@ -523,14 +523,14 @@ char* get_human_readable_memory_usage(long unsigned kilobytes) {
     long unsigned kb, mb, gb;
     char* result;
     kilobytes = kilobytes / MEM_SIZE;
-    gb = (long unsigned) kilobytes / (1024 * 1024);
-    mb = (long unsigned) (kilobytes - (gb * 1024 * 1024)) / 1024;
-    kb = (long unsigned) kilobytes - (gb * 1024 * 1024 + mb * 1024);
+    gb = (long unsigned) kilobytes / KB_IN_GB;
+    mb = (long unsigned) (kilobytes - (gb * KB_IN_GB)) / KB_IN_MB;
+    kb = (long unsigned) kilobytes - (gb * KB_IN_GB + mb * KB_IN_MB);
     if (kilobytes <= 0)
         asprintf(&result, "less than 0 KB");
-    else if (kilobytes > 0 && kilobytes < 1024)
+    else if (kilobytes > 0 && kilobytes < KB_IN_MB)
         asprintf(&result, "%lu KB", kilobytes);
-    else if (kilobytes >= 1024 && kilobytes < 1024 * 1024)
+    else if (kilobytes >= KB_IN_MB && kilobytes < KB_IN_GB)
         asprintf(&result, "%lu MB %lu KB", mb, kb);
     else
         asprintf(&result, "%lu GB %lu MB %lu KB", gb, mb, kb);
