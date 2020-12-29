@@ -24,19 +24,12 @@ typedef struct edge_list {
 
 typedef struct el_list_query {
     int num[2];            //valore del vertice
-    struct el_list_query *next_num;
+    bool can_reach;
 } el_query;
 
 void create_list(edge *head, int val) {
     edge *current = head;
     current -> num = val;
-    current -> next_num = NULL;
-}
-
-void create_list_query(el_query *head, int val1, int val2) {
-    el_query *current = head;
-    current -> num[0] = val1;
-    current -> num[1] = val2;
     current -> next_num = NULL;
 }
 
@@ -52,19 +45,6 @@ void push(edge *head, int val) {
     current -> next_num -> next_num = NULL;
 }
 
-void push_query(el_query *head, int val1, int val2) {
-    el_query *current = head;
-
-    while(current -> next_num != NULL) {
-        current = current -> next_num;
-    }
-
-    current -> next_num = (el_query *) malloc(sizeof(el_query));
-    current -> next_num -> num[0] = val1;
-    current -> next_num -> num[1] = val2;
-    current -> next_num -> next_num = NULL;
-}
-
 void print_list(edge *head) {
     edge *current = head;
 
@@ -74,27 +54,8 @@ void print_list(edge *head) {
     }
 }
 
-void print_list_query(el_query *head) {
-    el_query *current = head;
-
-    while(current != NULL) {
-        printf("%i %i\n", current -> num[0], current -> num[1]);
-        current = current -> next_num;
-    }
-}
-
 void free_list(edge *head) {
     edge *tmp;
-
-    while(head != NULL) {
-        tmp = head;
-        head = head -> next_num;
-        free(tmp);
-    }
-}
-
-void free_list_query(el_query *head) {
-    el_query *tmp;
 
     while(head != NULL) {
         tmp = head;
@@ -127,6 +88,11 @@ typedef struct thread_args {
     int *roots_num;             //During DAG reading we count the number of roots (with protection)
     int *root_index;            //Shared Index to initialize roots array in parallel way
     pthread_mutex_t *roots_mutex;
+    int queries_num;
+    el_query * array_queries;
+    bool *node_visited;
+    int num_labels;
+    row_l *array_labels;
 } t_args;
 
 typedef struct thread_labels_args {
@@ -624,6 +590,51 @@ bool dfs_search(row_g *graph, int node1, int node2, bool *visited) {
     return reachable;
 }
 
+void *solveQuery (void *args) {
+    t_args *my_data;
+    my_data = (t_args *) args;
+
+    int i, j, inf, sup, node1, node2;
+    bool dfs;
+
+    if (my_data->id == NUM_THREADS-1)
+        sup = my_data->queries_num;
+    else
+        sup = ((my_data->queries_num) / NUM_THREADS) * (my_data->id + 1);      //TODO e' necessario cast(int)?
+
+    if (my_data->id == 0)
+        inf = 0;
+    else
+        inf = ((my_data->queries_num) / NUM_THREADS) * (my_data->id);
+
+    //printf("Thread n. %i con inf: %i e sup: %i\n", my_data->id, inf, sup-1);
+
+    for(j=inf; j<sup; j++) {
+        dfs = true;
+        node1 = my_data -> array_queries[j].num[0];
+        node2 = my_data -> array_queries[j].num[1];
+
+        for(i=0; i<my_data->num_labels; i++) {
+            if (my_data->array_labels[node1].lbl_start[i]>my_data->array_labels[node2].lbl_start[i] ||
+                my_data->array_labels[node1].lbl_end[i]<my_data->array_labels[node2].lbl_end[i]) { // line 1-2 alg. 2 paper
+                my_data -> array_queries[j].can_reach = false;
+                //fprintf(fp_res_query, "%i %i 0\n", node1, node2);
+                dfs = false;
+                break;
+            }
+        }
+
+        if(dfs) {
+            memset(my_data->node_visited, false, my_data->total_vertex * sizeof(bool));
+            my_data -> array_queries[j].can_reach = dfs_search(my_data->graph, node1, node2, my_data->node_visited);
+
+            //fprintf(fp_res_query, "%i %i %d\n", node1, node2, reachable ? 1 : 0);
+        }
+    }
+
+    pthread_exit((void *) 0);
+}
+
 // see https://stackoverflow.com/a/10192994
 long long unsigned compute_delta_microseconds(struct timespec start, struct timespec end) {
     return (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
@@ -720,7 +731,7 @@ int main(int argc, char *argv[]) {
     int node1, node2;
     bool dfs;
     bool reachable;
-    bool *visited;
+    //bool *visited;
 
     // Controllo sugli argomenti
 
@@ -907,13 +918,13 @@ int main(int argc, char *argv[]) {
     asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
 
     //Stampa delle labels
-    for(i=0; i<num_vertex; i++){
+    /*for(i=0; i<num_vertex; i++){
         printf("Node: %i ", i);
         for(j=0; j<d; j++){
             printf("[%i, %i] ", labels[i].lbl_start[j], labels[i].lbl_end[j]);
         }
         printf("\n");
-    }
+    }*/
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
 
@@ -925,19 +936,29 @@ int main(int argc, char *argv[]) {
     }
 
     int a, b, num_query=0;
-    el_query *head_query = malloc(sizeof(el_query));
 
-    while (fscanf(fp_query, "%i %i  \n", &a, &b) != -1) {
-        if(num_query != 0) {
-            push_query(head_query, a, b);
-            num_query++;
-        } else {
-            create_list_query(head_query, a, b);
-            num_query++;
-        }
+    while (fscanf(fp, "%*[^\n]\n") != -1) {
+        num_query++;
+    }
+
+    printf("Numero Query: %i\n", num_query);
+
+    el_query *queries = malloc(sizeof(el_query)*num_query);
+
+    fseek(fp_query, 0L, SEEK_SET);
+
+    for(i=0; i<num_query; i++) {
+        fscanf(fp_query, "%i %i  \n", &a, &b);
+        queries[i].num[0] = a;
+        queries[i].num[1] = b;
     }
 
     fclose(fp_query);
+
+    // Stampa query
+    /*for(i=0; i<num_query; i++) {
+        printf("Query %i: %i %i\n", i, queries[i].num[0], queries[i].num[1]);
+    }*/
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &file2_read);
     delta_microseconds = compute_delta_microseconds(section_start, file2_read);
@@ -946,41 +967,43 @@ int main(int argc, char *argv[]) {
     
     //print_list_query(head_query);
 
-    printf("Numero Query: %i\n", num_query);
-
     clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
 
     // Risoluzione query
+    bool *visited[NUM_THREADS];
+
+    for(j=0; j<NUM_THREADS; j++) {
+        visited[j] = (bool *) malloc(num_vertex * sizeof(bool));
+        args[j].array_queries = queries;
+        args[j].node_visited = visited[j];
+        args[j].queries_num = num_query;
+        args[j].num_labels = d;
+        args[j].array_labels = labels;
+        err_code = pthread_create(&threads[j], NULL, solveQuery, (void *)&args[j]);
+        if(err_code) {
+            printf ("Errore numero %i nella creazione del thread %i.\n", err_code, j);
+            exit(1);
+        }
+    }
+
+    for(j=0; j < NUM_THREADS; j++) {
+        err_code = pthread_join(threads[j], NULL);
+        if(err_code) {
+            printf ("Errore numero %i nel joining del thread %i.\n", err_code, j);
+            exit(1);
+        }
+    }
 
     FILE *fp_res_query;
-    fp_res_query = fopen("res_query.txt", "w");
+    fp_res_query = fopen("res_query_prova.txt", "w");
 
     if (fp_res_query == NULL) {
         fprintf(stderr, "Unable to open file for store the result of the query.\n");
         exit(1);
     }
 
-    visited = (bool *) malloc(num_vertex * sizeof(bool));
-
-    for(el_query* next=head_query; next != NULL; next = next->next_num) {
-        dfs = true;
-        node1 = next -> num[0];
-        node2 = next -> num[1];
-
-        for(i=0; i<d; i++) {
-            if (labels[node1].lbl_start[i]>labels[node2].lbl_start[i] ||
-                labels[node1].lbl_end[i]<labels[node2].lbl_end[i]) { // line 1-2 alg. 2 paper
-                fprintf(fp_res_query, "%i %i 0\n", node1, node2);
-                dfs = false;
-                break;
-            }
-        }
-
-        if(dfs) {
-            memset(visited, false, num_vertex * sizeof(bool));
-            reachable = dfs_search(rows, node1, node2, visited);
-            fprintf(fp_res_query, "%i %i %d\n", node1, node2, reachable ? 1 : 0);
-        }
+    for(i=0; i<num_query; i++) {
+        fprintf(fp_res_query, "%i %i %d\n", queries[i].num[0], queries[i].num[1], queries[i].can_reach ? 1 : 0);
     }
 
     fclose(fp_res_query);
@@ -1009,7 +1032,7 @@ int main(int argc, char *argv[]) {
     }
     free(labels);
     free(rows);
-    free_list_query(head_query);
+    free(queries);
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &program_finished);
     delta_microseconds = compute_delta_microseconds(program_start, program_finished);
