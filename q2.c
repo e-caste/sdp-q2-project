@@ -632,25 +632,25 @@ long long unsigned compute_delta_microseconds(struct timespec start, struct time
 
 // asprintf automatically allocates the needed memory - see https://stackoverflow.com/a/23842944
 char* get_human_readable_time(long long unsigned microseconds) {
-    long us, ms, s, m, h;
+    long long unsigned us, ms, s, m, h;
     char* result;
-    h = (long) microseconds / 3600000000;
-    m = (long) microseconds / 60000000;
-    s = (long) microseconds / 1000000;
-    ms = (long) microseconds / 1000;
-    us = (long) microseconds - (h * 3600000000 + m * 60000000 + s * 1000000 + ms * 1000);
+    h = (long long unsigned) microseconds / US_IN_H;
+    m = (long long unsigned) (microseconds - (h * US_IN_H)) / US_IN_M;
+    s = (long long unsigned) (microseconds - (h * US_IN_H + m * US_IN_M)) / US_IN_S;
+    ms = (long long unsigned) (microseconds - (h * US_IN_H + m * US_IN_M + s * US_IN_S)) / US_IN_MS;
+    us = (long long unsigned) microseconds - (h * US_IN_H + m * US_IN_M + s * US_IN_S + ms * US_IN_MS);
     if (microseconds <= 0)
         asprintf(&result, "less than 0 microseconds");
-    else if (microseconds > 0 && microseconds < 1000)
+    else if (microseconds > 0 && microseconds < US_IN_MS)
         asprintf(&result, "%llu microseconds", microseconds);
-    else if (microseconds >= 1000 && microseconds < 1000000)
-        asprintf(&result, "%ld milliseconds, %ld microseconds", ms, us);
-    else if (microseconds >= 1000000 && microseconds < 60000000)
-        asprintf(&result, "%ld seconds, %ld milliseconds, %ld microseconds", s, ms, us);
-    else if (microseconds >= 60000000 && microseconds < 3600000000)
-        asprintf(&result, "%ld minutes, %ld seconds, %ld milliseconds, %ld microseconds", m, s, ms, us);
+    else if (microseconds >= US_IN_MS && microseconds < US_IN_S)
+        asprintf(&result, "%llu milliseconds, %llu microseconds", ms, us);
+    else if (microseconds >= US_IN_S && microseconds < US_IN_M)
+        asprintf(&result, "%llu seconds, %llu milliseconds, %llu microseconds", s, ms, us);
+    else if (microseconds >= US_IN_M && microseconds < US_IN_H)
+        asprintf(&result, "%llu minutes, %llu seconds, %llu milliseconds, %llu microseconds", m, s, ms, us);
     else
-        asprintf(&result, "%ld hours, %ld minutes, %ld seconds, %ld milliseconds, %ld microseconds", h, m, s, ms, us);
+        asprintf(&result, "%llu hours, %llu minutes, %llu seconds, %llu milliseconds, %llu microseconds", h, m, s, ms, us);
     return result;
 }
 
@@ -658,14 +658,14 @@ char* get_human_readable_memory_usage(long unsigned kilobytes) {
     long unsigned kb, mb, gb;
     char* result;
     kilobytes = kilobytes / MEM_SIZE;
-    gb = (long unsigned) kilobytes / (1024 * 1024);
-    mb = (long unsigned) kilobytes / 1024;
-    kb = (long unsigned) kilobytes - (gb * 1024 * 1024 + mb * 1024);
+    gb = (long unsigned) kilobytes / KB_IN_GB;
+    mb = (long unsigned) (kilobytes - (gb * KB_IN_GB)) / KB_IN_MB;
+    kb = (long unsigned) kilobytes - (gb * KB_IN_GB + mb * KB_IN_MB);
     if (kilobytes <= 0)
         asprintf(&result, "less than 0 KB");
-    else if (kilobytes > 0 && kilobytes < 1024)
+    else if (kilobytes > 0 && kilobytes < KB_IN_MB)
         asprintf(&result, "%lu KB", kilobytes);
-    else if (kilobytes >= 1024 && kilobytes < 1024 * 1024)
+    else if (kilobytes >= KB_IN_MB && kilobytes < KB_IN_GB)
         asprintf(&result, "%lu MB %lu KB", mb, kb);
     else
         asprintf(&result, "%lu GB %lu MB %lu KB", gb, mb, kb);
@@ -682,7 +682,7 @@ char* get_rss_virt_mem(void) {
     stat = fopen("/proc/self/stat", "r");
     if (stat == NULL) {
         // assuming on UNIX but not GNU/Linux
-        return "";
+        return "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
     }
     fscanf(stat,
            "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %*u %*u %*d %*d %*d %*d %*d %*d %*u %lu %ld",
@@ -692,15 +692,15 @@ char* get_rss_virt_mem(void) {
     rss = (long unsigned) rss * sysconf(_SC_PAGESIZE) / 1024;
     asprintf(&result,
              "Currently used memory (RAM): %s\n"
-             "Currently used virtual memory (included pages): %s\n",
+             "Currently used virtual memory (included pages): %s\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n",
              get_human_readable_memory_usage(rss),
              get_human_readable_memory_usage(virt));
     return result;
 }
 
-// args[1]: file1 (input .gra)
-// args[2]: n (label number)
-// args[3]: file2 (.que)
+// argv[1]: file1 (input .gra)
+// argv[2]: n (label number)
+// argv[3]: file2 (.que)
 int main(int argc, char *argv[]) {
 
     FILE *fp, *fp_query;
@@ -713,10 +713,15 @@ int main(int argc, char *argv[]) {
     int roots_num, root_index;
     pthread_mutex_t *roots_mutex;
     row_l *labels;
-    struct timespec start, file1_read, file2_read, labels_generation_finished, reachability_queries_finished;
+    struct timespec program_start, section_start, file1_read, file2_read, labels_generation_finished, reachability_queries_finished, program_finished;
     long long unsigned delta_microseconds;
     struct rusage memory;
     char* stats;
+    // needed for reachability query
+    int node1, node2;
+    bool dfs;
+    bool reachable;
+    bool *visited;
 
     // Controllo sugli argomenti
 
@@ -734,7 +739,8 @@ int main(int argc, char *argv[]) {
 
     // Apertura file1
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &program_start);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
     fp = fopen(argv[1], "r");
 
     if (fp == NULL) {
@@ -807,7 +813,7 @@ int main(int argc, char *argv[]) {
     }
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &file1_read);
-    delta_microseconds = compute_delta_microseconds(start, file1_read);
+    delta_microseconds = compute_delta_microseconds(section_start, file1_read);
     asprintf(&stats, "Read input file %s (file1) in %s.\n", argv[1], get_human_readable_time(delta_microseconds));
     asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
     fprintf(stdout, "Fine lettura file...\n");
@@ -824,7 +830,7 @@ int main(int argc, char *argv[]) {
     fprintf(stdout, "Ricerca delle radici ...\n");
     //Inizializzazione array Roots
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
     roots = (int *) malloc(roots_num * sizeof(int));
     if (roots == NULL ) {
         printf ("Error in creating roots struct\n" );
@@ -895,7 +901,7 @@ int main(int argc, char *argv[]) {
     fprintf(stdout, "Fine creazione delle labels...\n");
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &labels_generation_finished);
-    delta_microseconds = compute_delta_microseconds(start, labels_generation_finished);
+    delta_microseconds = compute_delta_microseconds(section_start, labels_generation_finished);
     asprintf(&stats, "%sGenerated %s labels in %s.\n", stats, argv[2], get_human_readable_time(delta_microseconds));
     asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
 
@@ -907,6 +913,8 @@ int main(int argc, char *argv[]) {
         }
         printf("\n");
     }
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
 
     // Lettura query
     fp_query = fopen(argv[3], "r");
@@ -929,52 +937,57 @@ int main(int argc, char *argv[]) {
     }
 
     fclose(fp_query);
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &file2_read);
+    delta_microseconds = compute_delta_microseconds(section_start, file2_read);
+    asprintf(&stats, "%sRead query file %s (file2) in %s.\n", stats, argv[3], get_human_readable_time(delta_microseconds));
+    asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
     
     //print_list_query(head_query);
 
     printf("Numero Query: %i\n", num_query);
 
+    clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
+
     // Risoluzione query
 
-    // FILE *fp_res_query;
-    // fp_res_query = fopen("res_query.txt", "w");
+    FILE *fp_res_query;
+    fp_res_query = fopen("res_query.txt", "w");
 
-    // if (fp_res_query == NULL) {
-    //     fprintf(stderr, "Unable to open file for store the result of the query.\n");
-    //     exit(1);
-    // }
+    if (fp_res_query == NULL) {
+        fprintf(stderr, "Unable to open file for store the result of the query.\n");
+        exit(1);
+    }
 
-    // int node1, node2;
-    // bool dfs;
-    // bool reachable;
-    // bool visited[num_vertex];
+    visited = (bool *) malloc(num_vertex * sizeof(bool));
 
-    // for(el_query* next=head_query; next != NULL; next = next->next_num) {
-    //     dfs = true;
-    //     node1 = next -> num[0];
-    //     node2 = next -> num[1];
+    for(el_query* next=head_query; next != NULL; next = next->next_num) {
+        dfs = true;
+        node1 = next -> num[0];
+        node2 = next -> num[1];
 
-    //     for(i=0; i<d; i++) {
-    //         if (labels[node1].lbl_start[i]>labels[node2].lbl_start[i] ||
-    //             labels[node1].lbl_end[i]<labels[node2].lbl_end[i]) {
-    //             fprintf(fp_res_query, "%i %i 0\n", node1, node2);
-    //             dfs = false;
-    //             break;
-    //         }
-    //     }
+        for(i=0; i<d; i++) {
+            if (labels[node1].lbl_start[i]>labels[node2].lbl_start[i] ||
+                labels[node1].lbl_end[i]<labels[node2].lbl_end[i]) {
+                fprintf(fp_res_query, "%i %i 0\n", node1, node2);
+                dfs = false;
+                break;
+            }
+        }
 
-    //     if(dfs) {
-    //         memset(visited, false, num_vertex * sizeof(bool));
-    //         reachable = dfs_search(rows, node1, node2, visited);
-    //         if(reachable) {
-    //             fprintf(fp_res_query, "%i %i 1\n", node1, node2);
-    //         } else {
-    //             fprintf(fp_res_query, "%i %i 0\n", node1, node2);
-    //         }
-    //     }
-    // }
+        if(dfs) {
+            memset(visited, false, num_vertex * sizeof(bool));
+            reachable = dfs_search(rows, node1, node2, visited);
+            fprintf(fp_res_query, "%i %i %d\n", node1, node2, reachable ? 1 : 0);
+        }
+    }
 
-    // fclose(fp_res_query);
+    fclose(fp_res_query);
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &reachability_queries_finished);
+    delta_microseconds = compute_delta_microseconds(section_start, reachability_queries_finished);
+    asprintf(&stats, "%sTested %d reachability queries in %s.\n", stats, num_query, get_human_readable_time(delta_microseconds));
+    asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
 
     // Deallocazione di tutte le risorse
 
@@ -997,9 +1010,14 @@ int main(int argc, char *argv[]) {
     free(rows);
     free_list_query(head_query);
 
+    clock_gettime(CLOCK_MONOTONIC_RAW, &program_finished);
+    delta_microseconds = compute_delta_microseconds(program_start, program_finished);
+    asprintf(&stats, "%sTotal program duration: %s.\n", stats, get_human_readable_time(delta_microseconds));
+
+    asprintf(&stats, "%sThreads used: %ld.\n", stats, NUM_THREADS);
+
     getrusage(RUSAGE_SELF, &memory);
     asprintf(&stats, "%sMaximum memory usage: %s\n", stats, get_human_readable_memory_usage(memory.ru_maxrss));
-    asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
 
     fprintf(stdout, "\n\n------------STATISTICS------------\n%s", stats);
 
