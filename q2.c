@@ -1,4 +1,3 @@
-#define _GNU_SOURCE  // allow usage of asprintf on GNU/Linux
 #include "q2.h"
 
 #define _GNU_SOURCE  // allow usage of asprintf on GNU/Linux
