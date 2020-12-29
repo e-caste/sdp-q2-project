@@ -500,8 +500,8 @@ void* RandomizedLabelingParallel(void* args) {
     randomize(indexes, my_data->roots_num);
 
     for(int j=0; j< my_data->roots_num; j++) { //TODO Parallelizzazione
-        RandomizedVisitParallelInit(my_data->roots[indexes[j]], my_data->lbl_num, my_data->labels, my_data->graph, &my_data->rank_node, my_data->vertex_num);
-        //RandomizedVisitRecursive(my_data->roots[indexes[j]], my_data->lbl_num, my_data->labels, my_data->graph, &my_data->rank_node, my_data->vertex_num);
+        //RandomizedVisitParallelInit(my_data->roots[indexes[j]], my_data->lbl_num, my_data->labels, my_data->graph, &my_data->rank_node, my_data->vertex_num);
+        RandomizedVisitRecursive(my_data->roots[indexes[j]], my_data->lbl_num, my_data->labels, my_data->graph, &my_data->rank_node, my_data->vertex_num);
     }
 
     pthread_exit((void *) 0);
@@ -566,7 +566,7 @@ void *scanRoots(void *args) {
     //can read in parallel the graph
     //see scanFile for more details
     if (my_data->id == NUM_THREADS-1)
-        sup = my_data->total_vertex - 1;
+        sup = my_data->total_vertex;
     else
         sup = ((my_data->total_vertex) / NUM_THREADS) * (my_data->id + 1);      //TODO e' necessario cast(int)?
 
@@ -900,6 +900,8 @@ int main(int argc, char *argv[]) {
     //RandomizedLabeling(rows, labels, d, num_vertex, roots, roots_num);
     fprintf(stdout, "Fine creazione delle labels...\n");
 
+    fflush(stdout);
+
     clock_gettime(CLOCK_MONOTONIC_RAW, &labels_generation_finished);
     delta_microseconds = compute_delta_microseconds(section_start, labels_generation_finished);
     asprintf(&stats, "%sGenerated %s labels in %s.\n", stats, argv[2], get_human_readable_time(delta_microseconds));
@@ -968,7 +970,7 @@ int main(int argc, char *argv[]) {
 
         for(i=0; i<d; i++) {
             if (labels[node1].lbl_start[i]>labels[node2].lbl_start[i] ||
-                labels[node1].lbl_end[i]<labels[node2].lbl_end[i]) {
+                labels[node1].lbl_end[i]<labels[node2].lbl_end[i]) { // line 1-2 alg. 2 paper
                 fprintf(fp_res_query, "%i %i 0\n", node1, node2);
                 dfs = false;
                 break;
