@@ -86,6 +86,11 @@ function extract_downloaded_graphs {
     done
   done
   # TODO: how to treat .test files? do we only consider some of them for queries?
+  for query_file in "$GRAIL_DATA_PATH"/*.test; do
+    # change extension: .test -> .que
+    output_file="${query_file%%.*}.que"
+    mv "$query_file" "$output_file"
+  done
 # this take ~3 minutes per file, which is too much
 #  for query_file in "$GRAIL_DATA_PATH"/*.test; do
 #    # change extension: .test -> .que
@@ -148,7 +153,7 @@ function run_benchmark {
       *)  # assuming path to specific graph
       # remove file extension (.gra) - see https://stackoverflow.com/a/61294531
       base_file=${arg%%.*}
-      if [[ -f "$arg" ]] && [[ -f "$base_file".que || -f "$base_file".stat ]] && [[ "$arg" =~ $graph_regex ]]; then
+      if [[ -f "$arg" ]] && [[ -f "$base_file".que ]] && [[ "$arg" =~ $graph_regex ]]; then
         if [[ "$RUN_MODE" = "benchmark" ]] ||  [[ "$RUN_MODE" = "test" ]]; then
           echo "Conflicting run mode: benchmark or test is set, but a DAG path has also been given. Please see the usage:"
           print_usage
