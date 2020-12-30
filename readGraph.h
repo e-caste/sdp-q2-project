@@ -1,6 +1,6 @@
 #ifndef READ_GRAPH_H
     #define READ_GRAPH_H
-    #include "main.h"
+    #include "utility.h"
 
     typedef struct row_label {
         int* lbl_start;

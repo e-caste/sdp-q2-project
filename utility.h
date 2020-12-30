@@ -1,7 +1,16 @@
 #ifndef UTILITY_H
     #define UTILITY_H
     
-    #include "main.h"
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <pthread.h>
+    #include <unistd.h>
+    #include <stdbool.h>
+    #include <time.h>
+    #include <string.h>
+    #include <sys/resource.h>    
+
+    #define NUM_THREADS sysconf(_SC_NPROCESSORS_ONLN)
 
     /*
     * used in get_human_readable_time
