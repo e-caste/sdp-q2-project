@@ -165,6 +165,21 @@ function run_benchmark {
       ;;
     esac
   done
+
+  # compile our program
+  make
+  make clean
+
+  case $RUN_MODE in
+    specific)
+    ;;
+    benchmark)
+    ;;
+    test)
+    ;;
+    all)
+    ;;
+  esac
 }
 
 # no arguments given
