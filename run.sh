@@ -60,7 +60,8 @@ function download_graphs {
     echo "Skipping download..."
     return
   fi
-  echo "You are about to download ~386MB from the Internet. Do you want to proceed? [y/N]"
+  echo "You are about to download ~386MB from the Internet and then extract them to ~1.3GB on disk."
+  echo "Do you want to proceed? [y/N]"
   read -r ans
   if [ "$ans" = "y" ] || [ "$ans" = "Y" ]; then
     echo "Downloading DAGs from Google Code Archive..."
