@@ -8,7 +8,7 @@ all: $(EXECUTABLE)
 $(EXECUTABLE): out.o readGraph.o buildLabels.o solveQuery.o utility.o
 	$(CC) $(OBJECTS) -o $@ -lpthread
 
-out.o: main.c main.h
+out.o: main.c
 	$(CC) $(CFLAGS) main.c -o out.o
 
 readGraph.o: readGraph.c readGraph.h

@@ -1,4 +1,3 @@
-#include "main.h"
 #include "buildLabels.h"
 #include "readGraph.h"
 #include "solveQuery.h"
@@ -223,13 +222,13 @@ int main(int argc, char *argv[]) {
     asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
 
     //Test labels print
-    for(i=0; i<num_vertex; i++){
-        printf("Node: %i ", i);
-        for(j=0; j<d; j++){
-            printf("[%i, %i] ", labels[i].lbl_start[j], labels[i].lbl_end[j]);
-        }
-        printf("\n");
-    }
+    // for(i=0; i<num_vertex; i++){
+    //     printf("Node: %i ", i);
+    //     for(j=0; j<d; j++){
+    //         printf("[%i, %i] ", labels[i].lbl_start[j], labels[i].lbl_end[j]);
+    //     }
+    //     printf("\n");
+    // }
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
 
