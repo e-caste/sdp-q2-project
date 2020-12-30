@@ -129,6 +129,13 @@ function generate_graphs {
   mv "$GEN_SCRIPT_PATH"/*.que "$GEN_DATA_PATH"
 }
 
+function run_cmd {
+  cmd="$EXE $1.gra $LABELS $1.que"
+  echo ""
+  echo "Running $cmd"
+  $cmd
+}
+
 function run_benchmark {
   number_regex='^[0-9]+$'
   graph_regex='^.+.gra$'
@@ -152,8 +159,8 @@ function run_benchmark {
       ;;
       *)  # assuming path to specific graph
       # remove file extension (.gra) - see https://stackoverflow.com/a/61294531
-      base_file=${arg%%.*}
-      if [[ -f "$arg" ]] && [[ -f "$base_file".que ]] && [[ "$arg" =~ $graph_regex ]]; then
+      base_name=${arg%%.*}
+      if [[ -f "$arg" ]] && [[ -f "$base_name".que ]] && [[ "$arg" =~ $graph_regex ]]; then
         if [[ "$RUN_MODE" = "benchmark" ]] ||  [[ "$RUN_MODE" = "test" ]]; then
           echo "Conflicting run mode: benchmark or test is set, but a DAG path has also been given. Please see the usage:"
           print_usage
@@ -161,7 +168,7 @@ function run_benchmark {
         fi
         echo "Run mode set to specific. DAG path recognized: $arg"
         RUN_MODE="specific"
-        SPECIFIC_DAG_PATH="$base_file"
+        SPECIFIC_DAG_PATH="$base_name"
         shift
       else
         echo "Unexpected DAG (.gra file): $arg. Terminating..."
@@ -177,21 +184,28 @@ function run_benchmark {
   # the name of our executable
   EXE="./$(grep ^EXECUTABLE Makefile | cut -d ' ' -f 3)"
 
-  case $RUN_MODE in
-    specific)
-      cmd="$EXE $SPECIFIC_DAG_PATH.gra $LABELS $SPECIFIC_DAG_PATH.que"
-      echo ""
-      echo "Running $cmd"
-      $cmd
-      exit 0
-    ;;
-    benchmark)
-    ;;
-    test)
-    ;;
-    all)
-    ;;
-  esac
+  if [[ "$RUN_MODE" = "all" ]]; then
+    echo "Run mode set to all: running $EXE against all benchmark and test DAGs"
+  fi
+
+  echo "Number of labels: $LABELS"
+  if [[ "$RUN_MODE" = "specific" ]]; then
+      run_cmd "$SPECIFIC_DAG_PATH"
+  else
+      if [[ "$RUN_MODE" = "benchmark" ]] || [[ "$RUN_MODE" = "all" ]]; then
+        for graph_file in "$GRAIL_DATA_PATH"/*.gra; do
+          base_name=${graph_file%%.*}
+          run_cmd "$base_name"
+        done
+      fi
+      if [[ "$RUN_MODE" = "test" ]] || [[ "$RUN_MODE" = "all" ]]; then
+        for graph_file in "$GEN_DATA_PATH"/*.gra; do
+          base_name=${graph_file%%.*}
+          run_cmd "$base_name"
+        done
+      fi
+  fi
+  exit 0
 }
 
 # no arguments given
