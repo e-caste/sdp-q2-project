@@ -1,0 +1,1058 @@
+#include "q2.h"
+
+// TODO: https://en.wikipedia.org/wiki/C_data_types
+//      Ottimizzazione delle memoria: sostituire int con short se possibile
+//      Quanti nodi al massimo? unsigned int: [0, 65,535] ; unsigned long int: [0, 4,294,967,295]
+
+// TODO: dividere q2.c in più file (es: main.c, read.c, label.c, query.c)
+
+typedef struct edge_list {
+    int num;            //valore del vertice
+    struct edge_list *next_num;
+} edge;
+
+typedef struct el_list_query {
+    int num[2];            //valore del vertice
+    bool can_reach;
+} el_query;
+
+void create_list(edge *head, int val) {
+    edge *current = head;
+    current -> num = val;
+    current -> next_num = NULL;
+}
+
+void push(edge *head, int val) {
+    edge *current = head;
+
+    while(current -> next_num != NULL) {
+        current = current -> next_num;
+    }
+
+    current -> next_num = (edge *) malloc(sizeof(edge));
+    current -> next_num -> num = val;  
+    current -> next_num -> next_num = NULL;
+}
+
+void print_list(edge *head) {
+    edge *current = head;
+
+    while(current != NULL) {
+        printf("%i ", current -> num);
+        current = current -> next_num;
+    }
+}
+
+void free_list(edge *head) {
+    edge *tmp;
+
+    while(head != NULL) {
+        tmp = head;
+        head = head -> next_num;
+        free(tmp);
+    }
+}
+
+typedef struct row_graph {
+    int edge_num;   //numero totali di vertici in quella direzione
+    bool not_root;   //memset per tutto a zero
+    edge *edges_pointer;
+    pthread_mutex_t *node_mutex;
+} row_g;
+
+// 3.1 multiple index construction
+typedef struct row_label {
+    int* lbl_start;
+    int* lbl_end;
+    bool* visited;
+} row_l;
+
+typedef struct thread_args {
+    int id;
+    int total_vertex;  // should be unsigned int
+    unsigned int total_threads;
+    int size_file;
+    char *filename;
+    row_g *graph;
+    int *roots;
+    int *roots_num;             //During DAG reading we count the number of roots (with protection)
+    int *root_index;            //Shared Index to initialize roots array in parallel way
+    pthread_mutex_t *roots_mutex;
+    int queries_num;
+    el_query * array_queries;
+    bool *node_visited;
+    int num_labels;
+    row_l *array_labels;
+} t_args;
+
+typedef struct thread_labels_args {
+    int lbl_num;
+    int rank_node;
+    row_l *labels;
+
+    row_g *graph;
+    int vertex_num;
+
+    int *roots;
+    int roots_num;
+    int *indexes;           //For doing random roots visit
+} t_lbl_args;               //TODO to reduce space allocation, we can reuse thread_struct with extra field
+
+typedef struct thread_child_args {
+    int id;
+    int node;
+    int lbl_num;
+    row_l *labels;
+    row_g *graph;
+    int vertex_num;
+    int *rank_node;
+    int rank_children_min;
+} t_child_args;
+
+//Swap e randomize sono funzioni di utilità per randomizzare Roots
+void swap (int *a, int *b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void randomize(int *array, int n) {
+    for(int i=n-1; i>0; i--) {
+        int j = rand() % (i+1);
+        if (i != j)
+            swap(&array[i], &array[j]);
+    }
+}
+
+// Scopo di "scanFile" : Leggere file1
+//ogni thread leggerà da inf a sup.
+//Inf e Sup sono il numero di riga del file di input 0, 1, ..., 10,...
+//Nel seguente codice, si sta per dividere il file da leggere
+//in N parti, così che ogni thread legga in parallelo
+//durante la lettura del grafo, si memorizzano alcune informazioni
+//necessarie per la creazione successiva delle labels (roots_num)
+
+void *scanFile(void *args) {
+    t_args *my_data;
+    my_data = (t_args *) args;
+    FILE *fp;
+    int j, i, k, c, pos;
+    int sup, inf;
+    unsigned int num_threads = my_data->total_threads;
+    bool not_root_is_set;
+
+    fp = fopen(my_data -> filename, "r");
+    if (fp == NULL) {
+        fprintf(stderr, "Unable to open file %s for reading, thread number %i.\n", my_data -> filename, my_data -> id );
+        exit(1);
+    }
+
+    //Definizione estremo superiore
+    if (my_data->id == num_threads-1)
+        sup = my_data->total_vertex;
+    else {
+        //con fseek mi metto in un punto casuale all'interno della riga
+        //successivamente controllo finchè non trovo '\n' (10)
+        //prendendo un carattere alla volta e "scartandolo"
+        //quando trovo la nuova riga come primo intero avrò il SUP
+        //NOTA: questa un'ottima strategia in quanto abbiamo righe non omogenee
+        // sup for id=0 is inf for id=1, they are contiguous so the whole file is guaranteed to be read
+        fseek(fp, (long) my_data->size_file*(my_data->id+1)/num_threads, SEEK_SET); // 1Gb / 4Thread = 250Mb ciascuno * id+1
+        while(i != 10) {
+            i = getc(fp);
+        }
+
+        i=0;
+
+        fscanf(fp, "%i", &sup);
+    }
+
+    //Definizione estremo inferiore
+    if (my_data->id == 0) {
+        fseek(fp, 0L, SEEK_SET);
+        fscanf(fp, "%*[^\n]\n");    // salto la prima riga (contiene il numero di vertici totale)
+        inf = 0;
+    } else {
+        fseek(fp, (long) my_data->size_file*my_data->id/num_threads, SEEK_SET); // 1Gb / 4Thread = 250Mb ciascuno * id
+
+        while(i != 10) {    
+            i = getc(fp);
+        }
+
+        pos = ftell(fp);            //conservo la posizione di inizio riga
+
+        fscanf(fp, "%i", &inf);     // leggo l'indice della riga
+
+        fseek(fp, pos, SEEK_SET);   //torno all'inizio della riga
+    }    
+
+    //printf("Thread n. %i con inf: %i e sup: %i\n", my_data->id, inf, sup-1);
+    
+    //adesso per le righe di competenza del thread, si legge il valore del nodo
+    //si costruisce e inizializza la struttura apposita e si inserisce in lista
+    for(j=inf; j<sup; j++) {
+        fscanf(fp, "%i: ", &i);     //scarto il numero della riga (== j) e anche ": "
+        edge *head;
+        head = malloc(sizeof(edge));
+        do {
+            i = -1;
+            if(k !=0) //alla prima iterazione k==0 
+                ungetc(c, fp);    //Poichè prima ho letto un carattere che non era "#" (altrimenti usciva dal ciclo) devo tornare indietro!!
+            int res = fscanf(fp, "%i ", &i);      // leggo sia il valore che lo spazio. Se ci fosse un "#" non legge nulla, perchè si aspetta un %i
+            if(i != -1) { // i vertici non possono essere negativi però meglio testare "res" TODO
+
+                //not_root_is_set = my_data->graph[i].not_root ? true : false;  // default == 0 == false;
+
+                if(k==0) {
+                    create_list(head, i);
+                } else {
+                    push(head, i);
+                }
+                //my_data -> graph[i].not_root = true;   //se era a uno lo rimetto a 1
+
+                pthread_mutex_lock(my_data->roots_mutex);
+                    not_root_is_set = my_data->graph[i].not_root ? true : false;  // default == 0 == false;
+                    my_data -> graph[i].not_root = true;   //se era a uno lo rimetto a 1
+                    if ((!not_root_is_set) && (my_data->graph[i].not_root)){
+                            *my_data->roots_num = (*(my_data->roots_num) - 1);
+                    }
+                pthread_mutex_unlock(my_data->roots_mutex);
+            }
+            c = fgetc(fp);              //prendo carattere successivo
+            k++;
+        } while(c != 35);               // se carattere == "#" (fine riga)
+        
+        if(i==-1) { //non prendo nessun intero -> lista archi vuota
+            my_data -> graph[j].edges_pointer = NULL;
+            my_data -> graph[j].edge_num = 0;
+        } else {
+            my_data -> graph[j].edges_pointer = head;
+            my_data -> graph[j].edge_num = k;
+        }
+        my_data->graph[j].node_mutex = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
+        if (my_data->graph[j].node_mutex == NULL ) {
+            printf ("Error in creating mutex protection for node\n" );
+            exit(1);
+        }
+
+        if(pthread_mutex_init(my_data->graph[j].node_mutex, NULL) != 0){
+            printf ("Error in initializing mutex protection for node\n" );
+            exit(1);
+        }
+        k = 0;  //vertice successivo
+    }
+
+    //printf("Thread n. %i e ho finito\n", my_data->id);
+
+    pthread_exit((void *) 0);
+
+}
+
+// Funziona (RICORSIVA) che richiama tutti i figli di un nodo per costruire le labels
+void RandomizedVisitRecursive(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex){
+    int rank_children_min = num_vertex, i,children_num = graph[node_num].edge_num;
+    int next_node[children_num];
+    int *indexes = NULL;
+    
+    //printf("RandomVisited-begin: node: %i\n", node_num);
+
+    if(labels[node_num].visited[lbl_num])
+        return;
+
+    //Per tutti i figli del nodo, richiamo la funzione
+    if(children_num > 0){
+        i=0;
+        for(edge* next=graph[node_num].edges_pointer; next != NULL; next = next->next_num){
+            next_node[i] = next->num;
+            i++;
+        }
+
+        // mi preparo a randomizzare la visita dei figli del nodo X
+        indexes = (int*) malloc(children_num * sizeof(int));
+        if(indexes == NULL) {
+            printf ("RandomizedVisit: Not enough room for these indexes\n" );
+            exit(1);
+        }
+
+        for(i=0; i<children_num; i++) {
+            indexes[i] = i;
+        }
+
+        randomize(indexes, children_num);
+
+        for(int j=0; j<children_num; j++) {
+            RandomizedVisitRecursive(next_node[indexes[j]], lbl_num, labels, graph, rank_root, num_vertex);
+        }
+    }    
+    
+    labels[node_num].visited[lbl_num] = true;
+    
+    //cerco minimo tra i figli del nodo
+    for(edge* next=graph[node_num].edges_pointer; next != NULL; next = next->next_num)
+        if(labels[next->num].lbl_start[lbl_num] < rank_children_min)
+            rank_children_min = labels[next->num].lbl_start[lbl_num];
+        
+    if(*rank_root < rank_children_min)
+        labels[node_num].lbl_start[lbl_num] = *rank_root;
+    else 
+        labels[node_num].lbl_start[lbl_num] =  rank_children_min;
+    
+    labels[node_num].lbl_end[lbl_num] = *rank_root;
+
+    *rank_root = *rank_root + 1 ;
+
+    //printf("RandomVisited-end: node: %i, lbl: %i, [%i, %i]\n", node_num, lbl_num, labels[node_num].lbl_start[lbl_num], labels[node_num].lbl_end[lbl_num]);
+}
+
+// Funzione (SEQUENZIALE) per creare N Labels e avviare la ricerca per ogni radice 
+void RandomizedLabeling(row_g * graph, row_l * labels, int num_label, int num_vertex, int * roots, int num_roots){
+    int i, rank_node ;
+
+    //Inizializzazione indici
+    int *indexes = malloc(num_roots*sizeof(int));
+    if(indexes == NULL) {
+        printf ("Not enough room for these indexes\n" );
+        exit(1);
+    }
+
+    for(i=0; i<num_roots; i++) {
+        indexes[i] = i;
+    }
+
+    //inizializzazione per valori random
+    srand(time(NULL));
+
+    for(i=0; i<num_label; i++){
+        rank_node = 1;
+
+        //Le radici sono gia' state cercate nel main.
+        randomize(indexes, num_roots);
+
+        for(int j=0; j<num_roots; j++) {
+            RandomizedVisitRecursive(roots[indexes[j]], i, labels, graph, &rank_node, num_vertex);
+        }
+    }
+}
+
+//INIZIO FUNZIONI PARALLELE (PAR 3.1)
+void* RandomizedVisitParallel(void* args) {
+    t_child_args* my_data;
+    my_data = (t_child_args*) args;
+    
+    //Un Thread alla volta. (Nodi condivisi richiedono protezione)
+    pthread_mutex_lock(my_data->graph[my_data->node].node_mutex);
+        if(my_data->labels[my_data->node].visited[my_data->lbl_num]){
+            //printf("RandomizedVisitParallel: %i già visitato, termino\n", my_data->node);
+            pthread_mutex_unlock(my_data->graph[my_data->node].node_mutex);
+            pthread_exit((void *) 0);
+        }
+
+        if(my_data->graph[my_data->node].edge_num > 0){ //Il nodo ha altri figli
+            pthread_mutex_unlock(my_data->graph[my_data->node].node_mutex);
+            RandomizedVisitParallelInit(my_data->node, my_data->lbl_num, my_data->labels, my_data->graph, my_data-> rank_node, my_data->vertex_num);
+        }else{ 
+            //NON HO ALTRI FIGLI (SONO FOGLIA)
+            my_data->labels[my_data->node].visited[my_data->lbl_num] = true;
+
+            //cerco minimo tra i figli del nodo
+            for(edge* next= my_data->graph[my_data->node].edges_pointer; next != NULL; next = next->next_num)
+                if(my_data->labels[next->num].lbl_start[my_data->lbl_num] < my_data->rank_children_min )
+                    my_data->rank_children_min = my_data->labels[next->num].lbl_start[my_data->lbl_num];
+            
+            if(*my_data->rank_node < my_data->rank_children_min)
+                my_data->labels[my_data->node].lbl_start[my_data->lbl_num] = *my_data->rank_node;
+            else 
+                my_data->labels[my_data->node].lbl_start[my_data->lbl_num] = my_data->rank_children_min;
+            
+            my_data->labels[my_data->node].lbl_end[my_data->lbl_num] = *my_data->rank_node;
+
+            *my_data->rank_node = *my_data->rank_node + 1 ;
+            pthread_mutex_unlock(my_data->graph[my_data->node].node_mutex);
+        }
+        //printf("RandomizedVisitParallel: Sono nodo: %i, lbl[%i]: [%i, %i]\n", my_data->node, my_data->lbl_num, my_data->labels[my_data->node].lbl_start[my_data->lbl_num], my_data->labels[my_data->node].lbl_end[my_data->lbl_num]);
+    pthread_exit((void *) 0);
+}
+
+void RandomizedVisitParallelInit(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex){
+    int rank_children_min = num_vertex, i,children_num = graph[node_num].edge_num, err_code;
+    int next_node[children_num];
+    int indexes[children_num];
+    pthread_t threads_child[children_num];   //1 thread for each children of the node
+    t_child_args args_child[children_num];
+
+    //printf("Sono il nodo: %i\n", node_num);
+    //Per tutti i figli del nodo, richiamo la funzione
+    if(children_num > 0){
+        i=0;
+        for(edge* next=graph[node_num].edges_pointer; next != NULL; next = next->next_num){
+            next_node[i] = next->num; //figli del nodo
+            indexes[i] = i; //i=0; i<children_num;i++
+            i++;
+        }
+
+        if(children_num > 1)
+            randomize(indexes, children_num);
+
+        for(i=0; i<children_num; i++) {
+            args_child[i].node = next_node[indexes[i]];
+            args_child[i].lbl_num = lbl_num;
+            args_child[i].labels = labels;
+            args_child[i].graph = graph;
+            args_child[i].vertex_num = num_vertex;
+            args_child[i].rank_node = rank_root;
+            args_child[i].rank_children_min = num_vertex;
+            err_code = pthread_create(&threads_child[i], NULL, RandomizedVisitParallel, (void *)&args_child[i]);
+            if(err_code) {
+                printf ("RandomizedVisitInit: Error number %i in creating thread %i.\n", err_code, i);
+                exit(1);
+            }
+        }
+
+        for(i=0; i<children_num; i++) { //il nodo deve aspettare tutti i suoi figli
+            err_code = pthread_join(threads_child[i], NULL);
+            if(err_code) {
+                printf ("RandomizedVisitInit: Error number %i in joining thread for  %i.\n", err_code, i);
+                exit(1);
+            }
+        }
+    }
+
+    //un po' di duplicazione del codice...
+    pthread_mutex_lock(graph[node_num].node_mutex);
+        if(labels[node_num].visited[lbl_num]){
+            //printf("RandomizedVisitInit: %i già visitato, termino\n", node_num);
+            pthread_mutex_unlock(graph[node_num].node_mutex);
+            return;
+        }
+
+        labels[node_num].visited[lbl_num] = true;
+
+        //cerco minimo tra i figli del nodo
+        for(edge* next=graph[node_num].edges_pointer; next != NULL; next = next->next_num)
+            if(labels[next->num].lbl_start[lbl_num] < rank_children_min)
+                rank_children_min = labels[next->num].lbl_start[lbl_num];
+            
+        if(*rank_root < rank_children_min)
+            labels[node_num].lbl_start[lbl_num] = *rank_root;
+        else 
+            labels[node_num].lbl_start[lbl_num] =  rank_children_min;
+        
+        labels[node_num].lbl_end[lbl_num] = *rank_root;
+
+        *rank_root = *rank_root + 1 ;
+        //printf("RandomizedVisitInit: Sono nodo: %i, lbl[%i]: [%i, %i]\n", node_num, lbl_num, labels[node_num].lbl_start[lbl_num], labels[node_num].lbl_end[lbl_num]);
+    pthread_mutex_unlock(graph[node_num].node_mutex);
+}
+
+void* RandomizedLabelingParallel(void* args) {
+    t_lbl_args* my_data;
+    my_data = (t_lbl_args*) args;
+    int indexes[my_data->roots_num];
+    
+    //Randomizzazione radici (ogni thread il suo)
+    //Le radici sono gia' state cercate nel main.
+
+    memcpy(indexes, my_data->indexes, my_data->roots_num*sizeof(int));
+    randomize(indexes, my_data->roots_num);
+
+    for(int j=0; j< my_data->roots_num; j++) { //TODO Parallelizzazione
+        //RandomizedVisitParallelInit(my_data->roots[indexes[j]], my_data->lbl_num, my_data->labels, my_data->graph, &my_data->rank_node, my_data->vertex_num);
+        RandomizedVisitRecursive(my_data->roots[indexes[j]], my_data->lbl_num, my_data->labels, my_data->graph, &my_data->rank_node, my_data->vertex_num);
+    }
+
+    pthread_exit((void *) 0);
+}
+
+// La funzione RandomizedLabelingInit prepara la struttura data per ogni
+// thread - uno per label per il momento - e avvia i thread
+void RandomizedLabelingParallelInit(row_g * graph, row_l * labels, int label_num, int vertex_num, int * roots, int roots_num){
+    int i, err_code ;
+    pthread_t threads_lbl[label_num];   //1 thread for each label
+    t_lbl_args args_lbl[label_num];
+    int indexes[roots_num];
+
+    for(i=0; i<roots_num; i++){
+        indexes[i] = i;
+    }
+
+    //inizializzazione per valori random
+    srand(time(NULL));
+
+    for(i=0; i<label_num; i++){
+        args_lbl[i].rank_node = 1;
+
+        args_lbl[i].lbl_num = i;
+        args_lbl[i].labels = labels;    //it's a pointer so it can modify the object.
+                                        //TODO volendo potrei passare direttamente: labels[lbl_num]
+        args_lbl[i].graph = graph;
+        args_lbl[i].vertex_num = vertex_num;
+        args_lbl[i].roots = roots;
+        args_lbl[i].roots_num = roots_num;
+        args_lbl[i].indexes = indexes;  //struttura condivisa. -> no protezione xk lavoro su una copia
+
+        err_code = pthread_create(&threads_lbl[i], NULL, RandomizedLabelingParallel, (void *)&args_lbl[i]);
+        if(err_code) {
+            printf ("RandomizedLabelingInit: Error number %i in creating thread %i.\n", err_code, i);
+            exit(1);
+        }
+    }
+
+    for(i=0; i<label_num; i++) {
+        err_code = pthread_join(threads_lbl[i], NULL);
+        if(err_code) {
+            printf ("RandomizedLabelingInit: Error number %i in joining thread for  %i.\n", err_code, i);
+            exit(1);
+        }
+    }
+}
+
+//Scopo di "scanRoots": inizializzare l'array di roots
+//Questa è una funzione parallela, quindi i thread si
+//dividono il grafo da leggere con lo stesso meccanismo
+//usato anche in scanFile.
+//Tale array verrà successivamente randomizzato ed
+//utilizzato per creare le labels
+
+void *scanRoots(void *args) {
+    t_args *my_data;
+    my_data = (t_args *) args;
+    int sup, inf, i, j;
+    unsigned int num_threads = my_data->total_threads;
+
+    //Definition of 'Sup' and 'Inf' so that each thread
+    //can read in parallel the graph
+    //see scanFile for more details
+    if (my_data->id == num_threads-1)
+        sup = my_data->total_vertex;
+    else
+        sup = ((my_data->total_vertex) / num_threads) * (my_data->id + 1);      //TODO e' necessario cast(int)?
+
+    if (my_data->id == 0)
+        inf = 0;
+    else
+        inf = ((my_data->total_vertex)/num_threads)*(my_data->id);
+
+    for(i=inf; i<sup; i++) {
+        if(!my_data->graph[i].not_root) {  //if (is root)
+            pthread_mutex_lock(my_data->roots_mutex);
+                j = (*(my_data->root_index));
+                my_data->roots[j] = i;
+                *my_data->root_index = j + 1;
+            pthread_mutex_unlock(my_data->roots_mutex);
+
+        }
+    }
+
+    pthread_exit((void *) 0);
+}
+
+bool dfs_search(row_g *graph, int node1, int node2, bool *visited) {
+    if(node1 == node2)
+        return true;
+    if(visited[node1])
+        return false;
+
+    int children_num = graph[node1].edge_num;
+    bool reachable = false;
+    
+    if(children_num > 0) {
+
+        int children[children_num];
+        int i=0;
+
+        for(edge* next=graph[node1].edges_pointer; next != NULL; next = next->next_num){
+            if(next -> num == node2) {
+                return true;
+            }
+            children[i] = next->num;
+            i++;
+        }
+
+        for(i=0; i<children_num; i++) {
+            reachable = dfs_search(graph, children[i], node2, visited);
+            if(reachable) {
+                return true;
+            }
+        }
+
+    }
+
+    visited[node1] = true;
+
+    return reachable;
+}
+
+void *solveQuery (void *args) {
+    t_args *my_data;
+    my_data = (t_args *) args;
+    unsigned int num_threads = my_data->total_threads;
+
+    int i, j, inf, sup, node1, node2;
+    bool dfs;
+
+    if (my_data->id == num_threads-1)
+        sup = my_data->queries_num;
+    else
+        sup = ((my_data->queries_num) / num_threads) * (my_data->id + 1);      //TODO e' necessario cast(int)?
+
+    if (my_data->id == 0)
+        inf = 0;
+    else
+        inf = ((my_data->queries_num) / num_threads) * (my_data->id);
+
+    //printf("Thread n. %i con inf: %i e sup: %i\n", my_data->id, inf, sup-1);
+
+    for(j=inf; j<sup; j++) {
+        dfs = true;
+        node1 = my_data -> array_queries[j].num[0];
+        node2 = my_data -> array_queries[j].num[1];
+
+        for(i=0; i<my_data->num_labels; i++) {
+            if (my_data->array_labels[node1].lbl_start[i]>my_data->array_labels[node2].lbl_start[i] ||
+                my_data->array_labels[node1].lbl_end[i]<my_data->array_labels[node2].lbl_end[i]) { // line 1-2 alg. 2 paper
+                my_data -> array_queries[j].can_reach = false;
+                //fprintf(fp_res_query, "%i %i 0\n", node1, node2);
+                dfs = false;
+                break;
+            }
+        }
+
+        if(dfs) {
+            memset(my_data->node_visited, false, my_data->total_vertex * sizeof(bool));
+            my_data -> array_queries[j].can_reach = dfs_search(my_data->graph, node1, node2, my_data->node_visited);
+
+            //fprintf(fp_res_query, "%i %i %d\n", node1, node2, reachable ? 1 : 0);
+        }
+    }
+
+    pthread_exit((void *) 0);
+}
+
+// see https://stackoverflow.com/a/10192994
+long long unsigned compute_delta_microseconds(struct timespec start, struct timespec end) {
+    return (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+}
+
+// asprintf automatically allocates the needed memory - see https://stackoverflow.com/a/23842944
+char* get_human_readable_time(long long unsigned microseconds) {
+    long long unsigned us, ms, s, m, h;
+    char* result;
+    h = (long long unsigned) microseconds / US_IN_H;
+    m = (long long unsigned) (microseconds - (h * US_IN_H)) / US_IN_M;
+    s = (long long unsigned) (microseconds - (h * US_IN_H + m * US_IN_M)) / US_IN_S;
+    ms = (long long unsigned) (microseconds - (h * US_IN_H + m * US_IN_M + s * US_IN_S)) / US_IN_MS;
+    us = (long long unsigned) microseconds - (h * US_IN_H + m * US_IN_M + s * US_IN_S + ms * US_IN_MS);
+    if (microseconds <= 0)
+        asprintf(&result, "less than 0 microseconds");
+    else if (microseconds > 0 && microseconds < US_IN_MS)
+        asprintf(&result, "%llu microseconds", microseconds);
+    else if (microseconds >= US_IN_MS && microseconds < US_IN_S)
+        asprintf(&result, "%llu milliseconds, %llu microseconds", ms, us);
+    else if (microseconds >= US_IN_S && microseconds < US_IN_M)
+        asprintf(&result, "%llu seconds, %llu milliseconds, %llu microseconds", s, ms, us);
+    else if (microseconds >= US_IN_M && microseconds < US_IN_H)
+        asprintf(&result, "%llu minutes, %llu seconds, %llu milliseconds, %llu microseconds", m, s, ms, us);
+    else
+        asprintf(&result, "%llu hours, %llu minutes, %llu seconds, %llu milliseconds, %llu microseconds", h, m, s, ms, us);
+    return result;
+}
+
+char* get_human_readable_memory_usage(long unsigned kilobytes) {
+    long unsigned kb, mb, gb;
+    char* result;
+    kilobytes = kilobytes / MEM_SIZE;
+    gb = (long unsigned) kilobytes / KB_IN_GB;
+    mb = (long unsigned) (kilobytes - (gb * KB_IN_GB)) / KB_IN_MB;
+    kb = (long unsigned) kilobytes - (gb * KB_IN_GB + mb * KB_IN_MB);
+    if (kilobytes <= 0)
+        asprintf(&result, "less than 0 KB");
+    else if (kilobytes > 0 && kilobytes < KB_IN_MB)
+        asprintf(&result, "%lu KB", kilobytes);
+    else if (kilobytes >= KB_IN_MB && kilobytes < KB_IN_GB)
+        asprintf(&result, "%lu MB %lu KB", mb, kb);
+    else
+        asprintf(&result, "%lu GB %lu MB %lu KB", gb, mb, kb);
+    return result;
+}
+
+// see https://www.tutorialspoint.com/how-to-get-memory-usage-at-runtime-using-cplusplus
+// and https://man7.org/linux/man-pages/man5/proc.5.html
+// and https://en.wikipedia.org/wiki/Resident_set_size
+char* get_rss_virt_mem(void) {
+    FILE *stat;
+    long unsigned rss, virt;
+    char* result;
+    stat = fopen("/proc/self/stat", "r");
+    if (stat == NULL) {
+        // assuming on UNIX but not GNU/Linux
+        return "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+    }
+    fscanf(stat,
+           "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %*u %*u %*d %*d %*d %*d %*d %*d %*u %lu %ld",
+           &virt, &rss);
+    fclose(stat);
+    virt = (long unsigned) virt / 1024;
+    rss = (long unsigned) rss * sysconf(_SC_PAGESIZE) / 1024;
+    asprintf(&result,
+             "Currently used memory (RAM): %s\n"
+             "Currently used virtual memory (included pages): %s\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n",
+             get_human_readable_memory_usage(rss),
+             get_human_readable_memory_usage(virt));
+    return result;
+}
+
+// argv[1]: file1 (input .gra)
+// argv[2]: n (label number)
+// argv[3]: file2 (.que)
+int main(int argc, char *argv[]) {
+
+    FILE *fp, *fp_query;
+    unsigned int num_vertex, num_threads;
+    int i, j, size, c=0, k=0, err_code=0, d;
+    row_g *rows;
+    pthread_t *threads;
+    t_args *args;
+    int *roots;
+    int roots_num, root_index;
+    pthread_mutex_t *roots_mutex;
+    row_l *labels;
+    struct timespec program_start, section_start, file1_read, file2_read, labels_generation_finished, reachability_queries_finished, program_finished;
+    long long unsigned delta_microseconds;
+    struct rusage memory;
+    char* stats;
+    // needed for reachability query
+    int node1, node2;
+    bool dfs;
+    bool reachable;
+    bool **visited;
+
+    // Controllo sugli argomenti
+
+    if (argc != 4) {
+        fprintf(stderr, "Enter only 'file1', 'n' and 'file2' as arguments!\n");
+        exit(1);
+    }
+
+    d = atoi(argv[2]);
+
+    if (d <=0 ){
+        fprintf(stderr, "Please insert valid value for labels number!\n");
+        exit(1);
+    }
+
+    // Apertura file1
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &program_start);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
+    fp = fopen(argv[1], "r");
+
+    if (fp == NULL) {
+        fprintf(stderr, "Unable to open file %s for reading.\n", argv[1] );
+        exit(1);
+    }
+
+    // Prendere numero vertici per allocare la giusta memoria
+
+    fscanf(fp,"%i\n", &num_vertex);
+
+    // this is needed to prevent an infinite wait
+    // when using very small graphs (e.g. 10 vertices) on heavily multithreaded CPUs (e.g. 24 threads)
+    num_threads = NUM_THREADS > num_vertex ? num_vertex : NUM_THREADS;
+
+    // only now we know the correct size of these arrays
+    threads = (pthread_t *) malloc(num_threads * sizeof(pthread_t));
+    args = (t_args *) malloc(num_threads * sizeof(t_args));
+
+    rows = (row_g *) malloc (num_vertex * sizeof (row_g));  //array di liste
+    if (rows == NULL ) {
+        printf ("Not enough room for this size graph\n" );
+        exit(1);
+    }
+
+    // Prendere grandezza file per dividerlo per fseek
+
+    fseek(fp, 0L, SEEK_END);
+    size = ftell(fp);
+
+    fclose(fp);
+
+    // Ottengo roots_num come num_vertex - not_roots.
+    // in pratica quando scorro per leggere il file
+    // se incontro una 'non radice', decremento il contatore -> richiede protezione
+    roots_num = num_vertex;
+
+    roots_mutex = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
+    if (roots_mutex == NULL ) {
+        printf ("Error in creating mutex protection for roots counter \n" );
+        exit(1);
+    }
+
+    if(pthread_mutex_init(roots_mutex, NULL) != 0){
+        printf ("Error in initializing mutex protection for roots counter \n" );
+        exit(1);
+    }
+
+    // Creazione thread
+    for(j=0; j < num_threads; j++) {
+        args[j].filename = argv[1];
+        args[j].graph = rows;
+        args[j].total_vertex = num_vertex;          //facoltativo? TODO
+        args[j].total_threads = num_threads;
+        args[j].size_file = size;
+        args[j].roots_num = &roots_num;             //puntatore alla variabile 'condivisa'
+        args[j].roots_mutex = roots_mutex;          //protezione per la variabile 'condivisa'
+    }
+
+    printf("Inizio a leggere il file...\n");
+
+    for(i=0; i<num_threads; i++) {    //eventualmente si può unire il for.    TODO
+        args[i].id = i;
+        err_code = pthread_create(&threads[i], NULL, scanFile, (void *)&args[i]);
+        if(err_code) {
+            printf ("Errore numero %i nella creazione del thread %i.\n", err_code, i);
+            exit(1);
+        }
+    }
+
+    // Aspettare che i thread finiscano
+
+    for(j=0; j < num_threads; j++) {
+        err_code = pthread_join(threads[j], NULL);
+        if(err_code) {
+            printf ("Errore numero %i nel joining del thread %i.\n", err_code, j);
+            exit(1);
+        }
+    }
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &file1_read);
+    delta_microseconds = compute_delta_microseconds(section_start, file1_read);
+    asprintf(&stats, "Read input file %s (file1) in %s.\n", argv[1], get_human_readable_time(delta_microseconds));
+    asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
+    fprintf(stdout, "Fine lettura file...\n");
+
+    // Stampa di prova grafo
+
+    // for(i=0; i<num_vertex; i++) {
+    //     printf("%i : ", i);
+    //     print_list(rows[i].edges_pointer);
+    //     //printf(" -----> num_edge: %i\n", rows[i].edge_num);
+    //     printf("\n");
+    // }
+
+    fprintf(stdout, "Ricerca delle radici ...\n");
+    //Inizializzazione array Roots
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
+    roots = (int *) malloc(roots_num * sizeof(int));
+    if (roots == NULL ) {
+        printf ("Error in creating roots struct\n" );
+        exit(1);
+    }
+
+    root_index = 0;     //variabile *condivisa* per inizializzare parallelamente Roots
+
+    // Creazione thread per lettura radici
+    //E' considerata radice ogni nodo senza genitori (not_root = false)
+    for(i=0; i<num_threads; i++) {
+        args[i].id = i;
+        args[i].roots = roots;
+        args[i].root_index = &root_index;
+        err_code = pthread_create(&threads[i], NULL, scanRoots, (void *)&args[i]);
+        if(err_code) {
+            printf ("Errore numero %i nella creazione del thread %i.\n", err_code, i);
+            exit(1);
+        }
+    }
+
+    // Aspettare che i thread finiscano
+
+    for(j=0; j < num_threads; j++) {
+        err_code = pthread_join(threads[j], NULL);
+        if(err_code) {
+            printf ("Errore numero %i nel joining del thread %i.\n", err_code, j);
+            exit(1);
+        }
+    }
+    fprintf(stdout, "Fine ricerca delle radici ...\n");
+
+    // Stampa di prova radici
+    // printf("roots: ");
+    // for(i=0; i<roots_num; i++){
+    //     printf("%i ", roots[i]);
+    // }
+    // printf("\n");
+
+
+    // Allocazione struct per labels
+    // labels procederrano di pari ordine con l'indice rows (Indice del nodo).
+
+    labels = (row_l *) malloc (num_vertex * sizeof (row_l));
+    if (labels == NULL ) {
+        printf ("Not enough room for this size labels\n" );
+        exit(1);
+    }
+
+    for(i=0; i<num_vertex; i++){
+        labels[i].lbl_start = (int *) malloc (d * sizeof (int));
+        labels[i].lbl_end = (int *) malloc (d * sizeof (int));
+        labels[i].visited = (bool *) malloc (d * sizeof (bool));
+        if ((labels[i].lbl_start == NULL ) || (labels[i].lbl_end == NULL ) || (labels[i].visited == NULL )) {
+            printf ("Not enough room for this size labels\n" );
+            exit(1);
+        }
+
+        //Inizializzazione (Non è detto che tutto sia azzerato!)
+        memset(labels[i].lbl_start, 0, d * sizeof(int));
+        memset(labels[i].lbl_end, 0, d * sizeof(int));
+        memset(labels[i].visited, false, d * sizeof(bool));
+    }
+
+    fprintf(stdout, "Creazione delle labels...\n");
+    RandomizedLabelingParallelInit(rows, labels, d, num_vertex, roots, roots_num);
+    //RandomizedLabeling(rows, labels, d, num_vertex, roots, roots_num);
+    fprintf(stdout, "Fine creazione delle labels...\n");
+
+    fflush(stdout);
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &labels_generation_finished);
+    delta_microseconds = compute_delta_microseconds(section_start, labels_generation_finished);
+    asprintf(&stats, "%sGenerated %s labels in %s.\n", stats, argv[2], get_human_readable_time(delta_microseconds));
+    asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
+
+    //Stampa delle labels
+    /*for(i=0; i<num_vertex; i++){
+        printf("Node: %i ", i);
+        for(j=0; j<d; j++){
+            printf("[%i, %i] ", labels[i].lbl_start[j], labels[i].lbl_end[j]);
+        }
+        printf("\n");
+    }*/
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
+
+    // Lettura query
+    fp_query = fopen(argv[3], "r");
+    if (fp_query == NULL) {
+        fprintf(stderr, "Unable to open file %s for reading.\n", argv[3] );
+        exit(1);
+    }
+
+    int a, b, num_query=0;
+
+    while (fscanf(fp, "%*[^\n]\n") != -1) {
+        num_query++;
+    }
+
+    printf("Numero Query: %i\n", num_query);
+
+    el_query *queries = malloc(sizeof(el_query)*num_query);
+
+    fseek(fp_query, 0L, SEEK_SET);
+
+    for(i=0; i<num_query; i++) {
+        fscanf(fp_query, "%i %i  \n", &a, &b);
+        queries[i].num[0] = a;
+        queries[i].num[1] = b;
+    }
+
+    fclose(fp_query);
+
+    // Stampa query
+    /*for(i=0; i<num_query; i++) {
+        printf("Query %i: %i %i\n", i, queries[i].num[0], queries[i].num[1]);
+    }*/
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &file2_read);
+    delta_microseconds = compute_delta_microseconds(section_start, file2_read);
+    asprintf(&stats, "%sRead query file %s (file2) in %s.\n", stats, argv[3], get_human_readable_time(delta_microseconds));
+    asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
+    
+    //print_list_query(head_query);
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
+
+    // Risoluzione query
+    visited = (bool **) malloc(num_threads * sizeof(bool *));
+
+    for(j=0; j<num_threads; j++) {
+        visited[j] = (bool *) malloc(num_vertex * sizeof(bool));
+        args[j].array_queries = queries;
+        args[j].node_visited = visited[j];
+        args[j].queries_num = num_query;
+        args[j].num_labels = d;
+        args[j].array_labels = labels;
+        err_code = pthread_create(&threads[j], NULL, solveQuery, (void *)&args[j]);
+        if(err_code) {
+            printf ("Errore numero %i nella creazione del thread %i.\n", err_code, j);
+            exit(1);
+        }
+    }
+
+    for(j=0; j < num_threads; j++) {
+        err_code = pthread_join(threads[j], NULL);
+        if(err_code) {
+            printf ("Errore numero %i nel joining del thread %i.\n", err_code, j);
+            exit(1);
+        }
+    }
+
+    FILE *fp_res_query;
+    fp_res_query = fopen("res_query_prova.txt", "w");
+
+    if (fp_res_query == NULL) {
+        fprintf(stderr, "Unable to open file for store the result of the query.\n");
+        exit(1);
+    }
+
+    for(i=0; i<num_query; i++) {
+        fprintf(fp_res_query, "%i %i %d\n", queries[i].num[0], queries[i].num[1], queries[i].can_reach ? 1 : 0);
+    }
+
+    fclose(fp_res_query);
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &reachability_queries_finished);
+    delta_microseconds = compute_delta_microseconds(section_start, reachability_queries_finished);
+    asprintf(&stats, "%sTested %d reachability queries in %s.\n", stats, num_query, get_human_readable_time(delta_microseconds));
+    asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
+
+    // Deallocazione di tutte le risorse
+
+    for(i=0; i<num_vertex; i++) {
+        free_list(rows[i].edges_pointer);
+        pthread_mutex_destroy(rows[i].node_mutex);
+        free(rows[i].node_mutex);
+    }
+
+    pthread_mutex_destroy(roots_mutex);
+    free(roots_mutex);
+    free(roots);
+
+    for(i=0; i<num_vertex; i++){
+        free(labels[i].lbl_start);
+        free(labels[i].lbl_end);
+        free(labels[i].visited);
+    }
+    free(labels);
+    free(rows);
+    free(queries);
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &program_finished);
+    delta_microseconds = compute_delta_microseconds(program_start, program_finished);
+    asprintf(&stats, "%sTotal program duration: %s.\n", stats, get_human_readable_time(delta_microseconds));
+
+    asprintf(&stats, "%sThreads used: %ld.\n", stats, num_threads);
+
+    getrusage(RUSAGE_SELF, &memory);
+    asprintf(&stats, "%sMaximum memory usage: %s\n", stats, get_human_readable_memory_usage(memory.ru_maxrss));
+
+    fprintf(stdout, "\n\n------------STATISTICS------------\n%s", stats);
+
+    return 0;
+}
+
+
+
+
+
+// comando per compilare
+// gcc -o q2 q2.c -lpthread

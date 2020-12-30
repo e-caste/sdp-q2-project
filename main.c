@@ -13,11 +13,11 @@
 // argv[3]: file2 (.que)
 int main(int argc, char *argv[]) {
     FILE *fp, *fp_query;
-    unsigned int num_vertex;
+    unsigned int num_vertex, num_threads;
     int i, j, size, c=0, k=0, err_code=0, d;
     row_g *rows;
-    pthread_t threads[NUM_THREADS];
-    t_args args[NUM_THREADS];
+    pthread_t *threads;
+    t_args *args;
     int *roots;
     int roots_num, root_index;
     pthread_mutex_t *roots_mutex;
@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
     int node1, node2;
     bool dfs;
     bool reachable;
-    //bool *visited;
+    bool **visited;
 
     // Controllo sugli argomenti
 
@@ -67,6 +67,14 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
+    // this is needed to prevent an infinite wait
+    // when using very small graphs (e.g. 10 vertices) on heavily multithreaded CPUs (e.g. 24 threads)
+    num_threads = NUM_THREADS > num_vertex ? num_vertex : NUM_THREADS;
+
+    // only now we know the correct size of these arrays
+    threads = (pthread_t *) malloc(num_threads * sizeof(pthread_t));
+    args = (t_args *) malloc(num_threads * sizeof(t_args));
+
     // Prendere grandezza file per dividerlo per fseek
 
     fseek(fp, 0L, SEEK_END);
@@ -91,10 +99,11 @@ int main(int argc, char *argv[]) {
     }
 
     // Creazione thread
-    for(j=0; j < NUM_THREADS; j++) {
+    for(j=0; j < num_threads; j++) {
         args[j].filename = argv[1];
         args[j].graph = rows;
         args[j].total_vertex = num_vertex;          //facoltativo? TODO
+        args[j].total_threads = num_threads;
         args[j].size_file = size;
         args[j].roots_num = &roots_num;             //puntatore alla variabile 'condivisa'
         args[j].roots_mutex = roots_mutex;          //protezione per la variabile 'condivisa'
@@ -102,7 +111,7 @@ int main(int argc, char *argv[]) {
 
     printf("Inizio a leggere il file...\n");
 
-    for(i=0; i<NUM_THREADS; i++) {    //eventualmente si può unire il for.    TODO
+    for(i=0; i<num_threads; i++) {    //eventualmente si può unire il for.    TODO
         args[i].id = i;
         err_code = pthread_create(&threads[i], NULL, scanFile, (void *)&args[i]);
         if(err_code) {
@@ -113,7 +122,7 @@ int main(int argc, char *argv[]) {
 
     // Aspettare che i thread finiscano
 
-    for(j=0; j < NUM_THREADS; j++) {
+    for(j=0; j < num_threads; j++) {
         err_code = pthread_join(threads[j], NULL);
         if(err_code) {
             printf ("Errore numero %i nel joining del thread %i.\n", err_code, j);
@@ -150,7 +159,7 @@ int main(int argc, char *argv[]) {
 
     // Creazione thread per lettura radici
     //E' considerata radice ogni nodo senza genitori (not_root = false)
-    for(i=0; i<NUM_THREADS; i++) {
+    for(i=0; i<num_threads; i++) {
         args[i].id = i;
         args[i].roots = roots;
         args[i].root_index = &root_index;
@@ -163,7 +172,7 @@ int main(int argc, char *argv[]) {
 
     // Aspettare che i thread finiscano
 
-    for(j=0; j < NUM_THREADS; j++) {
+    for(j=0; j < num_threads; j++) {
         err_code = pthread_join(threads[j], NULL);
         if(err_code) {
             printf ("Errore numero %i nel joining del thread %i.\n", err_code, j);
@@ -269,9 +278,9 @@ int main(int argc, char *argv[]) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
 
     // Risoluzione query
-    bool *visited[NUM_THREADS];
+    visited = (bool **) malloc(num_threads * sizeof(bool *));
 
-    for(j=0; j<NUM_THREADS; j++) {
+    for(j=0; j<num_threads; j++) {
         visited[j] = (bool *) malloc(num_vertex * sizeof(bool));
         args[j].array_queries = queries;
         args[j].node_visited = visited[j];
@@ -285,7 +294,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    for(j=0; j < NUM_THREADS; j++) {
+    for(j=0; j < num_threads; j++) {
         err_code = pthread_join(threads[j], NULL);
         if(err_code) {
             printf ("Errore numero %i nel joining del thread %i.\n", err_code, j);
@@ -337,7 +346,7 @@ int main(int argc, char *argv[]) {
     delta_microseconds = compute_delta_microseconds(program_start, program_finished);
     asprintf(&stats, "%sTotal program duration: %s.\n", stats, get_human_readable_time(delta_microseconds));
 
-    asprintf(&stats, "%sThreads used: %ld.\n", stats, NUM_THREADS);
+    asprintf(&stats, "%sThreads used: %ld.\n", stats, num_threads);
 
     getrusage(RUSAGE_SELF, &memory);
     asprintf(&stats, "%sMaximum memory usage: %s\n", stats, get_human_readable_memory_usage(memory.ru_maxrss));

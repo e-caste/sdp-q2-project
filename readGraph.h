@@ -27,7 +27,8 @@
 
     typedef struct thread_args {
         int id;
-        int total_vertex;
+        int total_vertex;  // should be unsigned long
+        unsigned int total_threads;
         int size_file;
         char *filename;
         row_g *graph;
