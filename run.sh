@@ -34,6 +34,21 @@ function print_usage {
   echo ""
 }
 
+function extract_downloaded_graphs {
+  echo "Extracting downloaded DAGs..."
+  for dag in "$GRAIL_DATA_PATH"/*.gz; do
+    [[ -e "$dag" ]] || break  # there are no .gz files
+    echo "Decompressing $dag with gzip..."
+    gzip --decompress "$dag"
+  done
+  for dag in "$GRAIL_DATA_PATH"/*.tar; do
+    [[ -e "$dag" ]] || break  # there are no .tar files
+    echo "Unarchiving $dag with tar..."
+    tar -xf "$dag" --directory "$GRAIL_DATA_PATH"
+    rm "$dag"
+  done
+}
+
 function download_graphs {
   # if the dir does not exist
   if [[ ! -d "$GRAIL_DATA_PATH" ]]; then
@@ -74,6 +89,7 @@ while [[ $# -gt 0 ]]; do
     ;;
     -d|--download)
     download_graphs
+    extract_downloaded_graphs
     shift
     ;;
     *)
