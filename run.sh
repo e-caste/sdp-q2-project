@@ -87,9 +87,11 @@ function extract_downloaded_graphs {
   done
   # TODO: how to treat .test files? do we only consider some of them for queries?
   for query_file in "$GRAIL_DATA_PATH"/*.test; do
+    [[ -e "$query_file" ]] || break  # there is no .test file
     # change extension: .test -> .que
     output_file="${query_file%%.*}.que"
     mv "$query_file" "$output_file"
+    echo "Renamed $query_file to $output_file"
   done
 # this take ~3 minutes per file, which is too much
 #  for query_file in "$GRAIL_DATA_PATH"/*.test; do
