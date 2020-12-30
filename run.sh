@@ -85,7 +85,17 @@ function extract_downloaded_graphs {
       fi
     done
   done
-  # TODO: how to treat .test files? do we only consider some of them for queries? the last character of each line needs to be removed
+  # TODO: how to treat .test files? do we only consider some of them for queries?
+# this take ~3 minutes per file, which is too much
+#  for query_file in "$GRAIL_DATA_PATH"/*.test; do
+#    # change extension: .test -> .que
+#    output_file="${query_file%%.*}.que"
+#    echo "Removing excess number field from $query_file, replacing with $output_file..."
+#    while IFS= read -r line; do
+#      echo "$line" | cut -d ' ' -f 1,2 >> "$output_file"
+#    done < "$query_file"
+#    # rm "$query_file"
+#  done
 }
 
 function generate_graphs {
