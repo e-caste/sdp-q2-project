@@ -20,12 +20,15 @@ DAGS=(
   "cit-Patents.scc.gra.gz"
   "citeseerx.gra.gz"
 )
+LABELS=5
+RUN_MODE="all"  # benchmark -> DAGs from $GRAIL_DATA_PATH | test -> DAGs from $GEN_DATA_PATH | all -> both | specific -> only given graph path
+SPECIFIC_DAG_PATH=""
 
 function print_usage {
   echo ""
   echo "Use -h or --help to show this help."
   echo "Usage:"
-  echo "$0 [-d|--download] [-g|--generate] [-r|--run (-l|--labels <number of labels>) [benchmark|test]|[<path to graph file>]]"
+  echo "$0 [-d|--download] [-g|--generate] [-r|--run (-l|--labels <number of labels>) [benchmark|test|<path to graph file>]]"
   echo "[] mean an argument is optional"
   echo "() mean an argument is mandatory"
   echo "| means it is possible to choose the argument on its left or on its right"
@@ -112,7 +115,46 @@ function generate_graphs {
 }
 
 function run_benchmark {
-  echo "args: $@"
+  number_regex='^[0-9]+$'
+  graph_regex='^.+.gra$'
+  # parse arguments after -r|--run
+  while [[ $# -gt 0 ]]; do
+    arg="$1"
+    case $arg in
+      -l|--labels)
+      if [[ $2 =~ $number_regex ]]; then
+        echo "Set number of labels to $2"
+        LABELS=$2
+      else
+        echo "Unexpected number of labels: $2, using default $LABELS..."
+      fi
+      shift 2
+      ;;
+      benchmark|test)
+      echo "Run mode set to $arg only"
+      RUN_MODE=$arg
+      shift
+      ;;
+      *)  # assuming path to specific graph
+      # remove file extension (.gra) - see https://stackoverflow.com/a/61294531
+      base_file=${arg%%.*}
+      if [[ -f "$arg" ]] && [[ -f "$base_file".que || -f "$base_file".stat ]] && [[ "$arg" =~ $graph_regex ]]; then
+        if [[ "$RUN_MODE" = "benchmark" ]] ||  [[ "$RUN_MODE" = "test" ]]; then
+          echo "Conflicting run mode: benchmark or test is set, but a DAG path has also been given. Please see the usage:"
+          print_usage
+          exit 1
+        fi
+        echo "Run mode set to specific. DAG path recognized: $arg"
+        RUN_MODE="specific"
+        SPECIFIC_DAG_PATH="$base_file"
+        shift
+      else
+        echo "Unexpected DAG (.gra file): $arg. Terminating..."
+        exit 1
+      fi
+      ;;
+    esac
+  done
 }
 
 # no arguments given
