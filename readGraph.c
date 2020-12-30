@@ -1,4 +1,3 @@
-
 #include "readGraph.h"
 
 // Scopo di "scanFile" : Leggere 'file1'
@@ -90,7 +89,7 @@ void *scanFile(void *args) {
                 pthread_mutex_lock(my_data->roots_mutex);
                     not_root_is_set = my_data->graph[i].not_root ? true : false;  // default == 0 == false;
                     my_data -> graph[i].not_root = true;   //se era a uno lo rimetto a 1
-                    if ((!not_root_is_set) && (my_data->graph[i].not_root)){
+                    if ((!not_root_is_set) && (my_data->graph[i].not_root)){ // E' considerata radice ogni nodo senza genitori (not_root = false)
                             *my_data->roots_num = (*(my_data->roots_num) - 1);
                     }
                 pthread_mutex_unlock(my_data->roots_mutex);
