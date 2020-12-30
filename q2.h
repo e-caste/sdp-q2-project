@@ -16,6 +16,17 @@
 #include <string.h>
 #include <sys/resource.h>
 
+#define _GNU_SOURCE  // allow usage of asprintf on GNU/Linux
+#define NUM_THREADS sysconf(_SC_NPROCESSORS_ONLN)
+
+// see https://iq.opengenus.org/detect-operating-system-in-c/
+// used to print the used memory correctly on macOS and GNU/Linux
+#ifdef __APPLE__
+    #define MEM_SIZE 1024
+#else
+    #define MEM_SIZE 1
+#endif
+
 /*
  * used in get_human_readable_time
  * US = microseconds
