@@ -73,11 +73,14 @@ function extract_downloaded_graphs {
     rm "$dag"
   done
   # move .gra files from .tar to parent directory
-  for dir in "$GRAIL_DATA_PATH"/*; do
-    if [[ -d "$dir" ]]; then
-      mv "$dir"/* "$GRAIL_DATA_PATH"
-      rmdir "$dir"
-    fi
+  # run twice since the maximum number of nested directories is 2
+  for _ in {1..2}; do
+    for dir in "$GRAIL_DATA_PATH"/*; do
+      if [[ -d "$dir" ]]; then
+        mv "$dir"/* "$GRAIL_DATA_PATH"
+        rmdir "$dir"
+      fi
+    done
   done
   # TODO: how to treat .test files? do we only consider some of them for queries? the last character of each line needs to be removed
 }
