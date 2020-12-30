@@ -30,12 +30,12 @@
     } t_child_args;
 
     // SEQUENTIAL VERSION
-    void RandomizedVisitRecursive(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex);
-    void RandomizedLabeling(row_g * graph, row_l * labels, int num_label, int num_vertex, int * roots, int num_roots);
+    void RandomizedLabelingSequential(row_g * graph, row_l * labels, int num_label, int num_vertex, int * roots, int num_roots);
+    void RandomizedVisitSequentialRecursive(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex);
 
     //PARALLEL VERSION
-    void* RandomizedVisitParallel(void* args);
-    void RandomizedVisitParallelInit(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex);
-    void* RandomizedLabelingParallel(void* args);
     void RandomizedLabelingParallelInit(row_g * graph, row_l * labels, int label_num, int vertex_num, int * roots, int roots_num);
+    void* RandomizedLabelingParallel(void* args);
+    void RandomizedVisitParallelInit(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex);
+    void* RandomizedVisitParallel(void* args);
 #endif  //BUILD_LABELS_H

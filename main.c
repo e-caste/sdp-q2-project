@@ -9,30 +9,29 @@
 
 
 // argv[1]: file1 (input .gra)
-// argv[2]: n (label number)
+// argv[2]: n (label number 'd')
 // argv[3]: file2 (.que)
 int main(int argc, char *argv[]) {
     FILE *fp, *fp_query;
     unsigned int num_vertex, num_threads;
-    int i, j, size, c=0, k=0, err_code=0, d;
+    int i, j, size, err_code=0, d;
     row_g *rows;
     pthread_t *threads;
     t_args *args;
+    // needed for labels generation
     int *roots;
     int roots_num, root_index;
     pthread_mutex_t *roots_mutex;
     row_l *labels;
+    // needed for time and memory statistics
     struct timespec program_start, section_start, file1_read, file2_read, labels_generation_finished, reachability_queries_finished, program_finished;
     long long unsigned delta_microseconds;
     struct rusage memory;
     char* stats;
     // needed for reachability query
-    int node1, node2;
-    bool dfs;
-    bool reachable;
     bool **visited;
 
-    // Controllo sugli argomenti
+    // Checks on arguments
 
     if (argc != 4) {
         fprintf(stderr, "Enter only 'file1', 'n' and 'file2' as arguments!\n");
@@ -46,7 +45,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    // Apertura file1
+    // Opening file1
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &program_start);
     clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
@@ -57,11 +56,11 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    // Prendere numero vertici per allocare la giusta memoria
+    // Take vertex number to alloc correct memory
 
     fscanf(fp,"%i\n", &num_vertex);
 
-    rows = (row_g *) malloc (num_vertex * sizeof (row_g));  //array di liste
+    rows = (row_g *) malloc (num_vertex * sizeof (row_g));  //array of lists
     if (rows == NULL ) {
         printf ("Not enough room for this size graph\n" );
         exit(1);
@@ -75,16 +74,16 @@ int main(int argc, char *argv[]) {
     threads = (pthread_t *) malloc(num_threads * sizeof(pthread_t));
     args = (t_args *) malloc(num_threads * sizeof(t_args));
 
-    // Prendere grandezza file per dividerlo per fseek
+    // Take the file size for divide it later by threads
 
     fseek(fp, 0L, SEEK_END);
     size = ftell(fp);
 
     fclose(fp);
 
-    // Ottengo roots_num come num_vertex - not_roots.
-    // in pratica quando scorro per leggere il file
-    // se incontro una 'non radice', decremento il contatore -> richiede protezione
+    // We gain the roots_num as num_vertex - not_roots.
+    // In practice, when we will scan file1
+    // if we find a not_root, we decrement the counter -> need protection
     roots_num = num_vertex;
 
     roots_mutex = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
@@ -98,34 +97,33 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    // Creazione thread
+    // Preparing structure for parallel reading of file1 by many threads
     for(j=0; j < num_threads; j++) {
         args[j].filename = argv[1];
         args[j].graph = rows;
-        args[j].total_vertex = num_vertex;          //facoltativo? TODO
+        args[j].total_vertex = num_vertex;
         args[j].total_threads = num_threads;
         args[j].size_file = size;
-        args[j].roots_num = &roots_num;             //puntatore alla variabile 'condivisa'
-        args[j].roots_mutex = roots_mutex;          //protezione per la variabile 'condivisa'
+        args[j].roots_num = &roots_num;             // pointer of 'shared' variable
+        args[j].roots_mutex = roots_mutex;          // protection for 'shared' variable
     }
 
-    printf("Inizio a leggere il file...\n");
+    printf("Starting the reading of DAG file...\n");
 
-    for(i=0; i<num_threads; i++) {    //eventualmente si può unire il for.    TODO
+    for(i=0; i<num_threads; i++) {
         args[i].id = i;
         err_code = pthread_create(&threads[i], NULL, scanFile, (void *)&args[i]);
         if(err_code) {
-            printf ("Errore numero %i nella creazione del thread %i.\n", err_code, i);
+            printf ("Error number %i in thread %i creation.\n", err_code, i);
             exit(1);
         }
     }
 
-    // Aspettare che i thread finiscano
-
+    // Wait until all thread end
     for(j=0; j < num_threads; j++) {
         err_code = pthread_join(threads[j], NULL);
         if(err_code) {
-            printf ("Errore numero %i nel joining del thread %i.\n", err_code, j);
+            printf ("Error number %i in thread %i joining.\n", err_code, j);
             exit(1);
         }
     }
@@ -134,9 +132,9 @@ int main(int argc, char *argv[]) {
     delta_microseconds = compute_delta_microseconds(section_start, file1_read);
     asprintf(&stats, "Read input file %s (file1) in %s.\n", argv[1], get_human_readable_time(delta_microseconds));
     asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
-    fprintf(stdout, "Fine lettura file...\n");
+    fprintf(stdout, "End of DAG file reading...\n");
 
-    // Stampa di prova grafo
+    // Test of Graph print
 
     // for(i=0; i<num_vertex; i++) {
     //     printf("%i : ", i);
@@ -145,8 +143,7 @@ int main(int argc, char *argv[]) {
     //     printf("\n");
     // }
 
-    fprintf(stdout, "Ricerca delle radici ...\n");
-    //Inizializzazione array Roots
+    fprintf(stdout, "Starting roots search...\n");
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
     roots = (int *) malloc(roots_num * sizeof(int));
@@ -155,42 +152,42 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    root_index = 0;     //variabile *condivisa* per inizializzare parallelamente Roots
-
-    // Creazione thread per lettura radici
-    //E' considerata radice ogni nodo senza genitori (not_root = false)
+    root_index = 0;  // *shared* variable for Roots parallel inizialization
+    
+    //TODO 
+    // merge this scanRoots thread creation with scanFile so we create just
+    // one time the thread. -> merge ScanRoots in ScanFiles
     for(i=0; i<num_threads; i++) {
         args[i].id = i;
         args[i].roots = roots;
         args[i].root_index = &root_index;
         err_code = pthread_create(&threads[i], NULL, scanRoots, (void *)&args[i]);
         if(err_code) {
-            printf ("Errore numero %i nella creazione del thread %i.\n", err_code, i);
+            printf ("Error number %i in thread %i creation.\n", err_code, i);
             exit(1);
         }
     }
-
-    // Aspettare che i thread finiscano
 
     for(j=0; j < num_threads; j++) {
         err_code = pthread_join(threads[j], NULL);
         if(err_code) {
-            printf ("Errore numero %i nel joining del thread %i.\n", err_code, j);
+            printf ("Error number %i in thread %i joining.\n", err_code, j);
             exit(1);
         }
     }
-    fprintf(stdout, "Fine ricerca delle radici ...\n");
+    fprintf(stdout, "End of root search...\n");
 
-    // Stampa di prova radici
+    // Test roots print
     // printf("roots: ");
     // for(i=0; i<roots_num; i++){
     //     printf("%i ", roots[i]);
     // }
     // printf("\n");
 
+    // Label bulding
 
-    // Allocazione struct per labels
-    // labels procederrano di pari ordine con l'indice rows (Indice del nodo).
+    // label struct Inizializzation
+    // labels will follow the same index order of rows (node index).
 
     labels = (row_l *) malloc (num_vertex * sizeof (row_l));
     if (labels == NULL ) {
@@ -207,16 +204,16 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
 
-        //Inizializzazione (Non è detto che tutto sia azzerato!)
+        //It's not always true that these values are resetted
         memset(labels[i].lbl_start, 0, d * sizeof(int));
         memset(labels[i].lbl_end, 0, d * sizeof(int));
         memset(labels[i].visited, false, d * sizeof(bool));
     }
 
-    fprintf(stdout, "Creazione delle labels...\n");
+    fprintf(stdout, "Starting label creation...\n");
     RandomizedLabelingParallelInit(rows, labels, d, num_vertex, roots, roots_num);
-    //RandomizedLabeling(rows, labels, d, num_vertex, roots, roots_num);
-    fprintf(stdout, "Fine creazione delle labels...\n");
+    //RandomizedLabelingSequential(rows, labels, d, num_vertex, roots, roots_num);
+    fprintf(stdout, "End Label creation...\n");
 
     fflush(stdout);
 
@@ -225,18 +222,18 @@ int main(int argc, char *argv[]) {
     asprintf(&stats, "%sGenerated %s labels in %s.\n", stats, argv[2], get_human_readable_time(delta_microseconds));
     asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
 
-    //Stampa delle labels
-    /*for(i=0; i<num_vertex; i++){
+    //Test labels print
+    for(i=0; i<num_vertex; i++){
         printf("Node: %i ", i);
         for(j=0; j<d; j++){
             printf("[%i, %i] ", labels[i].lbl_start[j], labels[i].lbl_end[j]);
         }
         printf("\n");
-    }*/
+    }
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
 
-    // Lettura query
+    // Query reading
     fp_query = fopen(argv[3], "r");
     if (fp_query == NULL) {
         fprintf(stderr, "Unable to open file %s for reading.\n", argv[3] );
@@ -249,7 +246,7 @@ int main(int argc, char *argv[]) {
         num_query++;
     }
 
-    printf("Numero Query: %i\n", num_query);
+    printf("Query Number: %i\n", num_query);
 
     el_query *queries = malloc(sizeof(el_query)*num_query);
 
@@ -263,7 +260,7 @@ int main(int argc, char *argv[]) {
 
     fclose(fp_query);
 
-    // Stampa query
+    // Test query print
     /*for(i=0; i<num_query; i++) {
         printf("Query %i: %i %i\n", i, queries[i].num[0], queries[i].num[1]);
     }*/
@@ -277,7 +274,7 @@ int main(int argc, char *argv[]) {
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
 
-    // Risoluzione query
+    // Query Resolution
     visited = (bool **) malloc(num_threads * sizeof(bool *));
 
     for(j=0; j<num_threads; j++) {
@@ -289,7 +286,7 @@ int main(int argc, char *argv[]) {
         args[j].array_labels = labels;
         err_code = pthread_create(&threads[j], NULL, solveQuery, (void *)&args[j]);
         if(err_code) {
-            printf ("Errore numero %i nella creazione del thread %i.\n", err_code, j);
+            printf ("Error number %i in thread %i creation.\n", err_code, j);
             exit(1);
         }
     }
@@ -297,7 +294,7 @@ int main(int argc, char *argv[]) {
     for(j=0; j < num_threads; j++) {
         err_code = pthread_join(threads[j], NULL);
         if(err_code) {
-            printf ("Errore numero %i nel joining del thread %i.\n", err_code, j);
+            printf ("Error number %i in thread %i joining.\n", err_code, j);
             exit(1);
         }
     }
@@ -321,7 +318,9 @@ int main(int argc, char *argv[]) {
     asprintf(&stats, "%sTested %d reachability queries in %s.\n", stats, num_query, get_human_readable_time(delta_microseconds));
     asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
 
-    // Deallocazione di tutte le risorse
+    // Resource deallocation
+
+    //TODO free num_thread
 
     for(i=0; i<num_vertex; i++) {
         free_list(rows[i].edges_pointer);
