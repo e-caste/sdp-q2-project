@@ -72,3 +72,71 @@ char* get_rss_virt_mem(void) {
              get_human_readable_memory_usage(virt));
     return result;
 }
+
+
+void exitWithDealloc(bool error, unsigned int num_vertex, FILE * fp_dag, row_g *rows, pthread_t *threads, t_args *args, pthread_mutex_t *roots_mutex, int *roots, row_l *labels, FILE *fp_query, el_query *queries){
+    //1. error in: rows = (row_g *) malloc (num_vertex * sizeof (row_g));
+    if(fp_dag)
+        fclose(fp_dag);
+
+    //2. error in: threads = (pthread_t *) malloc(num_threads * sizeof(pthread_t));
+    if(rows){
+        //6. error in: err_code = pthread_create(&threads[i], NULL, scanFile, (void *)&args[i]);
+        //7. error in: err_code = pthread_join(threads[j], NULL);
+        //8. error in: roots = (int *) malloc(roots_num * sizeof(int));
+        for(int i=0; i<num_vertex; i++) {
+                free_list(rows[i].edges_pointer);
+                if(rows[i].node_mutex){
+                    pthread_mutex_destroy(rows[i].node_mutex);
+                    free(rows[i].node_mutex);
+                }
+        }
+        free(rows);
+    }
+
+    //3. error in: args = (t_args *) malloc(num_threads * sizeof(t_args));
+    if(threads)
+        free(threads);
+
+    //4. error in: roots_mutex = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
+    if(args)
+        free(args);
+
+    //5. error in: if(pthread_mutex_init(roots_mutex, NULL) != 0){
+    if(roots_mutex){
+        pthread_mutex_destroy(roots_mutex);
+        free(roots_mutex);
+    }
+
+    //9. error in: err_code = pthread_create(&threads[i], NULL, scanRoots, (void *)&args[i]);
+    free(roots);
+
+    //10. error in: if ((labels[i].lbl_start == NULL ) || (labels[i].lbl_end == NULL ) || (labels[i].visited == NULL )) {
+    if(labels){
+        for(int i=0; i<num_vertex; i++){
+            if(labels[i].lbl_start)
+                free(labels[i].lbl_start);
+            if(labels[i].lbl_end)
+                free(labels[i].lbl_end);
+            if(labels[i].visited)
+                free(labels[i].visited);
+        }
+        free(labels);
+    }
+
+    //11. error in: el_query *queries = malloc(sizeof(el_query)*num_query);
+    if(fp_query)
+        fclose(fp_query);
+    
+    //12. error in: visited = (bool **) malloc(num_threads * sizeof(bool *));
+    if(queries)
+        free(queries);
+
+    if(error){
+        printf("deallocation with error successful!\n");
+        exit(1);
+    }else{
+        printf("deallocation without error successful!\n");
+        return;
+    }
+}
