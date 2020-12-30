@@ -108,6 +108,10 @@ function generate_graphs {
   mv "$GEN_SCRIPT_PATH"/*.que "$GEN_DATA_PATH"
 }
 
+function run_benchmark {
+  echo "args: $@"
+}
+
 # no arguments given
 if [[ $# -eq 0 ]]; then
   print_usage
@@ -131,6 +135,12 @@ while [[ $# -gt 0 ]]; do
     -g|--generate)
     generate_graphs
     shift
+    ;;
+    -r|--run)
+    # the $@ are all the remaining arguments (e.g. -l 2, but not -h or -d)
+    shift
+    run_benchmark "$@"
+    exit 0
     ;;
     *)
     echo "Unkwown option '$1'. See usage:"
