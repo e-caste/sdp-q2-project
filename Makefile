@@ -1,15 +1,15 @@
 CC = gcc
 CFLAGS = -Wall -c
-OBJECTS = out.o readGraph.o buildLabels.o solveQuery.o utility.o
-EXECUTABLE = out
+OBJECTS = main.o readGraph.o buildLabels.o solveQuery.o utility.o
+EXECUTABLE = main
 
 all: $(EXECUTABLE)
 
-$(EXECUTABLE): out.o readGraph.o buildLabels.o solveQuery.o utility.o
+$(EXECUTABLE): main.o readGraph.o buildLabels.o solveQuery.o utility.o
 	$(CC) $(OBJECTS) -o $@ -lpthread
 
-out.o: main.c
-	$(CC) $(CFLAGS) main.c -o out.o
+main.o: main.c
+	$(CC) $(CFLAGS) main.c -o main.o
 
 readGraph.o: readGraph.c readGraph.h
 	$(CC) $(CFLAGS) readGraph.c -o readGraph.o
@@ -24,4 +24,4 @@ utility.o: utility.c utility.h
 	$(CC) $(CFLAGS) utility.c -o utility.o
 
 clean:
-	-rm -f *.o out res_query_prova.txt
+	-rm -f *.o main res_query_prova.txt
