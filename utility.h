@@ -8,7 +8,9 @@
     #include <stdbool.h>
     #include <time.h>
     #include <string.h>
-    #include <sys/resource.h>    
+    #include <sys/resource.h>
+    
+    #include "readGraph.h"  //for exitWithDealloc
 
     #define NUM_THREADS sysconf(_SC_NPROCESSORS_ONLN)
 
@@ -40,8 +42,12 @@
         #define MEM_SIZE 1
     #endif  
 
+    //function for statistics
     long long unsigned compute_delta_microseconds(struct timespec start, struct timespec end);
     char* get_human_readable_time(long long unsigned microseconds);
     char* get_human_readable_memory_usage(long unsigned kilobytes);
     char* get_rss_virt_mem(void);
+
+    //function for correct program exits
+    //TODO void exitWithDealloc(bool error, unsigned int num_vertex, FILE * fp_dag, row_g *rows, pthread_t *threads, t_args *args, pthread_mutex_t *roots_mutex, int *roots, row_l *labels, FILE *fp_query, el_query *queries);
 #endif //UTILITY_H
