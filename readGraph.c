@@ -15,6 +15,7 @@ void *scanFile(void *args) {
     FILE *fp;
     int j, i, k, c, pos;
     int sup, inf;
+    unsigned int num_threads = my_data->total_threads;
     bool not_root_is_set;
 
     fp = fopen(my_data -> filename, "r");
@@ -24,7 +25,7 @@ void *scanFile(void *args) {
     }
 
     //Definizione estremo superiore
-    if (my_data->id == NUM_THREADS-1) 
+    if (my_data->id == num_threads-1) 
         sup = my_data->total_vertex;
     else {
         //con fseek mi metto in un punto casuale all'interno della riga
@@ -33,7 +34,7 @@ void *scanFile(void *args) {
         //quando trovo la nuova riga come primo intero avrò il SUP
         //NOTA: questa un'ottima strategia in quanto abbiamo righe non omogenee
         // sup for id=0 is inf for id=1, they are contiguous so the whole file is guaranteed to be read
-        fseek(fp, (long) my_data->size_file*(my_data->id+1)/NUM_THREADS, SEEK_SET); // 1Gb / 4Thread = 250Mb ciascuno * id+1
+        fseek(fp, (long) my_data->size_file*(my_data->id+1)/num_threads, SEEK_SET); // 1Gb / 4Thread = 250Mb ciascuno * id+1
         while(i != 10) {
             i = getc(fp);
         }
@@ -49,7 +50,7 @@ void *scanFile(void *args) {
         fscanf(fp, "%*[^\n]\n");    // salto la prima riga (contiene il numero di vertici totale)
         inf = 0;
     } else {
-        fseek(fp, (long) my_data->size_file*my_data->id/NUM_THREADS, SEEK_SET); // 1Gb / 4Thread = 250Mb ciascuno * id
+        fseek(fp, (long) my_data->size_file*my_data->id/num_threads, SEEK_SET); // 1Gb / 4Thread = 250Mb ciascuno * id
 
         while(i != 10) {    
             i = getc(fp);
@@ -189,19 +190,20 @@ void *scanRoots(void *args) {
     t_args *my_data;
     my_data = (t_args *) args;
     int sup, inf, i, j;
+    unsigned int num_threads = my_data->total_threads;
 
     //Definition of 'Sup' and 'Inf' so that each thread
     //can read in parallel the graph
     //see scanFile for more details
-    if (my_data->id == NUM_THREADS-1)
+    if (my_data->id == num_threads-1)
         sup = my_data->total_vertex;
     else
-        sup = ((my_data->total_vertex) / NUM_THREADS) * (my_data->id + 1);      //TODO e' necessario cast(int)?
+        sup = ((my_data->total_vertex) / num_threads) * (my_data->id + 1);      //TODO e' necessario cast(int)?
 
     if (my_data->id == 0)
         inf = 0;
     else
-        inf = ((my_data->total_vertex)/NUM_THREADS)*(my_data->id);
+        inf = ((my_data->total_vertex)/num_threads)*(my_data->id);
 
     for(i=inf; i<sup; i++) {
         if(!my_data->graph[i].not_root) {  //if (is root)

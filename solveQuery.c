@@ -39,19 +39,20 @@ bool dfs_search(row_g *graph, int node1, int node2, bool *visited) {
 void *solveQuery (void *args) {
     t_args *my_data;
     my_data = (t_args *) args;
+    unsigned int num_threads = my_data->total_threads;
 
     int i, j, inf, sup, node1, node2;
     bool dfs;
 
-    if (my_data->id == NUM_THREADS-1)
+    if (my_data->id == num_threads-1)
         sup = my_data->queries_num;
     else
-        sup = ((my_data->queries_num) / NUM_THREADS) * (my_data->id + 1);      //TODO e' necessario cast(int)?
+        sup = ((my_data->queries_num) / num_threads) * (my_data->id + 1);      //TODO e' necessario cast(int)?
 
     if (my_data->id == 0)
         inf = 0;
     else
-        inf = ((my_data->queries_num) / NUM_THREADS) * (my_data->id);
+        inf = ((my_data->queries_num) / num_threads) * (my_data->id);
 
     //printf("Thread n. %i con inf: %i e sup: %i\n", my_data->id, inf, sup-1);
 
