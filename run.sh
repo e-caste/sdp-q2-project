@@ -29,6 +29,9 @@ function print_usage {
   echo "() mean an argument is mandatory"
   echo "| means it is possible to choose the argument on its left or on its right"
   echo ""
+  echo "You need the following packages to run this script:"
+  echo "wget, gzip, tar, make, gcc"
+  echo ""
 }
 
 function download_graphs {
