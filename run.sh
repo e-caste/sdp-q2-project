@@ -173,10 +173,17 @@ function run_benchmark {
 
   # compile our program
   make
-  make clean
+  # make clean
+  # the name of our executable
+  EXE="./$(grep ^EXECUTABLE Makefile | cut -d ' ' -f 3)"
 
   case $RUN_MODE in
     specific)
+      cmd="$EXE $SPECIFIC_DAG_PATH.gra $LABELS $SPECIFIC_DAG_PATH.que"
+      echo ""
+      echo "Running $cmd"
+      $cmd
+      exit 0
     ;;
     benchmark)
     ;;
