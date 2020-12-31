@@ -139,9 +139,13 @@ function generate_graphs {
 
 function run_cmd {
   cmd="$EXE $1.gra $LABELS $1.que"
-  echo ""
-  echo "Running $cmd"
-  $cmd
+  if [[ -f "$1".que ]]; then
+    echo ""
+    echo "Running $cmd"
+    $cmd
+  else
+    echo "Skipping $cmd since $1.que does not exist..."
+  fi
 }
 
 function run_benchmark {
