@@ -93,16 +93,21 @@ function extract_downloaded_graphs {
     mv "$query_file" "$output_file"
     echo "Renamed $query_file to $output_file"
   done
-# this take ~3 minutes per file, which is too much
-#  for query_file in "$GRAIL_DATA_PATH"/*.test; do
-#    # change extension: .test -> .que
-#    output_file="${query_file%%.*}.que"
-#    echo "Removing excess number field from $query_file, replacing with $output_file..."
-#    while IFS= read -r line; do
-#      echo "$line" | cut -d ' ' -f 1,2 >> "$output_file"
-#    done < "$query_file"
-#    # rm "$query_file"
-#  done
+  CLEAN_EXE="clean_query_file"
+  echo "Compiling $CLEAN_EXE.c..."
+  gcc -Wall $CLEAN_EXE.c -o $CLEAN_EXE
+  for query_file in "$GEN_DATA_PATH"/*.que; do
+    [[ -e "$query_file" ]] || break  # there is no .que file
+    [[ -z $(head -1 "$query_file" | cut -d ' ' -f 3) ]] && break  # there is no third number on the first line, skip file
+    echo "Removing excess number field from $query_file..."
+    ./$CLEAN_EXE "$query_file"
+  done
+  for query_file in "$GRAIL_DATA_PATH"/*.que; do
+    [[ -e "$query_file" ]] || break  # there is no .que file
+    [[ -z $(head -1 "$query_file" | cut -d ' ' -f 3) ]] && break  # there is no third number on the first line, skip file
+    echo "Removing excess number field from $query_file..."
+    ./$CLEAN_EXE "$query_file"
+  done
 }
 
 function generate_graphs {
