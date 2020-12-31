@@ -23,6 +23,8 @@ DAGS=(
 LABELS=5
 RUN_MODE="all"  # benchmark -> DAGs from $GRAIL_DATA_PATH | test -> DAGs from $GEN_DATA_PATH | all -> both | specific -> only given graph path
 SPECIFIC_DAG_PATH=""
+CLEAN_EXE="clean_query_file"
+EXE="./$(grep ^EXECUTABLE Makefile | cut -d ' ' -f 3)"  # the name of our program
 
 function print_usage {
   echo ""
@@ -93,7 +95,6 @@ function extract_downloaded_graphs {
     mv "$query_file" "$output_file"
     echo "Renamed $query_file to $output_file"
   done
-  CLEAN_EXE="clean_query_file"
   echo "Compiling $CLEAN_EXE.c..."
   gcc -Wall $CLEAN_EXE.c -o $CLEAN_EXE
   for query_file in "$GEN_DATA_PATH"/*.que; do
@@ -188,8 +189,6 @@ function run_benchmark {
   # compile our program
   make
   # make clean
-  # the name of our executable
-  EXE="./$(grep ^EXECUTABLE Makefile | cut -d ' ' -f 3)"
 
   if [[ "$RUN_MODE" = "all" ]]; then
     echo "Run mode set to all: running $EXE against all benchmark and test DAGs"
