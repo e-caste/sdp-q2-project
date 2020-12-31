@@ -121,6 +121,7 @@ function extract_downloaded_graphs {
     if ! [[ "$(head -1 "$graph_file")" =~ $number_regex ]]; then
       # see https://stackoverflow.com/a/339941
       tail -n +2 "$graph_file" > "$tmp_file" && mv "$tmp_file" "$graph_file"
+      echo "Removed first non-numeric line from $graph_file"
     fi
   done
   [[ -f "$tmp_file" ]] && rm "$tmp_file"
