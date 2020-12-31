@@ -26,6 +26,9 @@ SPECIFIC_DAG_PATH=""
 CLEAN_EXE="clean_query_file"
 EXE="./$(grep ^EXECUTABLE Makefile | cut -d ' ' -f 3)"  # the name of our program
 
+number_regex='^[0-9]+$'
+graph_regex='^.+.gra$'
+
 function print_usage {
   echo ""
   echo "Use -h or --help to show this help."
@@ -109,6 +112,16 @@ function extract_downloaded_graphs {
     echo "Removing excess number field from $query_file..."
     ./$CLEAN_EXE "$query_file"
   done
+  tmp_file="_tmp"
+  for graph_file in "$GRAIL_DATA_PATH"/*.gra; do
+    [[ -e "$graph_file" ]] || break  # there is no .gra file
+    # if the first line is not a number, remove the first line
+    if ! [[ "$(head -1 "$graph_file")" =~ $number_regex ]]; then
+      # see https://stackoverflow.com/a/339941
+      tail -n +2 "$graph_file" > "$tmp_file" && mv "$tmp_file" "$graph_file"
+    fi
+  done
+  [[ -f "$tmp_file" ]] && rm "$tmp_file"
 }
 
 function generate_graphs {
@@ -149,8 +162,6 @@ function run_cmd {
 }
 
 function run_benchmark {
-  number_regex='^[0-9]+$'
-  graph_regex='^.+.gra$'
   # parse arguments after -r|--run
   while [[ $# -gt 0 ]]; do
     arg="$1"
