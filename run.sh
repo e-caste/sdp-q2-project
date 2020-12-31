@@ -36,7 +36,7 @@ function print_usage {
   echo "| means it is possible to choose the argument on its left or on its right"
   echo ""
   echo "You need the following packages to run this script:"
-  echo "wget, gzip, tar, make, gcc"
+  echo "wget gzip tar make gcc"
   echo ""
 }
 
