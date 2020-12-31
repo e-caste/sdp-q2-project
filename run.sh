@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# TODO: consider also query files from GRAIL that are not named exactly as the .gra file
+# TODO: consider also .dat query files
+
 DATA_PATH="data"
 GRAIL_DATA_PATH="$DATA_PATH/grail-dags"
 GEN_SCRIPT_PATH="graph-generator-stq"
@@ -90,7 +93,6 @@ function extract_downloaded_graphs {
       fi
     done
   done
-  # TODO: how to treat .test files? do we only consider some of them for queries?
   for query_file in "$GRAIL_DATA_PATH"/*.test; do
     [[ -e "$query_file" ]] || break  # there is no .test file
     # change extension: .test -> .que
