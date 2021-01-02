@@ -1,4 +1,4 @@
-i#!/bin/bash
+#!/bin/bash
 
 ./run.sh --download
 ./run.sh --generate
