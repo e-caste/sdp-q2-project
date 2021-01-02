@@ -255,7 +255,10 @@ function run_benchmark {
       if [[ "$RUN_MODE" = "benchmark" ]] || [[ "$RUN_MODE" = "all" ]]; then
         for graph_file in "$GRAIL_DATA_PATH"/*.gra; do
           name_without_path=$(echo "$graph_file" | cut -d '/' -f 3)
-          run_cmd "$graph_file" "$GRAIL_DATA_PATH/${GRAIL_GRA_QUE["$name_without_path"]}"
+          # ignore missing .gra files from GRAIL_GRA_QUE that have been downloaded with the necessary ones
+          if [[ ${GRAIL_GRA_QUE["$name_without_path"]+_} ]]; then
+            run_cmd "$graph_file" "$GRAIL_DATA_PATH/${GRAIL_GRA_QUE["$name_without_path"]}"
+          fi
         done
       fi
       if [[ "$RUN_MODE" = "test" ]] || [[ "$RUN_MODE" = "all" ]]; then
