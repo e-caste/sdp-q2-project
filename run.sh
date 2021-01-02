@@ -190,13 +190,13 @@ function generate_graphs {
 }
 
 function run_cmd {
-  cmd="$EXE $1.gra $LABELS $1.que"
-  if [[ -f "$1".que ]]; then
+  cmd="$EXE $1 $LABELS $2"
+  if [[ -f "$1" ]] && [[ -f "$2" ]]; then
     echo ""
     echo "Running $cmd"
     $cmd
   else
-    echo "Skipping $cmd since $1.que does not exist..."
+    echo "Skipping $cmd since $1 or $2 do not exist..."
   fi
 }
 
@@ -254,14 +254,14 @@ function run_benchmark {
   else
       if [[ "$RUN_MODE" = "benchmark" ]] || [[ "$RUN_MODE" = "all" ]]; then
         for graph_file in "$GRAIL_DATA_PATH"/*.gra; do
-          base_name=${graph_file%%.*}
-          run_cmd "$base_name"
+          name_without_path=$(echo "$graph_file" | cut -d '/' -f 3)
+          run_cmd "$graph_file" "$GRAIL_DATA_PATH/${GRAIL_GRA_QUE["$name_without_path"]}"
         done
       fi
       if [[ "$RUN_MODE" = "test" ]] || [[ "$RUN_MODE" = "all" ]]; then
         for graph_file in "$GEN_DATA_PATH"/*.gra; do
           base_name=${graph_file%%.*}
-          run_cmd "$base_name"
+          run_cmd "$base_name".gra "$base_name".que
         done
       fi
   fi
