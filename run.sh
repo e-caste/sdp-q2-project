@@ -252,7 +252,7 @@ function prompt_install_dependencies {
       if [[ "$EUID" -eq 0 ]]; then
         $APT_CMD
       else
-        sudo "$APT_CMD"
+        sudo $APT_CMD
       fi
     else
       echo "Please re-run this script when you have installed the needed packages."
