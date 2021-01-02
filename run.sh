@@ -67,7 +67,7 @@ function download_graphs {
     return
   fi
   echo "You are about to download ~386MB from the Internet and then extract them to ~1.3GB on disk."
-  echo "Do you want to proceed? [y/N]"
+  echo -n "Do you want to proceed? [y/N]"
   read -r ans
   if [ "$ans" = "y" ] || [ "$ans" = "Y" ]; then
     echo "Downloading DAGs from Google Code Archive..."
@@ -238,7 +238,23 @@ function run_benchmark {
         done
       fi
   fi
-  exit 0
+}
+
+function prompt_install_dependencies {
+  dpkg -s "$@" &> /dev/null
+  if [[ $? -eq 1 ]]; then
+    echo "You need to install the following packages before proceeding:"
+    echo "$@"
+    echo -n "Do you want to proceed? [y/N]"
+    read -r ans
+    if [ "$ans" = "y" ] || [ "$ans" = "Y" ]; then
+      echo "Installing packages..."
+      sudo apt install "$@"
+    else
+      echo "Please re-run this script when you have installed the needed packages."
+      exit 0
+    fi
+  fi
 }
 
 # no arguments given
@@ -257,17 +273,20 @@ while [[ $# -gt 0 ]]; do
     exit 0
     ;;
     -d|--download)
+    prompt_install_dependencies "wget gzip tar gcc"
     download_graphs
     extract_downloaded_graphs
     shift
     ;;
     -g|--generate)
+    prompt_install_dependencies "gcc make"
     generate_graphs
     shift
     ;;
     -r|--run)
     # the $@ are all the remaining arguments (e.g. -l 2, but not -h or -d)
     shift
+    prompt_install_dependencies "gcc make"
     run_benchmark "$@"
     exit 0
     ;;
