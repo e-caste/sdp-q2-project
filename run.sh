@@ -164,9 +164,9 @@ function extract_downloaded_graphs {
 }
 
 function generate_graphs {
-  graphs=($(find "$GEN_SCRIPT_PATH" -maxdepth 1 -name "*.gra"))
+  graphs_data=($(find "$GEN_DATA_PATH" -maxdepth 1 -name "*.gra"))
   # if there are no .gra files in the script directory
-  if [[ ${#graphs[@]} -eq 0 ]]; then
+  if [[ ${#graphs_data[@]} -eq 0 ]]; then
     # see cd handling: https://github.com/koalaman/shellcheck/wiki/SC2103
     cd "$GEN_SCRIPT_PATH" || exit
     make
@@ -174,19 +174,19 @@ function generate_graphs {
     cat run.sh
     ./run.sh
     cd ..
+    echo "Moving generated DAGs to $GEN_DATA_PATH..."
+    if [[ ! -d "$GEN_DATA_PATH" ]]; then
+      mkdir -p "$GEN_DATA_PATH"
+    fi
+    for dag in "$GEN_SCRIPT_PATH"/*.gra; do
+      echo -n "$dag" | cut -d / -f 2
+    done
+    mv "$GEN_SCRIPT_PATH"/*.gra "$GEN_DATA_PATH"
+    mv "$GEN_SCRIPT_PATH"/*.que "$GEN_DATA_PATH"
   else
     echo "It seems you have already generated the benchmark graphs."
     echo "Skipping DAG generation..."
   fi
-  if [[ ! -d "$GEN_DATA_PATH" ]]; then
-    mkdir -p "$GEN_DATA_PATH"
-  fi
-  echo "Moving generated DAGs to $GEN_DATA_PATH..."
-  for dag in "$GEN_SCRIPT_PATH"/*.gra; do
-    echo -n "$dag" | cut -d / -f 2
-  done
-  mv "$GEN_SCRIPT_PATH"/*.gra "$GEN_DATA_PATH"
-  mv "$GEN_SCRIPT_PATH"/*.que "$GEN_DATA_PATH"
 }
 
 function run_cmd {
