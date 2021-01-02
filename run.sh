@@ -7,6 +7,7 @@ DATA_PATH="data"
 GRAIL_DATA_PATH="$DATA_PATH/grail-dags"
 GEN_SCRIPT_PATH="graph-generator-stq"
 GEN_DATA_PATH="$DATA_PATH/gen-dags"
+# webpage: https://code.google.com/archive/p/grail/downloads
 URL_PREFIX="https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/grail"
 DAGS=(
 #  "updates_frwiki_graph.dat"
@@ -92,7 +93,7 @@ function download_graphs {
     echo "Skipping download..."
     return
   fi
-  echo "You are about to download ~386MB from the Internet and then extract them to ~1.3GB on disk."
+  echo "You are about to download ~156MB from the Internet and then extract them to ~478MB on disk."
   echo -n "Do you want to proceed? [y/N] "
   read -r ans
   if [ "$ans" = "y" ] || [ "$ans" = "Y" ]; then
