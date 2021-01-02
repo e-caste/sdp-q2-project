@@ -32,6 +32,32 @@ EXE="./$(grep ^EXECUTABLE Makefile | cut -d ' ' -f 3)"  # the name of our progra
 number_regex='^[0-9]+$'
 graph_regex='^.+.gra$'
 
+# create associative array for GRAIL .gra->.que file correspondences
+# see http://www.artificialworlds.net/blog/2012/10/17/bash-associative-array-examples/
+declare -A GRAIL_GRA_QUE=(
+  # large real
+  ["cit-Patents.scc.gra"]="cit-Patents.que"
+  ["uniprotenc_22m.scc.gra"]="uniprotenc_22m.que"
+  ["uniprotenc_100m.scc.gra"]="uniprotenc_100m.que"
+  # small dense real
+  ["arXiv_sub_6000-1.gra"]="arxiv.que"
+  ["citeseer_sub_10720.gra"]="citeseer.que"
+  ["go_sub_6793.gra"]="go.que"
+  ["pubmed_sub_9000-1.gra"]="pubmed.que"
+  ["yago_sub_6642.gra"]="yago.que"
+  # small sparse real
+  ["agrocyc_dag_uniq.gra"]="agrocyc.que"
+  ["amaze_dag_uniq.gra"]="amaze.que"
+  ["anthra_dag_uniq.gra"]="anthra.que"
+  ["ecoo_dag_uniq.gra"]="ecoo.que"
+  ["human_dag_uniq.gra"]="human.que"
+  ["kegg_dag_uniq.gra"]="kegg.que"
+  ["mtbrv_dag_uniq.gra"]="mtbrv.que"
+  ["nasa_dag_uniq.gra"]="nasa.que"
+  ["vchocyc_dag_uniq.gra"]="vchocyc.que"
+  ["xmark_dag_uniq.gra"]="xmark.que"
+)
+
 function print_usage {
   echo ""
   echo "Use -h or --help to show this help."
