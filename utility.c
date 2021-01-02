@@ -15,7 +15,7 @@ char* get_human_readable_time(long long unsigned microseconds) {
     ms = (long long unsigned) (microseconds - (h * US_IN_H + m * US_IN_M + s * US_IN_S)) / US_IN_MS;
     us = (long long unsigned) microseconds - (h * US_IN_H + m * US_IN_M + s * US_IN_S + ms * US_IN_MS);
     if (microseconds <= 0)
-        asprintf(&result, "less than 0 microseconds");
+        asprintf(&result, "less than 1 microsecond");
     else if (microseconds > 0 && microseconds < US_IN_MS)
         asprintf(&result, "%llu microseconds", microseconds);
     else if (microseconds >= US_IN_MS && microseconds < US_IN_S)
@@ -37,7 +37,7 @@ char* get_human_readable_memory_usage(long unsigned kilobytes) {
     mb = (long unsigned) (kilobytes - (gb * KB_IN_GB)) / KB_IN_MB;
     kb = (long unsigned) kilobytes - (gb * KB_IN_GB + mb * KB_IN_MB);
     if (kilobytes <= 0)
-        asprintf(&result, "less than 0 KB");
+        asprintf(&result, "less than 1 KB");
     else if (kilobytes > 0 && kilobytes < KB_IN_MB)
         asprintf(&result, "%lu KB", kilobytes);
     else if (kilobytes >= KB_IN_MB && kilobytes < KB_IN_GB)
