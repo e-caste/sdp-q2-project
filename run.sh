@@ -268,7 +268,7 @@ function run_benchmark {
 }
 
 function prompt_install_dependencies {
-  if ! dpkg -s "$@" &> /dev/null; then
+  if ! dpkg -s $@ &> /dev/null; then
     echo "You need to install the following packages before proceeding:"
     echo "$@"
     echo -n "Do you want to proceed? [y/N] "
