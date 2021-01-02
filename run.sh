@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# TODO: consider also query files from GRAIL that are not named exactly as the .gra file
-# TODO: consider also .dat query files
-
 DATA_PATH="data"
 GRAIL_DATA_PATH="$DATA_PATH/grail-dags"
 GEN_SCRIPT_PATH="graph-generator-stq"
