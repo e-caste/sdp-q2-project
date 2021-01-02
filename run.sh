@@ -67,7 +67,7 @@ function download_graphs {
     return
   fi
   echo "You are about to download ~386MB from the Internet and then extract them to ~1.3GB on disk."
-  echo -n "Do you want to proceed? [y/N]"
+  echo -n "Do you want to proceed? [y/N] "
   read -r ans
   if [ "$ans" = "y" ] || [ "$ans" = "Y" ]; then
     echo "Downloading DAGs from Google Code Archive..."
@@ -241,15 +241,19 @@ function run_benchmark {
 }
 
 function prompt_install_dependencies {
-  dpkg -s "$@" &> /dev/null
-  if [[ $? -eq 1 ]]; then
+  if ! dpkg -s "$@" &> /dev/null; then
     echo "You need to install the following packages before proceeding:"
     echo "$@"
-    echo -n "Do you want to proceed? [y/N]"
+    echo -n "Do you want to proceed? [y/N] "
     read -r ans
     if [ "$ans" = "y" ] || [ "$ans" = "Y" ]; then
       echo "Installing packages..."
-      sudo apt install "$@"
+      APT_CMD="apt install $@"
+      if [[ "$EUID" -eq 0 ]]; then
+        $APT_CMD
+      else
+        sudo "$APT_CMD"
+      fi
     else
       echo "Please re-run this script when you have installed the needed packages."
       exit 0
