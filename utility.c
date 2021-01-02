@@ -133,10 +133,10 @@ void exitWithDealloc(bool error, unsigned int num_vertex, FILE * fp_dag, row_g *
         free(queries);
 
     if(error){
-        printf("deallocation with error successful!\n");
+        fprintf(stdout, "Deallocation (with error) successful!\n");
         exit(1);
     }else{
-        printf("deallocation without error successful!\n");
+        fprintf(stdout, "Deallocation successful!\n");
         return;
     }
 }
