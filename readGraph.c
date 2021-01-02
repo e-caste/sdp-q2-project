@@ -12,10 +12,19 @@ void *scanFile(void *args) {
     t_args *my_data;
     my_data = (t_args *) args;
     FILE *fp;
-    int j, i, k, c, pos;
+    int j, i, k, pos;
     int sup, inf;
     unsigned int num_threads = my_data->total_threads;
     bool not_root_is_set;
+    char *line_buf = NULL;
+    ssize_t line_size;
+    size_t line_buf_size;
+    char a;
+    int offset;
+    char buffer[10];
+    memset(buffer, 0, sizeof(char)*10);
+    char space = ' ';
+    int val;
 
     fp = fopen(my_data -> filename, "r");
     if (fp == NULL) {
@@ -63,6 +72,7 @@ void *scanFile(void *args) {
     }    
 
     //printf("Thread n. %i con inf: %i e sup: %i\n", my_data->id, inf, sup-1);
+    offset = 0;
     
     //adesso per le righe di competenza del thread, si legge il valore del nodo
     //si costruisce e inizializza la struttura apposita e si inserisce in lista
@@ -70,41 +80,51 @@ void *scanFile(void *args) {
         fscanf(fp, "%i: ", &i);     //scarto il numero della riga (== j) e anche ": "
         edge *head;
         head = malloc(sizeof(edge));
-        do {
-            i = -1;
-            if(k !=0) //alla prima iterazione k==0 
-                ungetc(c, fp);    //Poichè prima ho letto un carattere che non era "#" (altrimenti usciva dal ciclo) devo tornare indietro!!
-            int res = fscanf(fp, "%i ", &i);      // leggo sia il valore che lo spazio. Se ci fosse un "#" non legge nulla, perchè si aspetta un %i
-            if(i != -1) { // i vertici non possono essere negativi però meglio testare "res" TODO
+        i=0;
 
-                //not_root_is_set = my_data->graph[i].not_root ? true : false;  // default == 0 == false;
+        line_size = getline(&line_buf, &line_buf_size, fp);
+
+        if(line_size != 2) {
+
+            while(offset!=(line_size - 2)) {
+
+                a = line_buf[offset];
+
+                while(strncmp(&a, &space, 1)) {
+                    buffer[i] = a;
+                    i++;
+                    offset++;
+                    a = line_buf[offset];
+                }
+
+                i=0;
+                val = atoi(buffer);
+                memset(buffer, 0, sizeof(char)*10);
 
                 if(k==0) {
-                    create_list(head, i);
+                    create_list(head, val);
                 } else {
-                    push(head, i);
+                    push(head, val);
                 }
-                //my_data -> graph[i].not_root = true;   //se era a uno lo rimetto a 1
+
+                k++;
+                offset++;
 
                 pthread_mutex_lock(my_data->roots_mutex);
-                    not_root_is_set = my_data->graph[i].not_root ? true : false;  // default == 0 == false;
-                    my_data -> graph[i].not_root = true;   //se era a uno lo rimetto a 1
-                    if ((!not_root_is_set) && (my_data->graph[i].not_root)){ // E' considerata radice ogni nodo senza genitori (not_root = false)
+                    not_root_is_set = my_data->graph[val].not_root ? true : false;  // default == 0 == false;
+                    my_data -> graph[val].not_root = true;   //se era a uno lo rimetto a 1
+                    if ((!not_root_is_set) && (my_data->graph[val].not_root)){ // E' considerata radice ogni nodo senza genitori (not_root = false)
                             *my_data->roots_num = (*(my_data->roots_num) - 1);
                     }
                 pthread_mutex_unlock(my_data->roots_mutex);
             }
-            c = fgetc(fp);              //prendo carattere successivo
-            k++;
-        } while(c != 35);               // se carattere == "#" (fine riga)
-        
-        if(i==-1) { //non prendo nessun intero -> lista archi vuota
-            my_data -> graph[j].edges_pointer = NULL;
-            my_data -> graph[j].edge_num = 0;
-        } else {
+
             my_data -> graph[j].edges_pointer = head;
             my_data -> graph[j].edge_num = k;
-        }
+        } else { //non prendo nessun intero -> lista archi vuota
+            my_data -> graph[j].edges_pointer = NULL;
+            my_data -> graph[j].edge_num = 0;
+        } 
         my_data->graph[j].node_mutex = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
         if (my_data->graph[j].node_mutex == NULL ) {
             printf ("Error in creating mutex protection for node\n" );
@@ -115,10 +135,13 @@ void *scanFile(void *args) {
             printf ("Error in initializing mutex protection for node\n" );
             exit(1);
         }
-        k = 0;  //vertice successivo
+        k = 0;
+        offset = 0;  //vertice successivo
     }
 
     //printf("Thread n. %i e ho finito\n", my_data->id);
+
+    free(line_buf);
 
     pthread_exit((void *) 0);
 
