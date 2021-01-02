@@ -3,4 +3,5 @@ grail/
 **/.DS_Store
 cmake-build-debug/
 **/.o
+logs/
 
