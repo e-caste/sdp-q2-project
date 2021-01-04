@@ -6,9 +6,6 @@
 //      Ottimizzazione delle memoria: sostituire int con short se possibile
 //      Quanti nodi al massimo? unsigned int: [0, 65,535] ; unsigned long int: [0, 4,294,967,295]
 
-//TODO: capire perchè in utility.h dà errori in compilazione
-void exitWithDealloc(bool error, unsigned int num_vertex, FILE * fp_dag, row_g *rows, pthread_t *threads, t_args *args, pthread_mutex_t *roots_mutex, int *roots, row_l *labels, FILE *fp_query, el_query *queries);
-
 // argv[1]: file1 (input .gra)
 // argv[2]: n (label number 'd')
 // argv[3]: file2 (.que)
