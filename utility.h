@@ -10,8 +10,6 @@
     #include <string.h>
     #include <sys/resource.h>
     
-    #include "readGraph.h"  //for exitWithDealloc
-
     #define NUM_THREADS sysconf(_SC_NPROCESSORS_ONLN)
 
     /*
@@ -40,7 +38,50 @@
         #define MEM_SIZE 1024
     #else
         #define MEM_SIZE 1
-    #endif  
+    #endif
+
+    //STRUCTURES used in common phase (readGraph, Label, Queries)
+
+    typedef struct row_label {
+        int* lbl_start;
+        int* lbl_end;
+        bool* visited;
+    } row_l;
+
+    typedef struct edge_list {
+        int num;                   // vertex-list: |value|next| -> |value|next| -> NULL
+        struct edge_list *next_num;
+    } edge;
+
+    typedef struct row_graph {
+        int edge_num;   //total number of vertex in this direction
+        bool not_root;
+        edge *edges_pointer;
+        pthread_mutex_t *node_mutex;
+    } row_g;
+
+    typedef struct el_list_query {
+        int num[2];
+        bool can_reach;
+    } el_query;
+
+    typedef struct thread_args {
+        int id;
+        int total_vertex;  // mem-Optimizzation: could be unsigned long 
+        unsigned int total_threads;
+        int size_file;
+        char *filename;
+        row_g *graph;
+        int *roots;
+        int *roots_num;             //During DAG reading we count the number of roots (with protection)
+        int *root_index;            //Shared Index to initialize roots array in parallel way
+        pthread_mutex_t *roots_mutex;
+        int queries_num;
+        el_query * array_queries;
+        bool *node_visited;
+        int num_labels;
+        row_l *array_labels;
+    } t_args;
 
     //function for statistics
     long long unsigned compute_delta_microseconds(struct timespec start, struct timespec end);
@@ -48,6 +89,13 @@
     char* get_human_readable_memory_usage(long unsigned kilobytes);
     char* get_rss_virt_mem(void);
 
+    //function from readGraph for exitWithDealloc
+    void free_list(edge *head);
+
+    //utilities functions for build and randomize an array of roots
+    void swap (int *a, int *b);
+    void randomize(int *array, int n);
+
     //function for correct program exits
-    //TODO void exitWithDealloc(bool error, unsigned int num_vertex, FILE * fp_dag, row_g *rows, pthread_t *threads, t_args *args, pthread_mutex_t *roots_mutex, int *roots, row_l *labels, FILE *fp_query, el_query *queries);
+    void exitWithDealloc(bool error, unsigned int num_vertex, FILE * fp_dag, row_g *rows, pthread_t *threads, t_args *args, pthread_mutex_t *roots_mutex, int *roots, row_l *labels, FILE *fp_query, el_query *queries);
 #endif //UTILITY_H

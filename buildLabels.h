@@ -1,6 +1,6 @@
 #ifndef BUILD_LABELS_H
     #define BUILD_LABELS_H
-    #include "readGraph.h"
+    #include "utility.h"
     
     // paper par. 3.1: multiple index construction
 
