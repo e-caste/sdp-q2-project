@@ -211,7 +211,7 @@ int main(int argc, char *argv[]) {
         getrusage(RUSAGE_SELF, &memory);
         asprintf(&stats, "%sMaximum memory usage: %s\n", stats, get_human_readable_memory_usage(memory.ru_maxrss));
         fprintf(stdout, "\n\n------------STATISTICS------------\n%s", stats);
-        exitWithDealloc(false, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
+        exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
     }
 
     // Test roots print
