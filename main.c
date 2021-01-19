@@ -153,6 +153,14 @@ int main(int argc, char *argv[]) {
 
     fprintf(stdout, "Starting roots search...\n");
 
+    roots_num = 0;
+
+    for(i=0; i<num_vertex; i++) {
+        if(!rows[i].not_root) {
+            roots_num++;
+        }
+    }
+
     clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
     roots = (int *) malloc(roots_num * sizeof(int));
     if (roots == NULL ) {
@@ -183,6 +191,15 @@ int main(int argc, char *argv[]) {
             exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
         }
     }
+
+    /*j=0;
+    for(i=0; i<num_vertex; i++) {
+        if(!rows[i].not_root) {
+            roots[j] = i;
+            j++;
+        }
+    }*/
+
     fprintf(stdout, "End of root search...\n");
 
     // Test roots print
