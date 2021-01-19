@@ -16,7 +16,7 @@ DAGS=(
 #  "uniprotenc_150m.scc.gra.gz"
   "uniprotenc_100m.scc.gra.gz"
   "uniprotenc_22m.scc.gra.gz"
-#  "go_uniprot.gra.gz"
+#  "go_uniprot.gra.gz"„
   "citeseer.scc.gra.gz"
   "cit-Patents.scc.gra.gz"
 #  "citeseerx.gra.gz"
