@@ -107,25 +107,29 @@ void *scanFile(void *args) {
                     push(head, val);
                 }
 
-                k++;
-                offset++;
+                my_data -> graph[val].not_root = true;
 
-                pthread_mutex_lock(my_data->roots_mutex);
+                /*pthread_mutex_lock(my_data->roots_mutex);
                     not_root_is_set = my_data->graph[val].not_root ? true : false;  // default == 0 == false;
                     my_data -> graph[val].not_root = true;   //se era a uno lo rimetto a 1
                     if ((!not_root_is_set) && (my_data->graph[val].not_root)){ // E' considerata radice ogni nodo senza genitori (not_root = false)
                             *my_data->roots_num = (*(my_data->roots_num) - 1);
                     }
-                pthread_mutex_unlock(my_data->roots_mutex);
+                pthread_mutex_unlock(my_data->roots_mutex);*/
+
+                k++;
+                offset++;
             }
 
             my_data -> graph[j].edges_pointer = head;
             my_data -> graph[j].edge_num = k;
+
         } else { //non prendo nessun intero -> lista archi vuota
             my_data -> graph[j].edges_pointer = NULL;
             my_data -> graph[j].edge_num = 0;
-        } 
-        my_data->graph[j].node_mutex = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
+        }
+
+        /*my_data->graph[j].node_mutex = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
         if (my_data->graph[j].node_mutex == NULL ) {
             printf ("Error in creating mutex protection for node\n" );
             exit(1);
@@ -134,7 +138,8 @@ void *scanFile(void *args) {
         if(pthread_mutex_init(my_data->graph[j].node_mutex, NULL) != 0){
             printf ("Error in initializing mutex protection for node\n" );
             exit(1);
-        }
+        }*/
+
         k = 0;
         offset = 0;  //vertice successivo
     }
