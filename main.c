@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 
     d = atoi(argv[2]);
 
-    if (d <=0 ){
+    if (d < 0){
         fprintf(stderr, "Please insert valid value for labels number!\n");
         exit(1);
     }
@@ -202,6 +202,18 @@ int main(int argc, char *argv[]) {
 
     fprintf(stdout, "End of root search...\n");
 
+    // ignore labels
+    if (d == 0) {
+        clock_gettime(CLOCK_MONOTONIC_RAW, &program_finished);
+        delta_microseconds = compute_delta_microseconds(program_start, program_finished);
+        asprintf(&stats, "%sTotal program duration: %s.\n", stats, get_human_readable_time(delta_microseconds));
+        asprintf(&stats, "%sThreads used: %u.\n", stats, num_threads);
+        getrusage(RUSAGE_SELF, &memory);
+        asprintf(&stats, "%sMaximum memory usage: %s\n", stats, get_human_readable_memory_usage(memory.ru_maxrss));
+        fprintf(stdout, "\n\n------------STATISTICS------------\n%s", stats);
+        exitWithDealloc(false, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
+    }
+
     // Test roots print
     // printf("roots: ");
     // for(i=0; i<roots_num; i++){
@@ -357,7 +369,7 @@ int main(int argc, char *argv[]) {
     delta_microseconds = compute_delta_microseconds(program_start, program_finished);
     asprintf(&stats, "%sTotal program duration: %s.\n", stats, get_human_readable_time(delta_microseconds));
 
-    asprintf(&stats, "%sThreads used: %ld.\n", stats, num_threads);
+    asprintf(&stats, "%sThreads used: %u.\n", stats, num_threads);
 
     getrusage(RUSAGE_SELF, &memory);
     asprintf(&stats, "%sMaximum memory usage: %s\n", stats, get_human_readable_memory_usage(memory.ru_maxrss));
