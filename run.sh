@@ -247,7 +247,7 @@ function run_benchmark {
 
   echo "Number of labels: $LABELS"
   if [[ "$RUN_MODE" = "specific" ]]; then
-      run_cmd "$SPECIFIC_DAG_PATH"
+      run_cmd "$SPECIFIC_DAG_PATH".gra "$SPECIFIC_DAG_PATH".que
   else
       if [[ "$RUN_MODE" = "benchmark" ]] || [[ "$RUN_MODE" = "all" ]]; then
         for graph_file in "$GRAIL_DATA_PATH"/*.gra; do
