@@ -20,6 +20,7 @@ int main(int argc, char *argv[]) {
     int *roots = NULL;
     int roots_num, root_index;
     pthread_mutex_t *roots_mutex = NULL;
+    pthread_barrier_t *barrier = NULL;
     row_l *labels = NULL;
     // needed for time and memory statistics
     struct timespec program_start, section_start, file1_read, file2_read, labels_generation_finished, reachability_queries_finished, program_finished;
@@ -92,7 +93,6 @@ int main(int argc, char *argv[]) {
     // We gain the roots_num as num_vertex - not_roots.
     // In practice, when we will scan file1
     // if we find a not_root, we decrement the counter -> need protection
-    roots_num = num_vertex;
 
     roots_mutex = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
     if (roots_mutex == NULL ) {
@@ -100,10 +100,24 @@ int main(int argc, char *argv[]) {
         exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
     }
 
+    barrier = (pthread_barrier_t *) malloc(sizeof(pthread_barrier_t));
+    if (barrier == NULL ) {
+        printf ("Error in creating barrier \n" );
+        exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
+    }
+
     if(pthread_mutex_init(roots_mutex, NULL) != 0){
         printf ("Error in initializing mutex protection for roots counter \n" );
         exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
     }
+
+    if(pthread_barrier_init(barrier, NULL, num_threads + 1) != 0){
+        printf ("Error in initializing barrier \n" );
+        exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
+    }
+
+    root_index = 0;
+    roots_num = 0;
 
     // Preparing structure for parallel reading of file1 by many threads
     for(j=0; j < num_threads; j++) {
@@ -114,6 +128,9 @@ int main(int argc, char *argv[]) {
         args[j].size_file = size;
         args[j].roots_num = &roots_num;             // pointer of 'shared' variable
         args[j].roots_mutex = roots_mutex;          // protection for 'shared' variable
+        args[j].barrier = barrier;
+        args[j].roots = &roots;
+        args[j].root_index = &root_index;
     }
 
     printf("Starting the reading of DAG file...\n");
@@ -128,13 +145,19 @@ int main(int argc, char *argv[]) {
     }
 
     // Wait until all thread end
-    for(j=0; j < num_threads; j++) {
+    /*for(j=0; j < num_threads; j++) {
         err_code = pthread_join(threads[j], NULL);
         if(err_code) {
             printf ("Error number %i in thread %i joining.\n", err_code, j);
             exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
         }
-    }
+    }*/
+
+    pthread_barrier_wait(barrier);
+
+
+
+
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &file1_read);
     delta_microseconds = compute_delta_microseconds(section_start, file1_read);
@@ -144,36 +167,42 @@ int main(int argc, char *argv[]) {
 
     // Test of Graph print
 
-    // for(i=0; i<num_vertex; i++) {
-    //     printf("%i : ", i);
-    //     print_list(rows[i].edges_pointer);
-    //     //printf(" -----> num_edge: %i\n", rows[i].edge_num);
-    //     printf("\n");
-    // }
+    /*for(i=0; i<num_vertex; i++) {
+        printf("%i : ", i);
+        for(j=0; j<rows[i].edge_num; j++){
+            printf("%i ", rows[i].edges[j]);
+        }
+        printf(" -----> num_edge: %i\n", rows[i].edge_num);
+        printf("\n");
+    }*/
 
     fprintf(stdout, "Starting roots search...\n");
 
-    roots_num = 0;
+    /*roots_num = 0;
 
     for(i=0; i<num_vertex; i++) {
         if(!rows[i].not_root) {
             roots_num++;
         }
-    }
+    }*/
+
+    pthread_barrier_wait(barrier);
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
-    roots = (int *) malloc(roots_num * sizeof(int));
+    roots = malloc(roots_num * sizeof(int));
     if (roots == NULL ) {
         printf ("Error in creating roots struct\n" );
         exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
     }
 
-    root_index = 0;  // *shared* variable for Roots parallel inizialization
+    pthread_barrier_wait(barrier);
+
+    //root_index = 0;  // *shared* variable for Roots parallel inizialization
     
     //TODO 
     // merge this scanRoots thread creation with scanFile so we create just
     // one time the thread. -> merge ScanRoots in ScanFiles
-    for(i=0; i<num_threads; i++) {
+    /*for(i=0; i<num_threads; i++) {
         args[i].id = i;
         args[i].roots = roots;
         args[i].root_index = &root_index;
@@ -182,7 +211,7 @@ int main(int argc, char *argv[]) {
             printf ("Error number %i in thread %i creation.\n", err_code, i);
             exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
         }
-    }
+    }*/
 
     for(j=0; j < num_threads; j++) {
         err_code = pthread_join(threads[j], NULL);
@@ -191,6 +220,9 @@ int main(int argc, char *argv[]) {
             exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
         }
     }
+
+    pthread_barrier_destroy(barrier);
+    free(barrier);
 
     /*j=0;
     for(i=0; i<num_vertex; i++) {

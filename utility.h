@@ -56,7 +56,7 @@
     typedef struct row_graph {
         int edge_num;   //total number of vertex in this direction
         bool not_root;
-        edge *edges_pointer;
+        int *edges;
         pthread_mutex_t *node_mutex;
     } row_g;
 
@@ -72,10 +72,11 @@
         int size_file;
         char *filename;
         row_g *graph;
-        int *roots;
+        int **roots;
         int *roots_num;             //During DAG reading we count the number of roots (with protection)
         int *root_index;            //Shared Index to initialize roots array in parallel way
         pthread_mutex_t *roots_mutex;
+        pthread_barrier_t *barrier;
         int queries_num;
         el_query * array_queries;
         bool *node_visited;
