@@ -85,7 +85,7 @@ void exitWithDealloc(bool error, unsigned int num_vertex, FILE * fp_dag, row_g *
         //7. error in: err_code = pthread_join(threads[j], NULL);
         //8. error in: roots = (int *) malloc(roots_num * sizeof(int));
         for(int i=0; i<num_vertex; i++) {
-                free_list(rows[i].edges_pointer);
+                free(rows[i].edges);
                 if(rows[i].node_mutex){
                     pthread_mutex_destroy(rows[i].node_mutex);
                     free(rows[i].node_mutex);
