@@ -1,5 +1,4 @@
 #include "buildLabels.h"
-#include "readGraph.h"
 #include "solveQuery.h"
 #include "utility.h"
 // TODO: https://en.wikipedia.org/wiki/C_data_types
@@ -90,10 +89,6 @@ int main(int argc, char *argv[]) {
 
     fclose(fp);
 
-    // We gain the roots_num as num_vertex - not_roots.
-    // In practice, when we will scan file1
-    // if we find a not_root, we decrement the counter -> need protection
-
     roots_mutex = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
     if (roots_mutex == NULL ) {
         printf ("Error in creating mutex protection for roots counter \n" );
@@ -145,19 +140,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Wait until all thread end
-    /*for(j=0; j < num_threads; j++) {
-        err_code = pthread_join(threads[j], NULL);
-        if(err_code) {
-            printf ("Error number %i in thread %i joining.\n", err_code, j);
-            exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
-        }
-    }*/
-
     pthread_barrier_wait(barrier);
-
-
-
-
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &file1_read);
     delta_microseconds = compute_delta_microseconds(section_start, file1_read);
@@ -166,7 +149,6 @@ int main(int argc, char *argv[]) {
     fprintf(stdout, "End of DAG file reading...\n");
 
     // Test of Graph print
-
     /*for(i=0; i<num_vertex; i++) {
         printf("%i : ", i);
         for(j=0; j<rows[i].edge_num; j++){
@@ -178,14 +160,7 @@ int main(int argc, char *argv[]) {
 
     fprintf(stdout, "Starting roots search...\n");
 
-    /*roots_num = 0;
-
-    for(i=0; i<num_vertex; i++) {
-        if(!rows[i].not_root) {
-            roots_num++;
-        }
-    }*/
-
+    // wait threads counts number of roots
     pthread_barrier_wait(barrier);
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
@@ -195,6 +170,7 @@ int main(int argc, char *argv[]) {
         exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
     }
 
+    //wait all threads initialize the roots[]
     pthread_barrier_wait(barrier);
 
     //root_index = 0;  // *shared* variable for Roots parallel inizialization

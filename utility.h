@@ -90,8 +90,8 @@
     char* get_human_readable_memory_usage(long unsigned kilobytes);
     char* get_rss_virt_mem(void);
 
-    //function from readGraph for exitWithDealloc
-    void free_list(edge *head);
+    //function from readGraph
+    void *scanFile(void *args);
 
     //utilities functions for build and randomize an array of roots
     void swap (int *a, int *b);

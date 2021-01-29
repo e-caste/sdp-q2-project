@@ -140,3 +140,19 @@ void exitWithDealloc(bool error, unsigned int num_vertex, FILE * fp_dag, row_g *
         return;
     }
 }
+
+//Swap e randomize are utility functions used for randomize the roots
+void swap (int *a, int *b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void randomize(int *array, int n) {
+    for(int i=n-1; i>0; i--) {
+        int j = rand() % (i+1);
+        if (i != j)
+            swap(&array[i], &array[j]);
+    }
+}
+

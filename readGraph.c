@@ -1,12 +1,10 @@
-#include "readGraph.h"
+#include "utility.h"
 
-// Scopo di "scanFile" : Leggere 'file1'
-// ogni thread leggerà da inf a sup.
-// Inf e Sup sono il numero di riga del file di input 0, 1, ..., 10,...
-// Nel seguente codice, si sta per dividere il file da leggere
-// in NUM_THREADS parti, così che ogni thread legga in parallelo
-// durante la lettura del grafo, si memorizzano alcune informazioni
-// necessarie per la creazione successiva delle labels (roots_num)
+// Scope of "scanFile" : Read 'file1'
+// Each thread will read from inf to sup
+// Inf and Sup are the input file row number: 0, 1, ..., 10,...
+// In the following code, 'file1' will be splitted
+// in NUM_THREADS, such as every thread can read in parallel.
 
 void *scanFile(void *args) {
     t_args *my_data;
@@ -32,17 +30,17 @@ void *scanFile(void *args) {
         exit(1);
     }
 
-    //Definizione estremo superiore
+    //Definition of superior limit
     if (my_data->id == num_threads-1) 
         sup = my_data->total_vertex;
     else {
-        //con fseek mi metto in un punto casuale all'interno della riga
-        //successivamente controllo finchè non trovo '\n' (10)
-        //prendendo un carattere alla volta e "scartandolo"
-        //quando trovo la nuova riga come primo intero avrò il SUP
-        //NOTA: questa un'ottima strategia in quanto abbiamo righe non omogenee
-        // sup for id=0 is inf for id=1, they are contiguous so the whole file is guaranteed to be read
-        fseek(fp, (long) my_data->size_file*(my_data->id+1)/num_threads, SEEK_SET); // 1Gb / 4Thread = 250Mb ciascuno * id+1
+        // with fseek I go in a random position inside the row
+        // So, after is done a check until is founded '\n' (10)
+        // The first number of the next row will be the SUP.
+        
+        // NOTE: This is a good strategies since we don't have row with the same edge
+        // NOTE: SUP for id=0 is INF for id=1. Range are contiguous so the whole file is guaranteed to be read
+        fseek(fp, (long) my_data->size_file*(my_data->id+1)/num_threads, SEEK_SET); // 1Gb / 4Threads = 250Mb. T1=250, T2=500, ...
         while(i != 10) {
             i = getc(fp);
         }
@@ -52,33 +50,33 @@ void *scanFile(void *args) {
         fscanf(fp, "%i", &sup);
     }
 
-    //Definizione estremo inferiore
+    //Definition of inferiror limit
     if (my_data->id == 0) {
         fseek(fp, 0L, SEEK_SET);
-        fscanf(fp, "%*[^\n]\n");    // salto la prima riga (contiene il numero di vertici totale)
+        fscanf(fp, "%*[^\n]\n");    // avoid first row which contains the vertex number
         inf = 0;
     } else {
+        // random position inside a row
         fseek(fp, (long) my_data->size_file*my_data->id/num_threads, SEEK_SET); // 1Gb / 4Thread = 250Mb ciascuno * id
 
+        //search until we found '/n'
         while(i != 10) {    
             i = getc(fp);
         }
+        
+        pos = ftell(fp);            // save the initial offset of the row
 
-        pos = ftell(fp);            //conservo la posizione di inizio riga
+        fscanf(fp, "%i", &inf);     // read row index number
 
-        fscanf(fp, "%i", &inf);     // leggo l'indice della riga
-
-        fseek(fp, pos, SEEK_SET);   //torno all'inizio della riga
+        fseek(fp, pos, SEEK_SET);   //return at the begin of the row
     }    
 
     //printf("Thread n. %i con inf: %i e sup: %i\n", my_data->id, inf, sup-1);
     offset = 0;
     k = 0;
     
-    //adesso per le righe di competenza del thread, si legge il valore del nodo
-    //si costruisce e inizializza la struttura apposita e si inserisce in lista
-    for(j=inf; j<sup; j++) {
-        fscanf(fp, "%i: ", &i);     //scarto il numero della riga (== j) e anche ": "
+    for(j=inf; j<sup; j++) {        //row format example: "2: 8 7 3 #"
+        fscanf(fp, "%i: ", &i);     // remove row number and ': '
         edge *head;
         head = malloc(sizeof(edge));
         i=0;
@@ -86,12 +84,12 @@ void *scanFile(void *args) {
 
         line_size = getline(&line_buf, &line_buf_size, fp);
 
-        if(line_size != 2) {
+        if(line_size != 2) {        //row format no edge: "3: #"    
 
             while(offset!=(line_size - 2)) {
-                a = line_buf[offset];
+                a = line_buf[offset];   //read char from line
                 if(!strncmp(&a, &space, 1)){
-                    k++;
+                    k++;    // just count the number of edge
                 }
                 offset++;
             }
@@ -99,17 +97,17 @@ void *scanFile(void *args) {
             my_data -> graph[j].edges = malloc(k*sizeof(int));
             if(my_data -> graph[j].edges == NULL) {
                 printf ("Not enough room for array of edges size\n" );
-                exit(0);
+                exit(1);
             }
 
-            offset = 0;
+            offset = 0;     //reset to begin of line
             k = 0;
 
-            while(offset!=(line_size - 2)) {
+            while(offset!=(line_size - 2)) { //insert in array value of edge
 
                 a = line_buf[offset];
 
-                while(strncmp(&a, &space, 1)) {
+                while(strncmp(&a, &space, 1)) { //avoid white space
                     buffer[i] = a;
                     i++;
                     offset++;
@@ -124,52 +122,37 @@ void *scanFile(void *args) {
 
                 my_data -> graph[val].not_root = true;
 
-                /*pthread_mutex_lock(my_data->roots_mutex);
-                    not_root_is_set = my_data->graph[val].not_root ? true : false;  // default == 0 == false;
-                    my_data -> graph[val].not_root = true;   //se era a uno lo rimetto a 1
-                    if ((!not_root_is_set) && (my_data->graph[val].not_root)){ // E' considerata radice ogni nodo senza genitori (not_root = false)
-                            *my_data->roots_num = (*(my_data->roots_num) - 1);
-                    }
-                pthread_mutex_unlock(my_data->roots_mutex);*/
-
-
                 k++;
                 offset++;
             }
 
-            //my_data -> graph[j].edges_pointer = head;
             my_data -> graph[j].edge_num = k;
 
-        } else { //non prendo nessun intero -> lista archi vuota
+        } else { //The is no edge in the line
             my_data -> graph[j].edges = NULL;
             my_data -> graph[j].edge_num = 0;
         }
 
-        /*my_data->graph[j].node_mutex = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
-        if (my_data->graph[j].node_mutex == NULL ) {
-            printf ("Error in creating mutex protection for node\n" );
-            exit(1);
-        }
-
-        if(pthread_mutex_init(my_data->graph[j].node_mutex, NULL) != 0){
-            printf ("Error in initializing mutex protection for node\n" );
-            exit(1);
-        }*/
-
         k = 0;
-        offset = 0;  //vertice successivo
+        offset = 0;  // next vertex
     }
 
     //printf("Thread n. %i e ho finito\n", my_data->id);
 
     free(line_buf);
 
+    //wait all threads fill shared graph.
+    //NOTE: last thread unlock also main thread
     pthread_barrier_wait(my_data -> barrier);
 
-    if (my_data->id == num_threads-1)
+    //START counting the roots
+
+    // Split the vertex in N_thread. 
+    // Each thread will count in parallel the roots
+    if (my_data->id == num_threads-1) //main is not here
         sup = my_data->total_vertex;
     else
-        sup = ((my_data->total_vertex) / num_threads) * (my_data->id + 1);      //TODO e' necessario cast(int)?
+        sup = ((my_data->total_vertex) / num_threads) * (my_data->id + 1);
 
     if (my_data->id == 0)
         inf = 0;
@@ -177,8 +160,8 @@ void *scanFile(void *args) {
         inf = ((my_data->total_vertex)/num_threads)*(my_data->id);
 
     for(i=inf; i<sup; i++) {
-        if(!my_data -> graph[i].not_root) {
-            pthread_mutex_lock(my_data->roots_mutex);
+        if(!my_data -> graph[i].not_root) { //if (is_root)
+            pthread_mutex_lock(my_data->roots_mutex); //global mutex to protect shared var 'roots_num'
                 j = (*(my_data -> roots_num));
                 *my_data -> roots_num = j + 1;
                 //printf("%i - ", *(my_data -> roots_num));
@@ -187,118 +170,24 @@ void *scanFile(void *args) {
         }
     }
 
+    //wait all threads count the number of roots
+    //NOTE: last thread will unlock main thread also
     pthread_barrier_wait(my_data -> barrier);
 
+    //NOTE: threads wait main thread allocate *shared* roots[]
     pthread_barrier_wait(my_data -> barrier);
 
-    //Definition of 'Sup' and 'Inf' so that each thread
-    //can read in parallel the graph
-    //see scanFile for more details
 
+    // START filling the roots[]
     for(i=inf; i<sup; i++) {
         if(!my_data->graph[i].not_root) {  //if (is root)
-            pthread_mutex_lock(my_data->roots_mutex);
-                j = (*(my_data->root_index));
-                (*my_data->roots)[j] = i;
-                *my_data->root_index = j + 1;
+            pthread_mutex_lock(my_data->roots_mutex);   // protection for shared index array: 'root_index'
+                j = (*(my_data->root_index));   //index
+                (*my_data->roots)[j] = i;       //roots[index] = vertex#
+                *my_data->root_index = j + 1;   //index++
             pthread_mutex_unlock(my_data->roots_mutex);
-
         }
     }
 
     pthread_exit((void *) 0);
-
-}
-
-//Scopo di "scanRoots": inizializzare l'array di roots
-//Questa è una funzione parallela, quindi i thread si
-//dividono il grafo da leggere con lo stesso meccanismo
-//usato anche in scanFile.
-//Tale array verrà successivamente randomizzato ed
-//utilizzato per creare le labels
-
-void *scanRoots(void *args) {
-    t_args *my_data;
-    my_data = (t_args *) args;
-    int sup, inf, i, j;
-    unsigned int num_threads = my_data->total_threads;
-
-    //Definition of 'Sup' and 'Inf' so that each thread
-    //can read in parallel the graph
-    //see scanFile for more details
-    if (my_data->id == num_threads-1)
-        sup = my_data->total_vertex;
-    else
-        sup = ((my_data->total_vertex) / num_threads) * (my_data->id + 1);      //TODO e' necessario cast(int)?
-
-    if (my_data->id == 0)
-        inf = 0;
-    else
-        inf = ((my_data->total_vertex)/num_threads)*(my_data->id);
-
-    for(i=inf; i<sup; i++) {
-        if(!my_data->graph[i].not_root) {  //if (is root)
-            pthread_mutex_lock(my_data->roots_mutex);
-                j = (*(my_data->root_index));
-                my_data->roots[j] = i;
-                *my_data->root_index = j + 1;
-            pthread_mutex_unlock(my_data->roots_mutex);
-
-        }
-    }
-
-    pthread_exit((void *) 0);
-}
-
-void create_list(edge *head, int val) {
-    edge *current = head;
-    current -> num = val;
-    current -> next_num = NULL;
-}
-
-void push(edge *head, int val) {
-    edge *current = head;
-
-    while(current -> next_num != NULL) {
-        current = current -> next_num;
-    }
-
-    current -> next_num = (edge *) malloc(sizeof(edge));
-    current -> next_num -> num = val;  
-    current -> next_num -> next_num = NULL;
-}
-
-void print_list(edge *head) {
-    edge *current = head;
-
-    while(current != NULL) {
-        printf("%i ", current -> num);
-        current = current -> next_num;
-    }
-}
-
-void free_list(edge *head) {
-    edge *tmp;
-
-    while(head != NULL) {
-        tmp = head;
-        head = head -> next_num;
-        free(tmp);
-    }
-}
-
-
-//Swap e randomize sono funzioni di utilità per randomizzare Roots
-void swap (int *a, int *b) {
-    int temp = *a;
-    *a = *b;
-    *b = temp;
-}
-
-void randomize(int *array, int n) {
-    for(int i=n-1; i>0; i--) {
-        int j = rand() % (i+1);
-        if (i != j)
-            swap(&array[i], &array[j]);
-    }
 }
