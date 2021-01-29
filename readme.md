@@ -19,15 +19,15 @@ Version: 1
 
 
 # Abstract
-Our group developed the Q2 project which consists of implementing an algorithm named **GRAIL** used for Scalable Reachability Index for Large Graphs. The project could be divided in three main phases:
+Our group developed the Q2 project which consists of implementing an algorithm named **GRAIL** used for Scalable Reachability Index for Large Graphs. The project could be divided in three main steps:
 - **Reading** the Directed Acyclic graph (**DAG**)
 - Generation of the **labels** required
-- Test **query recheability**
+- Test **query recheability** by means of labels
 
 
 # Schema of the code
 
-The main thread (**main.c**) prepare the thread's data structure for **DAG** reading. In particular, it reads the first line of the input file DAG which contains the vertex number size used for allocate the right memory. The DAG files, is read (**readGraph.c**) from the maximum number of threads that the processor is able to support. The idea is to split the file in N_THREAD equal part and each thread reads (without protection because there are no problem in reading) and fills the structure that rappresent the dag in memory. Moreover, just after the dag structure building, with some *synchronization*, each thread will count how many **roots** there are in its 'local' fragment and then fill a *shared* array containing all roots with some *protection*. These roots will be used later for label generation.
+The main thread (**main.c**) prepare the thread's data structure for **DAG** reading. In particular, it reads the first line of the input file DAG which contains the vertex number size used for allocate the right memory. The DAG files, is read (**readGraph.c**) from the maximum number of threads that the processor is able to support avoiding the scheduling of them. For instance if a processor is quad core and it's able to support 8 threads, eight is the number of threads that we create. The idea is to split the file in N_THREAD equal part and let each thread to read (without protection because there are no problem in reading) and fill its own part of the *shared* dag structure. Moreover, just after the bulding of the dag structure, with some *synchronization*, each thread counts how many **roots** there are in its 'local' fragment and then all together (with some *protection*) fill a *shared* array containing all roots. These roots will be used later for label generation.
 
 In the next step, the main thread re-initialize the thread's data structure for **label** generation. Concerning the label generation (**buildLabels.c**), we simply follow the paper structure. In particular, we run in parallel *one thread for each label* to generate. Each of these thread *visit* in random order the *roots*, and recursively -in random order- their *children* as described by the grail algorithm. We tried to implement a mutex basic version in which each label-thread also generate one *thread for each child* and with the required protection, they explore the graph for generate the label. We removed this implementation due to the limit of the maximum number thread able to create which is easy reached in very large graph.
 
