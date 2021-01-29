@@ -8,22 +8,14 @@ bool dfs_search(row_g *graph, int node1, int node2, bool *visited) {
 
     int children_num = graph[node1].edge_num;
     bool reachable = false;
+    int i;
     
     if(children_num > 0) {
 
-        int children[children_num];
-        int i=0;
-
-        for(edge* next=graph[node1].edges_pointer; next != NULL; next = next->next_num){
-            if(next -> num == node2) {
-                return true;
-            }
-            children[i] = next->num;
-            i++;
-        }
-
         for(i=0; i<children_num; i++) {
-            reachable = dfs_search(graph, children[i], node2, visited);
+            if (graph[node1].edges[i] == node2)
+                return true;
+            reachable = dfs_search(graph, graph[node1].edges[i], node2, visited);
             if(reachable) {
                 return true;
             }

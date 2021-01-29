@@ -73,6 +73,7 @@ void *scanFile(void *args) {
 
     //printf("Thread n. %i con inf: %i e sup: %i\n", my_data->id, inf, sup-1);
     offset = 0;
+    k = 0;
     
     //adesso per le righe di competenza del thread, si legge il valore del nodo
     //si costruisce e inizializza la struttura apposita e si inserisce in lista
@@ -81,10 +82,28 @@ void *scanFile(void *args) {
         edge *head;
         head = malloc(sizeof(edge));
         i=0;
+        bool first_visit = true;
 
         line_size = getline(&line_buf, &line_buf_size, fp);
 
         if(line_size != 2) {
+
+            while(offset!=(line_size - 2)) {
+                a = line_buf[offset];
+                if(!strncmp(&a, &space, 1)){
+                    k++;
+                }
+                offset++;
+            }
+
+            my_data -> graph[j].edges = malloc(k*sizeof(int));
+            if(my_data -> graph[j].edges == NULL) {
+                printf ("Not enough room for array of edges size\n" );
+                exit(0);
+            }
+
+            offset = 0;
+            k = 0;
 
             while(offset!=(line_size - 2)) {
 
@@ -101,11 +120,7 @@ void *scanFile(void *args) {
                 val = atoi(buffer);
                 memset(buffer, 0, sizeof(char)*10);
 
-                if(k==0) {
-                    create_list(head, val);
-                } else {
-                    push(head, val);
-                }
+                my_data -> graph[j].edges[k] = val;
 
                 my_data -> graph[val].not_root = true;
 
@@ -117,15 +132,16 @@ void *scanFile(void *args) {
                     }
                 pthread_mutex_unlock(my_data->roots_mutex);*/
 
+
                 k++;
                 offset++;
             }
 
-            my_data -> graph[j].edges_pointer = head;
+            //my_data -> graph[j].edges_pointer = head;
             my_data -> graph[j].edge_num = k;
 
         } else { //non prendo nessun intero -> lista archi vuota
-            my_data -> graph[j].edges_pointer = NULL;
+            my_data -> graph[j].edges = NULL;
             my_data -> graph[j].edge_num = 0;
         }
 
@@ -148,8 +164,90 @@ void *scanFile(void *args) {
 
     free(line_buf);
 
+    pthread_barrier_wait(my_data -> barrier);
+
+    if (my_data->id == num_threads-1)
+        sup = my_data->total_vertex;
+    else
+        sup = ((my_data->total_vertex) / num_threads) * (my_data->id + 1);      //TODO e' necessario cast(int)?
+
+    if (my_data->id == 0)
+        inf = 0;
+    else
+        inf = ((my_data->total_vertex)/num_threads)*(my_data->id);
+
+    for(i=inf; i<sup; i++) {
+        if(!my_data -> graph[i].not_root) {
+            pthread_mutex_lock(my_data->roots_mutex);
+                j = (*(my_data -> roots_num));
+                *my_data -> roots_num = j + 1;
+                //printf("%i - ", *(my_data -> roots_num));
+                //fflush(stdout);
+            pthread_mutex_unlock(my_data->roots_mutex);
+        }
+    }
+
+    pthread_barrier_wait(my_data -> barrier);
+
+    pthread_barrier_wait(my_data -> barrier);
+
+    //Definition of 'Sup' and 'Inf' so that each thread
+    //can read in parallel the graph
+    //see scanFile for more details
+
+    for(i=inf; i<sup; i++) {
+        if(!my_data->graph[i].not_root) {  //if (is root)
+            pthread_mutex_lock(my_data->roots_mutex);
+                j = (*(my_data->root_index));
+                (*my_data->roots)[j] = i;
+                *my_data->root_index = j + 1;
+            pthread_mutex_unlock(my_data->roots_mutex);
+
+        }
+    }
+
     pthread_exit((void *) 0);
 
+}
+
+//Scopo di "scanRoots": inizializzare l'array di roots
+//Questa è una funzione parallela, quindi i thread si
+//dividono il grafo da leggere con lo stesso meccanismo
+//usato anche in scanFile.
+//Tale array verrà successivamente randomizzato ed
+//utilizzato per creare le labels
+
+void *scanRoots(void *args) {
+    t_args *my_data;
+    my_data = (t_args *) args;
+    int sup, inf, i, j;
+    unsigned int num_threads = my_data->total_threads;
+
+    //Definition of 'Sup' and 'Inf' so that each thread
+    //can read in parallel the graph
+    //see scanFile for more details
+    if (my_data->id == num_threads-1)
+        sup = my_data->total_vertex;
+    else
+        sup = ((my_data->total_vertex) / num_threads) * (my_data->id + 1);      //TODO e' necessario cast(int)?
+
+    if (my_data->id == 0)
+        inf = 0;
+    else
+        inf = ((my_data->total_vertex)/num_threads)*(my_data->id);
+
+    for(i=inf; i<sup; i++) {
+        if(!my_data->graph[i].not_root) {  //if (is root)
+            pthread_mutex_lock(my_data->roots_mutex);
+                j = (*(my_data->root_index));
+                my_data->roots[j] = i;
+                *my_data->root_index = j + 1;
+            pthread_mutex_unlock(my_data->roots_mutex);
+
+        }
+    }
+
+    pthread_exit((void *) 0);
 }
 
 void create_list(edge *head, int val) {
@@ -203,45 +301,4 @@ void randomize(int *array, int n) {
         if (i != j)
             swap(&array[i], &array[j]);
     }
-}
-
-
-//Scopo di "scanRoots": inizializzare l'array di roots
-//Questa è una funzione parallela, quindi i thread si
-//dividono il grafo da leggere con lo stesso meccanismo
-//usato anche in scanFile.
-//Tale array verrà successivamente randomizzato ed
-//utilizzato per creare le labels
-
-void *scanRoots(void *args) {
-    t_args *my_data;
-    my_data = (t_args *) args;
-    int sup, inf, i, j;
-    unsigned int num_threads = my_data->total_threads;
-
-    //Definition of 'Sup' and 'Inf' so that each thread
-    //can read in parallel the graph
-    //see scanFile for more details
-    if (my_data->id == num_threads-1)
-        sup = my_data->total_vertex;
-    else
-        sup = ((my_data->total_vertex) / num_threads) * (my_data->id + 1);      //TODO e' necessario cast(int)?
-
-    if (my_data->id == 0)
-        inf = 0;
-    else
-        inf = ((my_data->total_vertex)/num_threads)*(my_data->id);
-
-    for(i=inf; i<sup; i++) {
-        if(!my_data->graph[i].not_root) {  //if (is root)
-            pthread_mutex_lock(my_data->roots_mutex);
-                j = (*(my_data->root_index));
-                my_data->roots[j] = i;
-                *my_data->root_index = j + 1;
-            pthread_mutex_unlock(my_data->roots_mutex);
-
-        }
-    }
-
-    pthread_exit((void *) 0);
 }

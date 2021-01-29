@@ -28,7 +28,6 @@ void RandomizedLabelingSequential(row_g * graph, row_l * labels, int num_label, 
 
 void RandomizedVisitSequentialRecursive(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex){
     int rank_children_min = num_vertex, i,children_num = graph[node_num].edge_num;
-    int next_node[children_num];
     int indexes[children_num];
 
     if(labels[node_num].visited[lbl_num])
@@ -37,10 +36,6 @@ void RandomizedVisitSequentialRecursive(int node_num, int lbl_num, row_l* labels
     //For each children of the node, recall the function
     if(children_num > 0){
         i=0;
-        for(edge* next=graph[node_num].edges_pointer; next != NULL; next = next->next_num){
-            next_node[i] = next->num;
-            i++;
-        }
 
         for(i=0; i<children_num; i++) {
             indexes[i] = i;
@@ -49,16 +44,16 @@ void RandomizedVisitSequentialRecursive(int node_num, int lbl_num, row_l* labels
         randomize(indexes, children_num);
 
         for(int j=0; j<children_num; j++) {//for each children in random order
-            RandomizedVisitSequentialRecursive(next_node[indexes[j]], lbl_num, labels, graph, rank_root, num_vertex);
+            RandomizedVisitSequentialRecursive(graph[node_num].edges[indexes[j]], lbl_num, labels, graph, rank_root, num_vertex);
         }
     }    
     
     labels[node_num].visited[lbl_num] = true;
     
     //searchg min value between children node
-    for(edge* next=graph[node_num].edges_pointer; next != NULL; next = next->next_num)
-        if(labels[next->num].lbl_start[lbl_num] < rank_children_min)
-            rank_children_min = labels[next->num].lbl_start[lbl_num];
+    for(i=0; i<children_num; i++)
+        if(labels[graph[node_num].edges[i]].lbl_start[lbl_num] < rank_children_min)
+            rank_children_min = labels[graph[node_num].edges[i]].lbl_start[lbl_num];
         
     if(*rank_root < rank_children_min)
         labels[node_num].lbl_start[lbl_num] = *rank_root;
@@ -142,11 +137,11 @@ void RandomizedVisitParallelInit(int node_num, int lbl_num, row_l* labels, row_g
     // For each child of the node, recall the function
     if(children_num > 0){
         i=0;
-        for(edge* next=graph[node_num].edges_pointer; next != NULL; next = next->next_num){
+        /*for(edge* next=graph[node_num].edges_pointer; next != NULL; next = next->next_num){
             next_node[i] = next->num; //Children node
             indexes[i] = i; //i=0; i<children_num;i++
             i++;
-        }
+        }*/
 
         if(children_num > 1)
             randomize(indexes, children_num);
@@ -184,9 +179,9 @@ void RandomizedVisitParallelInit(int node_num, int lbl_num, row_l* labels, row_g
         labels[node_num].visited[lbl_num] = true;
 
         //searchg min value between children node
-        for(edge* next=graph[node_num].edges_pointer; next != NULL; next = next->next_num)
+        /*for(edge* next=graph[node_num].edges_pointer; next != NULL; next = next->next_num)
             if(labels[next->num].lbl_start[lbl_num] < rank_children_min)
-                rank_children_min = labels[next->num].lbl_start[lbl_num];
+                rank_children_min = labels[next->num].lbl_start[lbl_num];*/
             
         if(*rank_root < rank_children_min)
             labels[node_num].lbl_start[lbl_num] = *rank_root;
@@ -218,9 +213,9 @@ void* RandomizedVisitParallel(void* args) {
             my_data->labels[my_data->node].visited[my_data->lbl_num] = true;
 
             //searchg min value between children node
-            for(edge* next= my_data->graph[my_data->node].edges_pointer; next != NULL; next = next->next_num)
+            /*for(edge* next= my_data->graph[my_data->node].edges_pointer; next != NULL; next = next->next_num)
                 if(my_data->labels[next->num].lbl_start[my_data->lbl_num] < my_data->rank_children_min )
-                    my_data->rank_children_min = my_data->labels[next->num].lbl_start[my_data->lbl_num];
+                    my_data->rank_children_min = my_data->labels[next->num].lbl_start[my_data->lbl_num];*/
             
             if(*my_data->rank_node < my_data->rank_children_min)
                 my_data->labels[my_data->node].lbl_start[my_data->lbl_num] = *my_data->rank_node;
