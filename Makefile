@@ -11,7 +11,7 @@ $(EXECUTABLE): main.o readGraph.o buildLabels.o solveQuery.o utility.o
 main.o: main.c
 	$(CC) $(CFLAGS) main.c -o main.o
 
-readGraph.o: readGraph.c readGraph.h
+readGraph.o: readGraph.c
 	$(CC) $(CFLAGS) readGraph.c -o readGraph.o
 
 buildLabels.o: buildLabels.c buildLabels.h

@@ -39,7 +39,7 @@ void *solveQuery (void *args) {
     if (my_data->id == num_threads-1)
         sup = my_data->queries_num;
     else
-        sup = ((my_data->queries_num) / num_threads) * (my_data->id + 1);      //TODO e' necessario cast(int)?
+        sup = ((my_data->queries_num) / num_threads) * (my_data->id + 1);
 
     if (my_data->id == 0)
         inf = 0;

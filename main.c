@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
         args[j].roots_mutex = roots_mutex;          // protection for 'shared' variable
         args[j].barrier = barrier;
         args[j].roots = &roots;
-        args[j].root_index = &root_index;
+        args[j].root_index = &root_index;           // shared variable for roots[] parallel initializzation -> need protection
     }
 
     printf("Starting the reading of DAG file...\n");
@@ -173,22 +173,6 @@ int main(int argc, char *argv[]) {
     //wait all threads initialize the roots[]
     pthread_barrier_wait(barrier);
 
-    //root_index = 0;  // *shared* variable for Roots parallel inizialization
-    
-    //TODO 
-    // merge this scanRoots thread creation with scanFile so we create just
-    // one time the thread. -> merge ScanRoots in ScanFiles
-    /*for(i=0; i<num_threads; i++) {
-        args[i].id = i;
-        args[i].roots = roots;
-        args[i].root_index = &root_index;
-        err_code = pthread_create(&threads[i], NULL, scanRoots, (void *)&args[i]);
-        if(err_code) {
-            printf ("Error number %i in thread %i creation.\n", err_code, i);
-            exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
-        }
-    }*/
-
     for(j=0; j < num_threads; j++) {
         err_code = pthread_join(threads[j], NULL);
         if(err_code) {
@@ -199,14 +183,6 @@ int main(int argc, char *argv[]) {
 
     pthread_barrier_destroy(barrier);
     free(barrier);
-
-    /*j=0;
-    for(i=0; i<num_vertex; i++) {
-        if(!rows[i].not_root) {
-            roots[j] = i;
-            j++;
-        }
-    }*/
 
     fprintf(stdout, "End of root search...\n");
 
@@ -316,8 +292,7 @@ int main(int argc, char *argv[]) {
     delta_microseconds = compute_delta_microseconds(section_start, file2_read);
     asprintf(&stats, "%sRead query file %s (file2) in %s.\n", stats, argv[3], get_human_readable_time(delta_microseconds));
     asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
-    
-    //print_list_query(head_query);
+
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
 
