@@ -74,6 +74,8 @@ void RandomizedLabelingParallelInit(row_g * graph, row_l * labels, int label_num
     t_lbl_args args_lbl[label_num];
     int indexes[roots_num];
 
+    // Scan Roots it once here.
+    // In threads code use a shadow created with memcpy -> should be faster
     for(i=0; i<roots_num; i++){
         indexes[i] = i;
     }
@@ -113,23 +115,24 @@ void* RandomizedLabelingParallel(void* args) {
     t_lbl_args* my_data;
     my_data = (t_lbl_args*) args;
     int indexes[my_data->roots_num];
+    pthread_mutex_t rank_mutex = PTHREAD_MUTEX_INITIALIZER;     // protection of rank_node in version 1 thread for each children only
     
     // roots randomization (each thread its own)
     // roots are provided by the main
+    // here we work in a shadow copy of original roots
     memcpy(indexes, my_data->indexes, my_data->roots_num*sizeof(int));
     randomize(indexes, my_data->roots_num);
 
     for(int j=0; j< my_data->roots_num; j++) {
-        //RandomizedVisitParallelInit(my_data->roots[indexes[j]], my_data->lbl_num, my_data->labels, my_data->graph, &my_data->rank_node, my_data->vertex_num);
+        //RandomizedVisitParallelInit(my_data->roots[indexes[j]], my_data->lbl_num, my_data->labels, my_data->graph, &my_data->rank_node, &rank_mutex, my_data->vertex_num);
         RandomizedVisitSequentialRecursive(my_data->roots[indexes[j]], my_data->lbl_num, my_data->labels, my_data->graph, &my_data->rank_node, my_data->vertex_num);
     }
 
     pthread_exit((void *) 0);
 }
 
-void RandomizedVisitParallelInit(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex){
+void RandomizedVisitParallelInit(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, pthread_mutex_t* rank_mutex, int num_vertex){
     int rank_children_min = num_vertex, i,children_num = graph[node_num].edge_num, err_code;
-    int next_node[children_num];
     int indexes[children_num];
     pthread_t threads_child[children_num];   //1 thread for each children of the node
     t_child_args args_child[children_num];
@@ -137,22 +140,21 @@ void RandomizedVisitParallelInit(int node_num, int lbl_num, row_l* labels, row_g
     // For each child of the node, recall the function
     if(children_num > 0){
         i=0;
-        /*for(edge* next=graph[node_num].edges_pointer; next != NULL; next = next->next_num){
-            next_node[i] = next->num; //Children node
-            indexes[i] = i; //i=0; i<children_num;i++
-            i++;
-        }*/
+
+        for(i=0; i<children_num; i++)
+            indexes[i] = i;
 
         if(children_num > 1)
             randomize(indexes, children_num);
 
         for(i=0; i<children_num; i++) {
-            args_child[i].node = next_node[indexes[i]];
+            args_child[i].node = graph[node_num].edges[indexes[i]];
             args_child[i].lbl_num = lbl_num;
             args_child[i].labels = labels;
             args_child[i].graph = graph;
             args_child[i].vertex_num = num_vertex;
             args_child[i].rank_node = rank_root;
+            args_child[i].rank_mutex = rank_mutex;
             args_child[i].rank_children_min = num_vertex;
             err_code = pthread_create(&threads_child[i], NULL, RandomizedVisitParallel, (void *)&args_child[i]);
             if(err_code) {
@@ -178,19 +180,22 @@ void RandomizedVisitParallelInit(int node_num, int lbl_num, row_l* labels, row_g
 
         labels[node_num].visited[lbl_num] = true;
 
-        //searchg min value between children node
-        /*for(edge* next=graph[node_num].edges_pointer; next != NULL; next = next->next_num)
-            if(labels[next->num].lbl_start[lbl_num] < rank_children_min)
-                rank_children_min = labels[next->num].lbl_start[lbl_num];*/
-            
-        if(*rank_root < rank_children_min)
-            labels[node_num].lbl_start[lbl_num] = *rank_root;
-        else 
-            labels[node_num].lbl_start[lbl_num] =  rank_children_min;
-        
-        labels[node_num].lbl_end[lbl_num] = *rank_root;
+        pthread_mutex_lock(rank_mutex);
+            //searching min value between children node
+            for(i=0; i<children_num; i++){
+                if(labels[graph[node_num].edges[i]].lbl_start[lbl_num] < rank_children_min)
+                    rank_children_min = labels[graph[node_num].edges[i]].lbl_start[lbl_num];
+            }
 
-        *rank_root = *rank_root + 1 ;
+            if(*rank_root < rank_children_min)
+                labels[node_num].lbl_start[lbl_num] = *rank_root;
+            else
+                labels[node_num].lbl_start[lbl_num] =  rank_children_min;
+        
+            labels[node_num].lbl_end[lbl_num] = *rank_root;
+
+            *rank_root = *rank_root + 1 ;
+        pthread_mutex_unlock(rank_mutex);
     pthread_mutex_unlock(graph[node_num].node_mutex);
 }
 
@@ -205,27 +210,30 @@ void* RandomizedVisitParallel(void* args) {
             pthread_exit((void *) 0);
         }
 
-        if(my_data->graph[my_data->node].edge_num > 0){ //The node has no other child
+        if(my_data->graph[my_data->node].edge_num > 0){ //The node has other child
             pthread_mutex_unlock(my_data->graph[my_data->node].node_mutex);
-            RandomizedVisitParallelInit(my_data->node, my_data->lbl_num, my_data->labels, my_data->graph, my_data-> rank_node, my_data->vertex_num);
+            RandomizedVisitParallelInit(my_data->node, my_data->lbl_num, my_data->labels, my_data->graph, my_data-> rank_node, my_data->rank_mutex, my_data->vertex_num);
         }else{ 
             //NO OTHER CHILD (LEAF)
             my_data->labels[my_data->node].visited[my_data->lbl_num] = true;
 
-            //searchg min value between children node
-            /*for(edge* next= my_data->graph[my_data->node].edges_pointer; next != NULL; next = next->next_num)
-                if(my_data->labels[next->num].lbl_start[my_data->lbl_num] < my_data->rank_children_min )
-                    my_data->rank_children_min = my_data->labels[next->num].lbl_start[my_data->lbl_num];*/
-            
-            if(*my_data->rank_node < my_data->rank_children_min)
-                my_data->labels[my_data->node].lbl_start[my_data->lbl_num] = *my_data->rank_node;
-            else 
-                my_data->labels[my_data->node].lbl_start[my_data->lbl_num] = my_data->rank_children_min;
-            
-            my_data->labels[my_data->node].lbl_end[my_data->lbl_num] = *my_data->rank_node;
+            pthread_mutex_lock(my_data->rank_mutex);
+                //searching min value between children node
+                for(int i=0; i< my_data->graph[my_data->node].edge_num; i++){
+                    if(my_data->labels[my_data->graph[my_data->node].edges[i]].lbl_start[my_data->lbl_num] < my_data->rank_children_min)
+                        my_data->rank_children_min = my_data->labels[my_data->graph[my_data->node].edges[i]].lbl_start[my_data->lbl_num];
+                }
 
-            *my_data->rank_node = *my_data->rank_node + 1 ;
-            pthread_mutex_unlock(my_data->graph[my_data->node].node_mutex);
+                if(*my_data->rank_node < my_data->rank_children_min)
+                    my_data->labels[my_data->node].lbl_start[my_data->lbl_num] = *my_data->rank_node;
+                else 
+                    my_data->labels[my_data->node].lbl_start[my_data->lbl_num] = my_data->rank_children_min;
+                
+                my_data->labels[my_data->node].lbl_end[my_data->lbl_num] = *my_data->rank_node;
+
+                *my_data->rank_node = *my_data->rank_node + 1 ;
+            pthread_mutex_unlock(my_data->rank_mutex);
+        pthread_mutex_unlock(my_data->graph[my_data->node].node_mutex);
         }
     pthread_exit((void *) 0);
 }

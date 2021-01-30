@@ -48,16 +48,11 @@
         bool* visited;
     } row_l;
 
-    typedef struct edge_list {
-        int num;                   // vertex-list: |value|next| -> |value|next| -> NULL
-        struct edge_list *next_num;
-    } edge;
-
     typedef struct row_graph {
         int edge_num;   //total number of vertex in this direction
         bool not_root;
         int *edges;
-        pthread_mutex_t *node_mutex;
+        pthread_mutex_t *node_mutex;  //for parallelize 1 thread for each children in labels
     } row_g;
 
     typedef struct el_list_query {

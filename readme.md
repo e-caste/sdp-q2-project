@@ -2,7 +2,7 @@
 
 Authors: Giulivi Benedetto, Alberti Enrico, Castelli Enrico
 
-Date: 2021-01-28
+Date: 2021-01-30
 
 Version: 1
 
@@ -16,7 +16,11 @@ Version: 1
 	- [```graph => row_g[vertex_num]```](#graph--row_gvertex_num)
 	- [```labels => row_l[vertex_num].field[labels_num]```](#labels--row_lvertex_numfieldlabels_num)
 	- [```queries => queries[queries_num].vertex[source, dest]```](#queries--queriesqueries_numvertexsource-dest)
-
+- [What Parallelize and How](#what-Parallelize-and-How)
+	- [Dag reading](#dag-reading)
+	- [Label building](#label-building)
+	- [Query resolution](#query-resolution)
+- [Time and Memory usage](#time-and-memory-usage)
 
 # Abstract
 Our group developed the Q2 project which consists of implementing an algorithm named **GRAIL** used for Scalable Reachability Index for Large Graphs. The project could be divided in three main steps:
@@ -41,16 +45,10 @@ Overall in each of these main phases, the main evaluate the **time** and **memor
 ## ```graph => row_g[vertex_num]```
 ```c++
 typedef struct row_graph {
-	int edge_num;   // total number of vertex in this direction
+	int edge_num;   //total number of vertex in this direction
 	bool not_root;
-	edge *edges_pointer;
-	pthread_mutex_t *node_mutex;
+	int *edges;
 } row_g;
-
-typedef struct edge_list {
-	int num;
-	struct edge_list *next_num;
-} edge;
 ```
 So we will have something like: 
 - vertex 0 has children x, y
@@ -98,7 +96,6 @@ typedef struct el_list_query {
 	int num[2];
 	bool can_reach;
 } el_query;
-
 ```
 So if we have 2 vertex (v1, v2) and two queries, we will have something like:
 - el_query[0] = Query 1 for V1 -> V2 
@@ -108,3 +105,39 @@ So if we have 2 vertex (v1, v2) and two queries, we will have something like:
 - el_query[0].can_reach = true/false based of V1 -> V2
 
 ---
+
+# What Parallelize and How
+
+## Dag reading
+- MAX thread allowed by processors without scheduling
+	- file splitted in function of its size
+	- threads read in a range from inf to sup defined accurately (read -> no protection)
+	- threads build shared array of roots. -> mutex on shared array and shared index
+## Label building
+- 1 thread for each label		: actual version
+	- each thread runs its own label generation. Many labels at time
+- MAX thread allowed by processors without scheduling for each roots
+	- divide the roots number by many thread. 1 label at time.
+- 1 thread for each children	: limit of thread exceeded (20'000)
+	- protection in children that enter in the same node with mutex
+
+## Query resolution
+- MAX thread allowed by processors without scheduling
+	- query file readed with main thread because of its limited size
+	- queries splitted in equal parts within the number of threads -> no protection because each thread write in its local part of the structure (array_queries[j].can_reach)
+	- dfs search recursive and not parallel
+
+
+# Time and Memory usage
+
+## Time
+
+|Test name 	| Sequential Version (ms) 	| Parallel Version (ms) |
+|:----------|:--------------------------|:----------------------|
+|		   	| 						 	|						|
+
+## Memory Usage
+
+|Test name 	| Sequential Version (ms) 	| Parallel Version (ms) |
+|:----------|:--------------------------|:----------------------|
+|		   	| 						 	|						|

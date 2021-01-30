@@ -15,7 +15,7 @@
         int *roots;
         int roots_num;
         int *indexes;           //For doing random roots visit
-    } t_lbl_args;               //TODO to reduce space allocation, we can reuse thread_struct with extra field
+    } t_lbl_args;
 
     typedef struct thread_child_args {
         int id;
@@ -24,6 +24,7 @@
         row_l *labels;
         row_g *graph;
         int vertex_num;
+        pthread_mutex_t* rank_mutex;    // version i thread for each children
         int *rank_node;
         int rank_children_min;
     } t_child_args;
@@ -33,8 +34,10 @@
     void RandomizedVisitSequentialRecursive(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex);
 
     //PARALLEL VERSION
+    // version 1: A thread for each label
     void RandomizedLabelingParallelInit(row_g * graph, row_l * labels, int label_num, int vertex_num, int * roots, int roots_num);
     void* RandomizedLabelingParallel(void* args);
-    void RandomizedVisitParallelInit(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex);
+    // version 2: A thread for each children of the node
+    void RandomizedVisitParallelInit(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, pthread_mutex_t* rank_mutex, int num_vertex);
     void* RandomizedVisitParallel(void* args);
 #endif  //BUILD_LABELS_H
