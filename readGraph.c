@@ -13,7 +13,6 @@ void *scanFile(void *args) {
     int j, i, k, pos;
     int sup, inf;
     unsigned int num_threads = my_data->total_threads;
-    bool not_root_is_set;
     char *line_buf = NULL;
     ssize_t line_size;
     size_t line_buf_size;
@@ -77,10 +76,8 @@ void *scanFile(void *args) {
     
     for(j=inf; j<sup; j++) {        //row format example: "2: 8 7 3 #"
         fscanf(fp, "%i: ", &i);     // remove row number and ': '
-        edge *head;
-        head = malloc(sizeof(edge));
+
         i=0;
-        bool first_visit = true;
 
         line_size = getline(&line_buf, &line_buf_size, fp);
 
