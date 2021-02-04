@@ -93,7 +93,7 @@ void RandomizedLabelingParallelInit(row_g * graph, row_l * labels, int label_num
         args_lbl[i].roots = roots;
         args_lbl[i].roots_num = roots_num;
         args_lbl[i].indexes = indexes;  //*shared* structure -> no protection because work in a shadow copy
-        args_lbl[i].threads_available = num_threads -label_num; //todo some test for decide if let scheduler decide is better
+        args_lbl[i].threads_available = (num_threads/label_num);
 
         //MODIFIED VERSION: 3 THREAD FOR EACH LABELS + SOME SUB-THREADS SPLITTING ROOTS
         err_code = pthread_create(&threads_lbl[i], NULL, RandomizedLabelingRootsParallelInit, (void *)&args_lbl[i]);
@@ -150,7 +150,7 @@ void* RandomizedLabelingRootsParallelInit(void* args) {   //1 thread for each la
     memcpy(indexes, my_data->indexes, my_data->roots_num*sizeof(int));
     randomize(indexes, my_data->roots_num);
 
-    if(my_data->threads_available > 0){//1 thread for each label + will run remaining thread splitting roots
+    if(my_data->threads_available > 1){//1 thread for each label + will run remaining thread splitting roots
         pthread_t threads_lbl[my_data->threads_available];
         t_lbl_args args_lbl[my_data->threads_available];
 
