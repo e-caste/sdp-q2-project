@@ -229,7 +229,8 @@ int main(int argc, char *argv[]) {
         memset(labels[i].visited, false, d * sizeof(bool));
 
         //for parallelize 1 thread for each children (labels)
-        /*rows[i].node_mutex = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
+        // OR 1 thread for each label + some threads for roots
+        rows[i].node_mutex = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
         if (rows[i].node_mutex  == NULL ) {
             printf ("Error in creating mutex protection for node\n" );
             exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
@@ -238,11 +239,11 @@ int main(int argc, char *argv[]) {
         if(pthread_mutex_init(rows[i].node_mutex , NULL) != 0){
             printf ("Error in initializing mutex protection for node\n" );
             exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
-        }*/
+        }
     }
 
     fprintf(stdout, "Starting label creation...\n");
-    RandomizedLabelingParallelInit(rows, labels, d, num_vertex, roots, roots_num);
+    RandomizedLabelingParallelInit(rows, labels, d, num_vertex, roots, roots_num, num_threads);
     //RandomizedLabelingSequential(rows, labels, d, num_vertex, roots, roots_num);
     fprintf(stdout, "End Label creation...\n");
 
