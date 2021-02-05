@@ -135,17 +135,41 @@ So if we have 2 vertex (v1, v2) and two queries, we will have something like:
 
 ## Time and Memory usage
 
-### Time
+Hardware configuration:
+- CPUs: 2x 8-core Xeon E5-2690 (32 threads)
+- RAM: 32GB 1333MHz DDR3 ECC
 
-|Test name 	| Sequential Version (ms) 	| Parallel Version (ms) |
-|:----------|:--------------------------|:----------------------|
-|		   	| 						 	|						|
+Parameter configuration:
+- labels: 5
 
-### Memory Usage
+S = sequential version (GRAIL paper repository)  
+P = parallel version (our program)  
+LT = labeling time (ms)  
+QT = query resolution time (ms)  
+TT = total time (ms)  
+MEM = maximum memory usage (MB)
 
-|Test name 	| Sequential Version (ms) 	| Parallel Version (ms) |
-|:----------|:--------------------------|:----------------------|
-|		   	| 						 	|						|
+|DAG | SLT | PLT | SQT | PQT | STT | PTT | SMEM | PMEM |
+|:---|:----|:----|:----|:----|:----|:----|:-----|:-----|
+| cit-Patents.scc.gra | 18451 | ? | 1131 | ? | 19582 | ? | 435 | ? |
+| uniprotenc_22m.scc.gra | 6239 | ? | 38 | ? | 6277 | ? | 178 | ? |
+| uniprotenc_100m.scc.gra | 86279 | ? | 60 | ? | 86339 | ? | 1761 | ? |
+| arXiv_sub_6000-1.gra | 14 | ? | 124 | ? | 138 | ? | 3 | ? |
+| citeseer_sub_10720.gra | 17 | ? | 13 | ? | 30 | ? | 3.1 | ? |
+| go_sub_6793.gra | 7 | ? | 7 | ? | 14 | ? | 2.5 | ? |
+| pubmed_sub_9000-1.gra | 14 | ? | 14 | ? | 28 | ? | 2.9 | ? |
+| yago_sub_6642.gra | 12 | ? | 8 | ? | 20 | ? | 2.7 | ? |
+| agrocyc_dag_uniq.gra | 11 | ? | 8 | ? | 19 | ? | 3.2 | ? |
+| amaze_dag_uniq.gra | 4 | ? | 307 | ? | 311 | ? | 2.4 | ? |
+| anthra_dag_uniq.gra | 11 | ? | 7 | ? | 18 | ? | 3.2 | ? |
+| ecoo_dag_uniq.gra | 11 | ? | 7 | ? | 18 | ? | 3.3 | ? |
+| human_dag_uniq.gra | 40 | ? | 10 | ? | 50 | ? | 6.1 | ? |
+| kegg_dag_uniq.gra | 4 | ? | 415 | ? | 419 | ? | 2.2 | ? |
+| mtbrv_dag_uniq.gra | 8 | ? | 7 | ? | 15 | ? | 2.9 | ? |
+| nasa_dag_uniq.gra | 5 | ? | 6 | ? | 11 | ? | 2.4 | ? |
+| vchocyc_dag_uniq.gra | 8 | ? | 7 | ? | 15 | ? | 2.8 | ? |
+| xmark_dag_uniq.gra | 5 | ? | 20 | ? | 25 | ? | 2.5 | ? |
+
 
 ## How to run
 
