@@ -181,8 +181,10 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    pthread_barrier_destroy(barrier);
-    free(barrier);
+    if(barrier){
+        pthread_barrier_destroy(barrier);
+        free(barrier);
+    }
 
     fprintf(stdout, "End of root search...\n");
 
@@ -262,6 +264,26 @@ int main(int argc, char *argv[]) {
     //     }
     //     printf("\n");
     // }
+
+    // Deallocation not useful anymore structure
+    if(roots_mutex){
+        pthread_mutex_destroy(roots_mutex);
+        free(roots_mutex);
+        roots_mutex = NULL; 
+    }
+
+    if(roots){
+        free(roots);
+        roots = NULL;
+    }
+
+    for(i=0; i<num_vertex; i++){
+        if(rows && rows[i].node_mutex){
+            pthread_mutex_destroy(rows[i].node_mutex);
+            free(rows[i].node_mutex);
+            rows[i].node_mutex = NULL;
+        }
+    }
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
 
