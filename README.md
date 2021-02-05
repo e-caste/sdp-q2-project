@@ -1,35 +1,35 @@
 # Presentation Document 
 
-Authors: Giulivi Benedetto, Alberti Enrico, Castelli Enrico
+Authors: Enrico Alberti, Enrico Castelli, Benedetto Giulivi
 
 Date: 2021-01-30
 
 Version: 1
 
-# Contents
+## Contents
 
 - [Presentation Document](#presentation-document)
 - [Contents](#contents)
 - [Abstract](#abstract)
-- [Schema of the code](#schema-of-the-code)
+- [Schema of the code](#code-schema)
 - [Main data Structures](#main-data-structures)
 	- [```graph => row_g[vertex_num]```](#graph--row_gvertex_num)
 	- [```labels => row_l[vertex_num].field[labels_num]```](#labels--row_lvertex_numfieldlabels_num)
 	- [```queries => queries[queries_num].vertex[source, dest]```](#queries--queriesqueries_numvertexsource-dest)
-- [What Parallelize and How](#what-Parallelize-and-How)
-	- [Dag reading](#dag-reading)
-	- [Label building](#label-building)
+- [What we parallelize and how](#what-we-parallelize-and-how)
+	- [DAG read](#dag-read)
+	- [Label build](#label-build)
 	- [Query resolution](#query-resolution)
 - [Time and Memory usage](#time-and-memory-usage)
 
-# Abstract
+## Abstract
 Our group developed the Q2 project which consists of implementing an algorithm named **GRAIL** used for Scalable Reachability Index for Large Graphs. The project could be divided in three main steps:
 - **Reading** the Directed Acyclic graph (**DAG**)
 - Generation of the **labels** required
 - Test **query reachability** by means of labels
 
 
-# Schema of the code
+## Code schema
 
 ### TODO: specify which kind of protection where
 ### TODO: more specific schema, following GRAIL paper
@@ -43,10 +43,10 @@ Finally, in the last step the main thread re-initializes the threads data struct
 Overall in each of these main phases, the main thread evaluates the **time** and **memory usage** needed to execute the code.
 
 
-# Main data Structures
+## Main data Structures
 
-## ```graph => row_g[vertex_num]```
-```c++
+### ```graph => row_g[vertex_num]```
+```c
 typedef struct row_graph {
 	int edge_num;   //total number of vertex in this direction
 	bool not_root;
@@ -67,7 +67,7 @@ So we will have something like:
 ---
 
 
-## ```labels => row_l[vertex_num].field[labels_num]```
+### ```labels => row_l[vertex_num].field[labels_num]```
 ```c
 typedef struct row_label {
 	int* lbl_start;
@@ -93,7 +93,7 @@ So we will have something like:
 
 ---
 
-## ```queries => queries[queries_num].vertex[source, dest]```
+### ```queries => queries[queries_num].vertex[source, dest]```
 ```c
 typedef struct el_list_query {
 	int num[2];
@@ -109,37 +109,38 @@ So if we have 2 vertex (v1, v2) and two queries, we will have something like:
 
 ---
 
-# What Parallelize and How
+## What we parallelize and how
 
-## Dag reading
-- MAX thread allowed by processors without scheduling
-	- file splitted in function of its size
+### DAG read
+- MAX threads allowed by processors without scheduling
+	- file split in function of its size
 	- threads read in a range from inf to sup defined accurately (read -> no protection)
-	- threads build shared array of roots. -> mutex on shared array and shared index
-## Label building
-- 1 thread for each label		: actual version
-	- each thread runs its own label generation. Many labels at time
-- MAX thread allowed by processors without scheduling for each roots
-	- divide the roots number by many thread. 1 label at time.
-- 1 thread for each children	: limit of thread exceeded (20'000)
-	- protection in children that enter in the same node with mutex
+	- threads build shared array of roots -> mutex on shared array and shared index
 
-## Query resolution
-- MAX thread allowed by processors without scheduling
-	- query file readed with main thread because of its limited size
-	- queries splitted in equal parts within the number of threads -> no protection because each thread write in its local part of the structure (array_queries[j].can_reach)
+### Label build
+- 1 thread for each label		: current version
+	- each thread runs its own label generation. Many labels at time
+- MAX threads allowed by processors without scheduling for each root
+	- divide the roots number by many threads. 1 label at time.
+- 1 thread for each child	: limit of threads exceeded (20'000)
+	- protection in children that enter the same node with mutex
+
+### Query resolution
+- MAX threads allowed by processors without scheduling
+	- query file read with main thread because of its limited size
+	- queries split in equal parts within the number of threads -> no protection because each thread write in its local part of the structure (array_queries[j].can_reach)
 	- dfs search recursive and not parallel
 
 
-# Time and Memory usage
+## Time and Memory usage
 
-## Time
+### Time
 
 |Test name 	| Sequential Version (ms) 	| Parallel Version (ms) |
 |:----------|:--------------------------|:----------------------|
 |		   	| 						 	|						|
 
-## Memory Usage
+### Memory Usage
 
 |Test name 	| Sequential Version (ms) 	| Parallel Version (ms) |
 |:----------|:--------------------------|:----------------------|
