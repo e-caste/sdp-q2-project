@@ -21,6 +21,7 @@ Version: 1
 	- [Label build](#label-build)
 	- [Query resolution](#query-resolution)
 - [Time and Memory usage](#time-and-memory-usage)
+- [How to run](#how-to-run)
 
 ## Abstract
 Our group developed the Q2 project which consists of implementing an algorithm named **GRAIL** used for Scalable Reachability Index for Large Graphs. The project could be divided in three main steps:
@@ -145,3 +146,41 @@ So if we have 2 vertex (v1, v2) and two queries, we will have something like:
 |Test name 	| Sequential Version (ms) 	| Parallel Version (ms) |
 |:----------|:--------------------------|:----------------------|
 |		   	| 						 	|						|
+
+## How to run
+
+We have created a Bash wrapper (`run.sh`) around our C program that allows for a quick execution of all of its parts and provides some added functionalities.
+
+```
+Use -h or --help to show this help.
+Usage:
+./run.sh ([-d|--download] [-g|--generate] [-r|--run [-l|--labels <number of labels>] [benchmark|test|<path to graph file>]])
+[] mean an argument is optional
+() mean an argument is mandatory
+| means the argument on its left is equivalent to the argument on its right
+It is required to give at least 1 argument to let the script know what is expected of it.
+
+There are 4 run modes available in this script:
+- 'specific': if you give a path to a .gra file, it will run our program against it
+- 'test': it will run our program against all the generated DAG files in data/gen-dags (it is required to run ./run.sh -g|--generate at least once in order to use this mode)
+- 'benchmark': it will run our program against all the downloaded DAG files in data/grail-dags (it is required to run ./run.sh -d|--download at least once in order to use this mode)
+- 'all': it will run our program against all the DAGs in data/gen-dags and data/grail-dags. It is equivalent to running both modes above.
+The default run mode is 'all'.
+The default number of labels is 5, but it can be specified with the -l|--labels <num> option.
+
+You need the following packages to run this script:
+wget gzip tar make gcc
+```
+
+So if you want to download all the needed DAG files that come with the GRAIL repository, you can simply use:  
+`./run.sh --download`  
+If you want to generate all the DAG files with prof. Quer's code, use:  
+`./run.sh --generate`  
+If you want to run our program against a single DAG file:  
+`./run.sh --run --labels 2 data/gen-dags/v100e10.gra`  
+If you want to run our program against all benchmark (GRAIL) DAG files:  
+`./run.sh --run benchmark`.
+
+See the help message above for all the other options.
+
+Note: this script always recompiles the code if `make` detects a change.
