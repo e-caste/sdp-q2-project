@@ -179,7 +179,7 @@ If you want to generate all the DAG files with prof. Quer's code, use:
 If you want to run our program against a single DAG file:  
 `./run.sh --run --labels 2 data/gen-dags/v100e10.gra`  
 If you want to run our program against all benchmark (GRAIL) DAG files:  
-`./run.sh --run benchmark`
+`./run.sh --run benchmark`  
 If you want to do everything in one line:  
 `./run.sh --download --generate --run --labels 4 all`.
 
