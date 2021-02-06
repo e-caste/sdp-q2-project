@@ -6,20 +6,20 @@
 
     typedef struct thread_labels_args {
         int lbl_num;
-        int rank_node;
+        unsigned long rank_node;
         row_l *labels;
 
         row_g *graph;
-        int vertex_num;
+        unsigned long vertex_num;
 
-        int *roots;
-        int roots_num;
-        int *indexes;           //For doing random roots visit
+        unsigned long *roots;
+        unsigned long roots_num;
+        unsigned long *indexes;           //For doing random roots visit
 
         pthread_mutex_t* rank_mutex;    // version 3: threads split roots
-        int id;
-        int threads_available;
-        int * rank_node_label;
+        unsigned long id;
+        unsigned int threads_available;
+        unsigned long * rank_node_label;
     } t_lbl_args;
 
     typedef struct thread_child_args {
@@ -40,7 +40,7 @@
 
     //PARALLEL VERSION
     // version 1: A thread for each label
-    void RandomizedLabelingParallelInit(row_g * graph, row_l * labels, int label_num, int vertex_num, int * roots, int roots_num, int num_threads);
+    void RandomizedLabelingParallelInit(row_g * graph, row_l * labels, int label_num, unsigned long vertex_num, unsigned long * roots, unsigned long roots_num, unsigned int num_threads);
     void* RandomizedLabelingParallel(void* args);
     // version 2: A thread for each children of the node
     void RandomizedVisitParallelInit(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, pthread_mutex_t* rank_mutex, int num_vertex);

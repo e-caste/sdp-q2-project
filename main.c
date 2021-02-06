@@ -247,8 +247,8 @@ int main(int argc, char *argv[]) {
     }
 
     fprintf(stdout, "Starting label creation...\n");
-    //RandomizedLabelingParallelInit(rows, labels, d, num_vertex, roots, roots_num, num_threads);
-    RandomizedLabelingSequential(rows, labels, d, num_vertex, roots, roots_num);
+    RandomizedLabelingParallelInit(rows, labels, d, num_vertex, roots, roots_num, num_threads);
+    //RandomizedLabelingSequential(rows, labels, d, num_vertex, roots, roots_num);
     fprintf(stdout, "End Label creation...\n");
 
     fflush(stdout);
