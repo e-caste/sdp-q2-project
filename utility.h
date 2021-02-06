@@ -49,9 +49,9 @@
     } row_l;
 
     typedef struct row_graph {
-        int edge_num;   //total number of vertex in this direction
+        unsigned long edge_num;   //total number of vertex in this direction
         bool not_root;
-        int *edges;
+        unsigned long *edges;
         pthread_mutex_t *node_mutex;  //for parallelize 1 thread for each children in labels
     } row_g;
 
@@ -61,15 +61,15 @@
     } el_query;
 
     typedef struct thread_args {
-        int id;
-        int total_vertex;  // mem-Optimizzation: could be unsigned long 
+        unsigned long id;
+        unsigned long total_vertex;
         unsigned int total_threads;
         int size_file;
         char *filename;
         row_g *graph;
-        int **roots;
-        int *roots_num;             //During DAG reading we count the number of roots (with protection)
-        int *root_index;            //Shared Index to initialize roots array in parallel way
+        unsigned long **roots;
+        unsigned long *roots_num;             //During DAG reading we count the number of roots (with protection)
+        unsigned long *root_index;            //Shared Index to initialize roots array in parallel way
         pthread_mutex_t *roots_mutex;
         pthread_barrier_t *barrier;
         int queries_num;
@@ -89,9 +89,9 @@
     void *scanFile(void *args);
 
     //utilities functions for build and randomize an array of roots
-    void swap (int *a, int *b);
-    void randomize(int *array, int n);
+    void swap (unsigned long *a, unsigned long *b);
+    void randomize(unsigned long *array, unsigned long n);
 
     //function for correct program exits
-    void exitWithDealloc(bool error, unsigned int num_vertex, FILE * fp_dag, row_g *rows, pthread_t *threads, t_args *args, pthread_mutex_t *roots_mutex, int *roots, row_l *labels, FILE *fp_query, el_query *queries);
+    void exitWithDealloc(bool error, unsigned long num_vertex, FILE * fp_dag, row_g *rows, pthread_t *threads, t_args *args, pthread_mutex_t *roots_mutex, unsigned long *roots, row_l *labels, FILE *fp_query, el_query *queries);
 #endif //UTILITY_H

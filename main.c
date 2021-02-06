@@ -10,14 +10,16 @@
 // argv[3]: file2 (.que)
 int main(int argc, char *argv[]) {
     FILE *fp = NULL, *fp_query = NULL;
-    unsigned int num_vertex, num_threads;
-    int i, j, size, err_code=0, d;
+    unsigned int num_threads;
+    unsigned long num_vertex;
+    unsigned long i, j, size;
+    int err_code=0, d;
     row_g *rows = NULL;
     pthread_t *threads = NULL;
     t_args *args = NULL;
     // needed for labels generation
-    int *roots = NULL;
-    int roots_num, root_index;
+    unsigned long *roots = NULL;
+    unsigned long roots_num, root_index;
     pthread_mutex_t *roots_mutex = NULL;
     pthread_barrier_t *barrier = NULL;
     row_l *labels = NULL;
@@ -57,7 +59,7 @@ int main(int argc, char *argv[]) {
 
     // Take vertex number to alloc correct memory
 
-    fscanf(fp,"%i\n", &num_vertex);
+    fscanf(fp,"%lu\n", &num_vertex);
 
     rows = (row_g *) malloc (num_vertex * sizeof (row_g));  //array of lists
     if (rows == NULL ) {
@@ -134,7 +136,7 @@ int main(int argc, char *argv[]) {
         args[i].id = i;
         err_code = pthread_create(&threads[i], NULL, scanFile, (void *)&args[i]);
         if(err_code) {
-            printf ("Error number %i in thread %i creation.\n", err_code, i);
+            printf ("Error number %i in thread %lu creation.\n", err_code, i);
             exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
         }
     }
@@ -164,7 +166,7 @@ int main(int argc, char *argv[]) {
     pthread_barrier_wait(barrier);
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
-    roots = malloc(roots_num * sizeof(int));
+    roots = (unsigned long *) malloc(roots_num * sizeof(unsigned long));
     if (roots == NULL ) {
         printf ("Error in creating roots struct\n" );
         exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
@@ -176,7 +178,7 @@ int main(int argc, char *argv[]) {
     for(j=0; j < num_threads; j++) {
         err_code = pthread_join(threads[j], NULL);
         if(err_code) {
-            printf ("Error number %i in thread %i joining.\n", err_code, j);
+            printf ("Error number %i in thread %lu joining.\n", err_code, j);
             exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
         }
     }
@@ -245,8 +247,8 @@ int main(int argc, char *argv[]) {
     }
 
     fprintf(stdout, "Starting label creation...\n");
-    RandomizedLabelingParallelInit(rows, labels, d, num_vertex, roots, roots_num, num_threads);
-    //RandomizedLabelingSequential(rows, labels, d, num_vertex, roots, roots_num);
+    //RandomizedLabelingParallelInit(rows, labels, d, num_vertex, roots, roots_num, num_threads);
+    RandomizedLabelingSequential(rows, labels, d, num_vertex, roots, roots_num);
     fprintf(stdout, "End Label creation...\n");
 
     fflush(stdout);
@@ -347,7 +349,7 @@ int main(int argc, char *argv[]) {
         args[j].array_labels = labels;
         err_code = pthread_create(&threads[j], NULL, solveQuery, (void *)&args[j]);
         if(err_code) {
-            printf ("Error number %i in thread %i creation.\n", err_code, j);
+            printf ("Error number %i in thread %lu creation.\n", err_code, j);
             exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, NULL, queries);
         }
     }
@@ -355,7 +357,7 @@ int main(int argc, char *argv[]) {
     for(j=0; j < num_threads; j++) {
         err_code = pthread_join(threads[j], NULL);
         if(err_code) {
-            printf ("Error number %i in thread %i joining.\n", err_code, j);
+            printf ("Error number %i in thread %lu joining.\n", err_code, j);
             exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, NULL, queries);
         }
     }

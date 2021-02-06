@@ -10,8 +10,8 @@ void *scanFile(void *args) {
     t_args *my_data;
     my_data = (t_args *) args;
     FILE *fp;
-    int j, i, k, pos;
-    int sup, inf;
+    unsigned long j, i, k, pos;
+    unsigned long sup, inf;
     unsigned int num_threads = my_data->total_threads;
     char *line_buf = NULL;
     ssize_t line_size;

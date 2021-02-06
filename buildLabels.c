@@ -3,10 +3,11 @@
 //SEQUENTIAL FUNCTION
 
 // RandomizedLabelingSequential is the SEQUENTIAL version used for creating N Labels
-void RandomizedLabelingSequential(row_g * graph, row_l * labels, int num_label, int num_vertex, int * roots, int num_roots){
-    int i, rank_node ;
-    int indexes[num_roots];
+void RandomizedLabelingSequential(row_g * graph, row_l * labels, int num_label, unsigned long num_vertex, unsigned long * roots, unsigned long num_roots){
+    unsigned long i, j, rank_node ;
 
+    unsigned long* indexes = (unsigned long *)malloc(num_roots*sizeof(unsigned long));
+    
     for(i=0; i<num_roots; i++) {
         indexes[i] = i;
     }
@@ -20,15 +21,18 @@ void RandomizedLabelingSequential(row_g * graph, row_l * labels, int num_label, 
         //roots are provided by the main.
         randomize(indexes, num_roots);
 
-        for(int j=0; j<num_roots; j++) {
+        for(j=0; j<num_roots; j++) {
             RandomizedVisitSequentialRecursive(roots[indexes[j]], i, labels, graph, &rank_node, num_vertex);
         }
     }
+
+    if(indexes)
+        free(indexes);
 }
 
-void RandomizedVisitSequentialRecursive(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex){
-    int rank_children_min = num_vertex, i,children_num = graph[node_num].edge_num;
-    int indexes[children_num];
+void RandomizedVisitSequentialRecursive(unsigned long node_num, int lbl_num, row_l* labels, row_g* graph, unsigned long* rank_root, unsigned long num_vertex){
+    unsigned long rank_children_min = num_vertex, i, j, children_num = graph[node_num].edge_num;
+    unsigned long* indexes = (unsigned long *)malloc(children_num*sizeof(unsigned long));
 
     if(labels[node_num].visited[lbl_num])
         return;
@@ -43,7 +47,7 @@ void RandomizedVisitSequentialRecursive(int node_num, int lbl_num, row_l* labels
 
         randomize(indexes, children_num);
 
-        for(int j=0; j<children_num; j++) {//for each children in random order
+        for(j=0; j<children_num; j++) {//for each children in random order
             RandomizedVisitSequentialRecursive(graph[node_num].edges[indexes[j]], lbl_num, labels, graph, rank_root, num_vertex);
         }
     }    
@@ -63,6 +67,9 @@ void RandomizedVisitSequentialRecursive(int node_num, int lbl_num, row_l* labels
     labels[node_num].lbl_end[lbl_num] = *rank_root;
 
     *rank_root = *rank_root + 1 ;
+
+    if(indexes)
+        free(indexes);
 }
 
 //PARALLEL FUNCTION
