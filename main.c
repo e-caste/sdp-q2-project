@@ -1,8 +1,5 @@
 #include "buildLabels.h"
 #include "utility.h"
-// TODO: https://en.wikipedia.org/wiki/C_data_types
-//      Ottimizzazione delle memoria: sostituire int con short se possibile
-//      Quanti nodi al massimo? unsigned int: [0, 65,535] ; unsigned long int: [0, 4,294,967,295]
 
 // argv[1]: file1 (input .gra)
 // argv[2]: n (label number 'd')

@@ -5,7 +5,6 @@
 // RandomizedLabelingSequential is the SEQUENTIAL version used for creating N Labels
 void RandomizedLabelingSequential(row_g * graph, row_l * labels, int num_label, unsigned long num_vertex, unsigned long * roots, unsigned long num_roots){
     unsigned long i, j, rank_node ;
-
     unsigned long* indexes = (unsigned long *)malloc(num_roots*sizeof(unsigned long));
     
     for(i=0; i<num_roots; i++) {
@@ -129,9 +128,7 @@ void RandomizedLabelingParallelInit(row_g * graph, row_l * labels, int label_num
 // RandomizedLabelingParallel is the PARALLEL version used for creating N Labels
 void* RandomizedLabelingParallel(void* args) {
     t_lbl_args* my_data;
-    my_data = (t_lbl_args*) args;
-    pthread_mutex_t rank_mutex = PTHREAD_MUTEX_INITIALIZER;     // protection of rank_node in version 1 thread for each children only
-    
+    my_data = (t_lbl_args*) args;    
     unsigned long* indexes = (unsigned long *)malloc(my_data->roots_num*sizeof(unsigned long));
 
     // roots randomization (each thread its own)
@@ -153,11 +150,11 @@ void* RandomizedLabelingParallel(void* args) {
 void* RandomizedLabelingRootsParallelInit(void* args) {   //1 thread for each label
     t_lbl_args* my_data;
     my_data = (t_lbl_args*) args;
-    int i=0, err_code=0;
-
-    int indexes[my_data->roots_num];
+    int err_code=0;
+    unsigned long i=0, j=0;
     pthread_mutex_t rank_mutex = PTHREAD_MUTEX_INITIALIZER;
-    
+    unsigned long* indexes = (unsigned long *)malloc(my_data->roots_num*sizeof(unsigned long));
+
     // roots randomization (each thread its own)
     // roots are provided by the main
     // here we work in a shadow copy of original roots
@@ -185,7 +182,7 @@ void* RandomizedLabelingRootsParallelInit(void* args) {   //1 thread for each la
 
             err_code = pthread_create(&threads_lbl[i], NULL, RandomizedLabelingRootsParallel, (void *)&args_lbl[i]);
             if(err_code) {
-                printf ("RandomizedLabelingRootsParallelInit: Error number %i in creating thread %i.\n", err_code, i);
+                printf ("RandomizedLabelingRootsParallelInit: Error number %i in creating thread %lu.\n", err_code, i);
                 exit(1);
             }
         }
@@ -193,15 +190,18 @@ void* RandomizedLabelingRootsParallelInit(void* args) {   //1 thread for each la
         for(i=0; i<my_data->threads_available; i++) {
             err_code = pthread_join(threads_lbl[i], NULL);
             if(err_code) {
-                printf ("RandomizedLabelingRootsParallelInit: Error number %i in joining thread for  %i.\n", err_code, i);
+                printf ("RandomizedLabelingRootsParallelInit: Error number %i in joining thread for  %lu.\n", err_code, i);
                 exit(1);
             }
         }
     }else{
-        for(int j=0; j< my_data->roots_num; j++) {
+        for(j=0; j< my_data->roots_num; j++) {
             RandomizedVisitSequentialRecursive(my_data->roots[indexes[j]], my_data->lbl_num, my_data->labels, my_data->graph, &my_data->rank_node, my_data->vertex_num);
         }
     }
+
+    if(indexes)
+        free(indexes);
 
     pthread_exit((void *) 0);
 }
@@ -209,8 +209,7 @@ void* RandomizedLabelingRootsParallelInit(void* args) {   //1 thread for each la
 void* RandomizedLabelingRootsParallel(void* args) { // some sub-threads splitting roots
     t_lbl_args* my_data;
     my_data = (t_lbl_args*) args;
-
-    int inf, sup, j;
+    unsigned long inf, sup, j;
 
     if (my_data->id == my_data->threads_available - 1)
         sup = my_data->roots_num;
@@ -229,10 +228,10 @@ void* RandomizedLabelingRootsParallel(void* args) { // some sub-threads splittin
     pthread_exit((void *) 0);
 }
 
-void RandomizedVisitParallelRoots(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex, pthread_mutex_t *rank_mutex){
-    int rank_children_min = num_vertex, i;
-    int children_num = graph[node_num].edge_num;
-    int indexes[children_num];
+void RandomizedVisitParallelRoots(unsigned long node_num, int lbl_num, row_l* labels, row_g* graph, unsigned long* rank_root, unsigned long num_vertex, pthread_mutex_t *rank_mutex){
+    unsigned long rank_children_min = num_vertex, i;
+    unsigned long children_num = graph[node_num].edge_num;
+    unsigned long* indexes = (unsigned long *)malloc(children_num*sizeof(unsigned long));
 
     pthread_mutex_lock(graph[node_num].node_mutex);
     
@@ -277,6 +276,10 @@ void RandomizedVisitParallelRoots(int node_num, int lbl_num, row_l* labels, row_
         pthread_mutex_unlock(rank_mutex);
 
     pthread_mutex_unlock(graph[node_num].node_mutex);
+
+    if(indexes)
+        free(indexes);
+
 }
 
 
