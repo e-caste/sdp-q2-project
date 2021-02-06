@@ -158,7 +158,7 @@ void* RandomizedLabelingRootsParallelInit(void* args) {   //1 thread for each la
     // roots randomization (each thread its own)
     // roots are provided by the main
     // here we work in a shadow copy of original roots
-    memcpy(indexes, my_data->indexes, my_data->roots_num*sizeof(int));
+    memcpy(indexes, my_data->indexes, my_data->roots_num*sizeof(unsigned long));
     randomize(indexes, my_data->roots_num);
 
     if(my_data->threads_available > 1){//1 thread for each label + will run remaining thread splitting roots
