@@ -1,5 +1,4 @@
 #include "buildLabels.h"
-#include "solveQuery.h"
 #include "utility.h"
 // TODO: https://en.wikipedia.org/wiki/C_data_types
 //      Ottimizzazione delle memoria: sostituire int con short se possibile

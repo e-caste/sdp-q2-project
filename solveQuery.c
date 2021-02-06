@@ -1,4 +1,4 @@
-#include "solveQuery.h"
+#include "utility.h"
 
 bool dfs_search(row_g *graph, unsigned long node1, unsigned long node2, bool *visited) {
     if(node1 == node2)
