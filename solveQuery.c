@@ -1,14 +1,14 @@
-#include "solveQuery.h"
+#include "utility.h"
 
-bool dfs_search(row_g *graph, int node1, int node2, bool *visited) {
+bool dfs_search(row_g *graph, unsigned long node1, unsigned long node2, bool *visited) {
     if(node1 == node2)
         return true;
     if(visited[node1])
         return false;
 
-    int children_num = graph[node1].edge_num;
+    unsigned long children_num = graph[node1].edge_num;
     bool reachable = false;
-    int i;
+    unsigned long i;
     
     if(children_num > 0) {
 
@@ -33,7 +33,7 @@ void *solveQuery (void *args) {
     my_data = (t_args *) args;
     unsigned int num_threads = my_data->total_threads;
 
-    int i, j, inf, sup, node1, node2;
+    unsigned long i, j, inf, sup, node1, node2;
     bool dfs;
 
     if (my_data->id == num_threads-1)
