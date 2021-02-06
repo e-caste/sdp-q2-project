@@ -22,18 +22,6 @@
         unsigned long * rank_node_label;
     } t_lbl_args;
 
-    typedef struct thread_child_args {
-        int id;
-        int node;
-        int lbl_num;
-        row_l *labels;
-        row_g *graph;
-        int vertex_num;
-        pthread_mutex_t* rank_mutex;    // version i thread for each children
-        int *rank_node;
-        int rank_children_min;
-    } t_child_args;
-
     // SEQUENTIAL VERSION
     void RandomizedLabelingSequential(row_g * graph, row_l * labels, int num_label, unsigned long num_vertex, unsigned long * roots, unsigned long num_roots);
     void RandomizedVisitSequentialRecursive(unsigned long node_num, int lbl_num, row_l* labels, row_g* graph, unsigned long* rank_root, unsigned long num_vertex);
@@ -42,9 +30,6 @@
     // version 1: A thread for each label
     void RandomizedLabelingParallelInit(row_g * graph, row_l * labels, int label_num, unsigned long vertex_num, unsigned long * roots, unsigned long roots_num, unsigned int num_threads);
     void* RandomizedLabelingParallel(void* args);
-    // version 2: A thread for each children of the node
-    void RandomizedVisitParallelInit(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, pthread_mutex_t* rank_mutex, int num_vertex);
-    void* RandomizedVisitParallel(void* args);
 
     // version 3: A thread for each label + many threads splits roots_num
     void* RandomizedLabelingRootsParallelInit(void* args);
