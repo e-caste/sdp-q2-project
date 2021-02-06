@@ -88,6 +88,10 @@
     //function from readGraph
     void *scanFile(void *args);
 
+    //function from solveQuery
+    bool dfs_search(row_g *graph, unsigned long node1, unsigned long node2, bool *visited);
+    void *solveQuery (void *args);
+
     //utilities functions for build and randomize an array of roots
     void swap (unsigned long *a, unsigned long *b);
     void randomize(unsigned long *array, unsigned long n);
