@@ -35,8 +35,8 @@
     } t_child_args;
 
     // SEQUENTIAL VERSION
-    void RandomizedLabelingSequential(row_g * graph, row_l * labels, int num_label, int num_vertex, int * roots, int num_roots);
-    void RandomizedVisitSequentialRecursive(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex);
+    void RandomizedLabelingSequential(row_g * graph, row_l * labels, int num_label, unsigned long num_vertex, unsigned long * roots, unsigned long num_roots);
+    void RandomizedVisitSequentialRecursive(unsigned long node_num, int lbl_num, row_l* labels, row_g* graph, unsigned long* rank_root, unsigned long num_vertex);
 
     //PARALLEL VERSION
     // version 1: A thread for each label
