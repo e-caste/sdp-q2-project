@@ -34,6 +34,6 @@
     // version 3: A thread for each label + many threads splits roots_num
     void* RandomizedLabelingRootsParallelInit(void* args);
     void* RandomizedLabelingRootsParallel(void* args);
-    void RandomizedVisitParallelRoots(int node_num, int lbl_num, row_l* labels, row_g* graph, int* rank_root, int num_vertex, pthread_mutex_t *rank_mutex);
+    void RandomizedVisitParallelRoots(unsigned long node_num, int lbl_num, row_l* labels, row_g* graph, unsigned long* rank_root, unsigned long num_vertex, pthread_mutex_t *rank_mutex);
 
 #endif  //BUILD_LABELS_H
