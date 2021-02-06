@@ -43,8 +43,8 @@
     //STRUCTURES used in common phase (readGraph, Label, Queries)
 
     typedef struct row_label {
-        int* lbl_start;
-        int* lbl_end;
+        unsigned long* lbl_start;
+        unsigned long* lbl_end;
         bool* visited;
     } row_l;
 
@@ -56,7 +56,7 @@
     } row_g;
 
     typedef struct el_list_query {
-        int num[2];
+        unsigned long num[2];
         bool can_reach;
     } el_query;
 
@@ -64,7 +64,7 @@
         unsigned long id;
         unsigned long total_vertex;
         unsigned int total_threads;
-        int size_file;
+        unsigned long size_file;
         char *filename;
         row_g *graph;
         unsigned long **roots;
@@ -72,7 +72,7 @@
         unsigned long *root_index;            //Shared Index to initialize roots array in parallel way
         pthread_mutex_t *roots_mutex;
         pthread_barrier_t *barrier;
-        int queries_num;
+        unsigned long queries_num;
         el_query * array_queries;
         bool *node_visited;
         int num_labels;

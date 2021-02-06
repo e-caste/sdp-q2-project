@@ -31,6 +31,7 @@ int main(int argc, char *argv[]) {
     // needed for reachability query
     bool **visited = NULL;
     el_query *queries = NULL;
+    unsigned long a, b, num_query=0;
 
     // Checks on arguments
 
@@ -219,8 +220,8 @@ int main(int argc, char *argv[]) {
     }
 
     for(i=0; i<num_vertex; i++){
-        labels[i].lbl_start = (int *) malloc (d * sizeof (int));
-        labels[i].lbl_end = (int *) malloc (d * sizeof (int));
+        labels[i].lbl_start = (unsigned long *) malloc (d * sizeof (unsigned long));
+        labels[i].lbl_end = (unsigned long *) malloc (d * sizeof (unsigned long));
         labels[i].visited = (bool *) malloc (d * sizeof (bool));
         if ((labels[i].lbl_start == NULL ) || (labels[i].lbl_end == NULL ) || (labels[i].visited == NULL )) {
             printf ("Not enough room for this size labels\n" );
@@ -228,8 +229,8 @@ int main(int argc, char *argv[]) {
         }
 
         //It's not always true that these values are resetted
-        memset(labels[i].lbl_start, 0, d * sizeof(int));
-        memset(labels[i].lbl_end, 0, d * sizeof(int));
+        memset(labels[i].lbl_start, 0, d * sizeof(unsigned long));
+        memset(labels[i].lbl_end, 0, d * sizeof(unsigned long));
         memset(labels[i].visited, false, d * sizeof(bool));
 
         //for parallelize 1 thread for each children (labels)
@@ -296,13 +297,11 @@ int main(int argc, char *argv[]) {
         exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
     }
 
-    int a, b, num_query=0;
-
     while (fscanf(fp, "%*[^\n]\n") != -1) {
         num_query++;
     }
 
-    printf("Query Number: %i\n", num_query);
+    printf("Query Number: %lu\n", num_query);
 
     queries = malloc(sizeof(el_query)*num_query);
     if(queries == NULL){
@@ -313,7 +312,7 @@ int main(int argc, char *argv[]) {
     fseek(fp_query, 0L, SEEK_SET);
 
     for(i=0; i<num_query; i++) {
-        fscanf(fp_query, "%i %i  \n", &a, &b);
+        fscanf(fp_query, "%lu %lu  \n", &a, &b);
         queries[i].num[0] = a;
         queries[i].num[1] = b;
     }
@@ -371,7 +370,7 @@ int main(int argc, char *argv[]) {
     }
 
     for(i=0; i<num_query; i++) {
-        fprintf(fp_res_query, "%i %i %d\n", queries[i].num[0], queries[i].num[1], queries[i].can_reach ? 1 : 0);
+        fprintf(fp_res_query, "%lu %lu %d\n", queries[i].num[0], queries[i].num[1], queries[i].can_reach ? 1 : 0);
     }
 
     fclose(fp_res_query);
