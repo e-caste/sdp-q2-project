@@ -54,7 +54,7 @@ void RandomizedVisitSequentialRecursive(unsigned long node_num, int lbl_num, row
     
     labels[node_num].visited[lbl_num] = true;
     
-    //searchg min value between children node
+    //searching min value between children node
     for(i=0; i<children_num; i++)
         if(labels[graph[node_num].edges[i]].lbl_start[lbl_num] < rank_children_min)
             rank_children_min = labels[graph[node_num].edges[i]].lbl_start[lbl_num];
@@ -75,11 +75,12 @@ void RandomizedVisitSequentialRecursive(unsigned long node_num, int lbl_num, row
 //PARALLEL FUNCTION
 
 // RandomizedLabelingParallelInit prepares data structure for each thread and run them
-void RandomizedLabelingParallelInit(row_g * graph, row_l * labels, int label_num, int vertex_num, int * roots, int roots_num, int num_threads){
-    int i, err_code ;
+void RandomizedLabelingParallelInit(row_g * graph, row_l * labels, int label_num, unsigned long vertex_num, unsigned long * roots, unsigned long roots_num, unsigned int num_threads){
+    int err_code ;
+    unsigned long i;
     pthread_t threads_lbl[label_num];   //1 thread for each label
     t_lbl_args args_lbl[label_num];
-    int indexes[roots_num];
+    unsigned long* indexes = (unsigned long *)malloc(roots_num*sizeof(unsigned long));
 
     // Scan Roots it once here.
     // In threads code use a shadow created with memcpy -> should be faster
@@ -100,15 +101,15 @@ void RandomizedLabelingParallelInit(row_g * graph, row_l * labels, int label_num
         args_lbl[i].roots = roots;
         args_lbl[i].roots_num = roots_num;
         args_lbl[i].indexes = indexes;  //*shared* structure -> no protection because work in a shadow copy
-        args_lbl[i].threads_available = num_threads -label_num; //todo some test for decide if let scheduler decide is better
+        args_lbl[i].threads_available = (num_threads/label_num); //todo some test for decide if let scheduler decide is better
 
         //MODIFIED VERSION: 3 THREAD FOR EACH LABELS + SOME SUB-THREADS SPLITTING ROOTS
-        err_code = pthread_create(&threads_lbl[i], NULL, RandomizedLabelingRootsParallelInit, (void *)&args_lbl[i]);
+        //err_code = pthread_create(&threads_lbl[i], NULL, RandomizedLabelingRootsParallelInit, (void *)&args_lbl[i]);
 
         //ORIGINAL VERSION: 1 THREAD FOR EACH LABELS
-        //err_code = pthread_create(&threads_lbl[i], NULL, RandomizedLabelingParallel, (void *)&args_lbl[i]);
+        err_code = pthread_create(&threads_lbl[i], NULL, RandomizedLabelingParallel, (void *)&args_lbl[i]);
         if(err_code) {
-            printf ("RandomizedLabelingInit: Error number %i in creating thread %i.\n", err_code, i);
+            printf ("RandomizedLabelingInit: Error number %i in creating thread %lu.\n", err_code, i);
             exit(1);
         }
     }
@@ -116,29 +117,36 @@ void RandomizedLabelingParallelInit(row_g * graph, row_l * labels, int label_num
     for(i=0; i<label_num; i++) {
         err_code = pthread_join(threads_lbl[i], NULL);
         if(err_code) {
-            printf ("RandomizedLabelingInit: Error number %i in joining thread for  %i.\n", err_code, i);
+            printf ("RandomizedLabelingInit: Error number %i in joining thread for %lu.\n", err_code, i);
             exit(1);
         }
     }
+
+    if(indexes)
+        free(indexes);
 }
 
 // RandomizedLabelingParallel is the PARALLEL version used for creating N Labels
 void* RandomizedLabelingParallel(void* args) {
     t_lbl_args* my_data;
     my_data = (t_lbl_args*) args;
-    int indexes[my_data->roots_num];
     pthread_mutex_t rank_mutex = PTHREAD_MUTEX_INITIALIZER;     // protection of rank_node in version 1 thread for each children only
     
+    unsigned long* indexes = (unsigned long *)malloc(my_data->roots_num*sizeof(unsigned long));
+
     // roots randomization (each thread its own)
     // roots are provided by the main
     // here we work in a shadow copy of original roots
-    memcpy(indexes, my_data->indexes, my_data->roots_num*sizeof(int));
+    memcpy(indexes, my_data->indexes, my_data->roots_num*sizeof(unsigned long));
     randomize(indexes, my_data->roots_num);
 
     for(int j=0; j< my_data->roots_num; j++) {
         //RandomizedVisitParallelInit(my_data->roots[indexes[j]], my_data->lbl_num, my_data->labels, my_data->graph, &my_data->rank_node, &rank_mutex, my_data->vertex_num);
         RandomizedVisitSequentialRecursive(my_data->roots[indexes[j]], my_data->lbl_num, my_data->labels, my_data->graph, &my_data->rank_node, my_data->vertex_num);
     }
+
+    if(indexes)
+        free(indexes);
 
     pthread_exit((void *) 0);
 }
@@ -157,7 +165,7 @@ void* RandomizedLabelingRootsParallelInit(void* args) {   //1 thread for each la
     memcpy(indexes, my_data->indexes, my_data->roots_num*sizeof(int));
     randomize(indexes, my_data->roots_num);
 
-    if(my_data->threads_available > 0){//1 thread for each label + will run remaining thread splitting roots
+    if(my_data->threads_available > 1){//1 thread for each label + will run remaining thread splitting roots
         pthread_t threads_lbl[my_data->threads_available];
         t_lbl_args args_lbl[my_data->threads_available];
 
