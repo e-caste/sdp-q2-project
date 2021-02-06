@@ -91,7 +91,7 @@ void *scanFile(void *args) {
                 offset++;
             }
 
-            my_data -> graph[j].edges = malloc(k*sizeof(int));
+            my_data -> graph[j].edges = malloc(k*sizeof(unsigned long));
             if(my_data -> graph[j].edges == NULL) {
                 printf ("Not enough room for array of edges size\n" );
                 exit(1);
