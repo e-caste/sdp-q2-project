@@ -31,7 +31,8 @@ void RandomizedLabelingSequential(row_g * graph, row_l * labels, int num_label, 
 
 void RandomizedVisitSequentialRecursive(unsigned long node_num, int lbl_num, row_l* labels, row_g* graph, unsigned long* rank_root, unsigned long num_vertex){
     unsigned long rank_children_min = num_vertex, i, j, children_num = graph[node_num].edge_num;
-    unsigned long* indexes = (unsigned long *)malloc(children_num*sizeof(unsigned long));
+    //unsigned long* indexes = (unsigned long *)malloc(children_num*sizeof(unsigned long));
+    unsigned long indexes[children_num];
 
     if(labels[node_num].visited[lbl_num])
         return;
@@ -67,8 +68,8 @@ void RandomizedVisitSequentialRecursive(unsigned long node_num, int lbl_num, row
 
     *rank_root = *rank_root + 1 ;
 
-    if(indexes)
-        free(indexes);
+    //if(indexes)
+    //    free(indexes);
 }
 
 //PARALLEL FUNCTION
