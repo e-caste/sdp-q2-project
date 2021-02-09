@@ -17,7 +17,7 @@ readGraph.o: readGraph.c
 buildLabels.o: buildLabels.c buildLabels.h
 	$(CC) $(CFLAGS) buildLabels.c -o buildLabels.o
 
-solveQuery.o: solveQuery.c solveQuery.h
+solveQuery.o: solveQuery.c
 	$(CC) $(CFLAGS) solveQuery.c -o solveQuery.o
 
 utility.o: utility.c utility.h

@@ -62,8 +62,8 @@ So we will have something like:
 |:----------------------------------|:--------------------------|
 | row_g[0]   						|vertex number 0 			|
 | row_g[1]   						|vertex number 1 			|
-| row_g[0].edges_pointer.num 		|  children 'x' of vertex 0 |
-| row_g[0].edges_pointer->next.num 	| children 'y' of vertex 0 	| 
+| row_g[0].edges[0]					|  children 'x' of vertex 0 |
+| row_g[0].edges[1]				 	| children 'y' of vertex 0 	| 
 
 ---
 
