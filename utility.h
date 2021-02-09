@@ -43,36 +43,36 @@
     //STRUCTURES used in common phase (readGraph, Label, Queries)
 
     typedef struct row_label {
-        int* lbl_start;
-        int* lbl_end;
+        unsigned long* lbl_start;
+        unsigned long* lbl_end;
         bool* visited;
     } row_l;
 
     typedef struct row_graph {
-        int edge_num;   //total number of vertex in this direction
+        unsigned long edge_num;   //total number of vertex in this direction
         bool not_root;
-        int *edges;
+        unsigned long *edges;
         pthread_mutex_t *node_mutex;  //for parallelize 1 thread for each children in labels
     } row_g;
 
     typedef struct el_list_query {
-        int num[2];
+        unsigned long num[2];
         bool can_reach;
     } el_query;
 
     typedef struct thread_args {
-        int id;
-        int total_vertex;  // mem-Optimizzation: could be unsigned long 
+        unsigned long id;
+        unsigned long total_vertex;
         unsigned int total_threads;
-        int size_file;
+        unsigned long size_file;
         char *filename;
         row_g *graph;
-        int **roots;
-        int *roots_num;             //During DAG reading we count the number of roots (with protection)
-        int *root_index;            //Shared Index to initialize roots array in parallel way
+        unsigned long **roots;
+        unsigned long *roots_num;             //During DAG reading we count the number of roots (with protection)
+        unsigned long *root_index;            //Shared Index to initialize roots array in parallel way
         pthread_mutex_t *roots_mutex;
         pthread_barrier_t *barrier;
-        int queries_num;
+        unsigned long queries_num;
         el_query * array_queries;
         bool *node_visited;
         int num_labels;
@@ -88,10 +88,14 @@
     //function from readGraph
     void *scanFile(void *args);
 
+    //function from solveQuery
+    bool dfs_search(row_g *graph, unsigned long node1, unsigned long node2, bool *visited);
+    void *solveQuery (void *args);
+
     //utilities functions for build and randomize an array of roots
-    void swap (int *a, int *b);
-    void randomize(int *array, int n);
+    void swap (unsigned long *a, unsigned long *b);
+    void randomize(unsigned long *array, unsigned long n);
 
     //function for correct program exits
-    void exitWithDealloc(bool error, unsigned int num_vertex, FILE * fp_dag, row_g *rows, pthread_t *threads, t_args *args, pthread_mutex_t *roots_mutex, int *roots, row_l *labels, FILE *fp_query, el_query *queries);
+    void exitWithDealloc(bool error, unsigned long num_vertex, FILE * fp_dag, row_g *rows, pthread_t *threads, t_args *args, pthread_mutex_t *roots_mutex, unsigned long *roots, row_l *labels, FILE *fp_query, el_query *queries);
 #endif //UTILITY_H
