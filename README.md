@@ -142,12 +142,15 @@ Hardware configuration:
 Parameter configuration:
 - labels: 5
 
-S = sequential version (GRAIL paper repository)  
-P = parallel version (our program)
-LT = labeling time (ms)  
-QT = query resolution time (ms)  
-TT = total time (ms)  
-MEM = maximum memory usage (MB)
+Prefixes:
+- S = sequential version (GRAIL paper repository)
+- P = parallel version (our program)
+
+Suffixes:
+- LT = labeling time (ms)
+- QT = query resolution time (ms)
+- TT = total time (ms)
+- MEM = maximum memory usage (MB)
 
 |DAG | SLT | PLT | SQT | PQT | STT | PTT | SMEM | PMEM |
 |:---|:----|:----|:----|:----|:----|:----|:-----|:-----|
@@ -169,6 +172,9 @@ MEM = maximum memory usage (MB)
 | nasa_dag_uniq.gra | 5 | 5 | 6 | 23 | 11 | 60 | 2.4 | 6.2 |
 | vchocyc_dag_uniq.gra | 8 | 9 | 7 | 22 | 15 | 67 | 2.8 | 7.2 |
 | xmark_dag_uniq.gra | 5 | 6 | 20 | 28 | 25 | 67 | 2.5 | 6.4 |
+
+Note: the sequential version total time (STT) is the sum of SLT and SQT, while for our program we have implemented a more granular time detection, which allows us to precisely identify the labeling and query resolution time spans, ignoring the file reads (that are accounted for in the total time as PTT = PLT + PQT + X).
+
 
 ## How to run
 
