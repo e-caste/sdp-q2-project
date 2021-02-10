@@ -89,8 +89,9 @@
     void *scanFile(void *args);
 
     //function from solveQuery
-    bool dfs_search(row_g *graph, unsigned long node1, unsigned long node2, bool *visited);
+    bool dfs_search(row_g *graph, unsigned long node1, unsigned long node2, bool *visited, int num_labels, row_l *array_labels);
     void *solveQuery (void *args);
+    bool contains(int node1, int node2, int num_labels, row_l *array_labels);
 
     //utilities functions for build and randomize an array of roots
     void swap (unsigned long *a, unsigned long *b);
