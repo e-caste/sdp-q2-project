@@ -1,14 +1,13 @@
 #include "utility.h"
 
 bool contains(int node1, int node2, int num_labels, row_l *array_labels) {
-    int i;
-
-    for(i=0; i<num_labels; i++) {
-            if (array_labels[node1].lbl_start[i]>array_labels[node2].lbl_start[i] ||
-                array_labels[node1].lbl_end[i]<array_labels[node2].lbl_end[i]) { // line 1-2 alg. 2 paper
-                return false;
-            }
+    for(int i=0; i<num_labels; ++i) {
+        if (array_labels[node1].lbl_start[i]>array_labels[node2].lbl_start[i] ||
+            array_labels[node1].lbl_end[i]<array_labels[node2].lbl_end[i]) { // line 1-2 alg. 2 paper
+            return false;
+        }
     }
+    return true;
 }
 
 bool dfs_search(row_g *graph, unsigned long node1, unsigned long node2, bool *visited, int num_labels, row_l *array_labels) {
