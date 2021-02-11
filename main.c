@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
     struct rusage memory;
     char* stats = NULL;
     // needed for reachability query
-    bool **visited = NULL;
+    int **visited = NULL;
     el_query *queries = NULL;
     unsigned long a, b, num_query=0;
 
@@ -329,14 +329,14 @@ int main(int argc, char *argv[]) {
     clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
 
     // Query Resolution
-    visited = (bool **) malloc(num_threads * sizeof(bool *));
+    visited = (int **) malloc(num_threads * sizeof(int *));
     if(visited == NULL){
         printf ("Not enough room for this size queries\n" );
         exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, NULL, queries);
     }
 
     for(j=0; j<num_threads; j++) {
-        visited[j] = (bool *) malloc(num_vertex * sizeof(bool));
+        visited[j] = (int *) malloc(num_vertex * sizeof(int));
         args[j].array_queries = queries;
         args[j].node_visited = visited[j];
         args[j].queries_num = num_query;
@@ -358,7 +358,7 @@ int main(int argc, char *argv[]) {
     }
 
     FILE *fp_res_query;
-    fp_res_query = fopen("res_query_prova.txt", "w");
+    fp_res_query = fopen("res_query.txt", "w");
 
     if (fp_res_query == NULL) {
         fprintf(stderr, "Unable to open file for store the result of the query.\n");

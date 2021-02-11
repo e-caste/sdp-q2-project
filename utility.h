@@ -73,7 +73,7 @@
         pthread_barrier_t *barrier;
         unsigned long queries_num;
         el_query * array_queries;
-        bool *node_visited;
+        int *node_visited;
         int num_labels;
         row_l *array_labels;
     } t_args;
@@ -94,7 +94,7 @@
     void *scanFile(void *args);
 
     //function from solveQuery
-    bool dfs_search(row_g *graph, unsigned long node1, unsigned long node2, bool *visited, int num_labels, row_l *array_labels);
+    bool dfs_search(row_g *graph, unsigned long node1, unsigned long node2, bool *visited, int num_labels, row_l *array_labels, int query_num);
     void *solveQuery (void *args);
     bool contains(int node1, int node2, int num_labels, row_l *array_labels);
 
