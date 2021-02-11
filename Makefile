@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -c
+CFLAGS = -Wall -O3 -c
 OBJECTS = main.o readGraph.o buildLabels.o solveQuery.o utility.o
 EXECUTABLE = main
 
