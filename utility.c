@@ -13,6 +13,17 @@ void sf_asprintf(char **strp, const char *fmt, ...) {
     va_end(ap);
 }
 
+// safe fscanf checks for number of read items
+void sf_fscanf(FILE* fp, const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    if (vfscanf(fp, fmt, ap) == 0) {
+        fprintf(stderr, "Error while reading variables from file with fscanf.");
+        exit(-1);
+    }
+    va_end(ap);
+}
+
 // see https://stackoverflow.com/a/10192994
 long long unsigned compute_delta_microseconds(struct timespec start, struct timespec end) {
     return (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
@@ -72,9 +83,9 @@ char* get_rss_virt_mem(void) {
         // assuming on UNIX but not GNU/Linux
         return "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
     }
-    fscanf(stat,
-           "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %*u %*u %*d %*d %*d %*d %*d %*d %*u %lu %ld",
-           &virt, &rss);
+    sf_fscanf(stat,
+              "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %*u %*u %*d %*d %*d %*d %*d %*d %*u %lu %ld",
+              &virt, &rss);
     fclose(stat);
     virt = (long unsigned) virt / 1024;
     rss = (long unsigned) rss * sysconf(_SC_PAGESIZE) / 1024;

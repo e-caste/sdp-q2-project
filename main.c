@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 
     // Take vertex number to alloc correct memory
 
-    fscanf(fp,"%lu\n", &num_vertex);
+    sf_fscanf(fp,"%lu\n", &num_vertex);
 
     rows = (row_g *) malloc (num_vertex * sizeof (row_g));  //array of lists
     if (rows == NULL ) {
@@ -308,7 +308,7 @@ int main(int argc, char *argv[]) {
     fseek(fp_query, 0L, SEEK_SET);
 
     for(i=0; i<num_query; i++) {
-        fscanf(fp_query, "%lu %lu  \n", &a, &b);
+        sf_fscanf(fp_query, "%lu %lu  \n", &a, &b);
         queries[i].num[0] = a;
         queries[i].num[1] = b;
     }
