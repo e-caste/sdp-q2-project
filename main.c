@@ -1,3 +1,4 @@
+#define _GNU_SOURCE 1  // allow usage of asprintf on GNU/Linux
 #include "buildLabels.h"
 #include "utility.h"
 

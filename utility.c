@@ -1,3 +1,4 @@
+#define _GNU_SOURCE 1  // allow usage of asprintf on GNU/Linux
 #include "utility.h"
 
 // see https://stackoverflow.com/a/10192994
