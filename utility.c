@@ -1,3 +1,4 @@
+#define _GNU_SOURCE 1  // allow usage of vasprintf on GNU/Linux
 #include "utility.h"
 
 // safe asprintf checks for memory allocation errors
