@@ -10,10 +10,10 @@ bool contains(int node1, int node2, int num_labels, row_l *array_labels) {
     return true;
 }
 
-bool dfs_search(row_g *graph, unsigned long node1, unsigned long node2, bool *visited, int num_labels, row_l *array_labels) {
+bool dfs_search(row_g *graph, unsigned long node1, unsigned long node2, bool *visited, int num_labels, row_l *array_labels, int query_num) {
     if(node1 == node2)
         return true;
-    if(visited[node1])
+    if(visited[node1] == query_num)
         return false;
 
     unsigned long children_num = graph[node1].edge_num;
@@ -26,7 +26,7 @@ bool dfs_search(row_g *graph, unsigned long node1, unsigned long node2, bool *vi
             if (graph[node1].edges[i] == node2)
                 return true;
             if(contains(graph[node1].edges[i], node2, num_labels, array_labels)) {
-                reachable = dfs_search(graph, graph[node1].edges[i], node2, visited, num_labels, array_labels);
+                reachable = dfs_search(graph, graph[node1].edges[i], node2, visited, num_labels, array_labels, query_num);
                 if(reachable) {
                     return true;
                 }
@@ -35,7 +35,7 @@ bool dfs_search(row_g *graph, unsigned long node1, unsigned long node2, bool *vi
 
     }
 
-    visited[node1] = true;
+    visited[node1] = query_num;
 
     return reachable;
 }
@@ -76,8 +76,8 @@ void *solveQuery (void *args) {
         }
 
         if(dfs) {
-            memset(my_data->node_visited, false, my_data->total_vertex * sizeof(bool));
-            my_data -> array_queries[j].can_reach = dfs_search(my_data->graph, node1, node2, my_data->node_visited, my_data->num_labels, my_data->array_labels);
+            //memset(my_data->node_visited, false, my_data->total_vertex * sizeof(bool));
+            my_data -> array_queries[j].can_reach = dfs_search(my_data->graph, node1, node2, my_data->node_visited, my_data->num_labels, my_data->array_labels, j);
 
             //fprintf(fp_res_query, "%i %i %d\n", node1, node2, reachable ? 1 : 0);
         }
