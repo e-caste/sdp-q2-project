@@ -7,7 +7,7 @@ void sf_asprintf(char **strp, const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
     if (vasprintf(strp, fmt, ap) < 0) {
-        fprintf(stderr, "Error while allocating memory for asprintf.");
+        fprintf(stderr, "Error while allocating memory for asprintf.\n");
         exit(-1);
     }
     va_end(ap);
@@ -17,8 +17,8 @@ void sf_asprintf(char **strp, const char *fmt, ...) {
 void sf_fscanf(FILE* fp, const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    if (vfscanf(fp, fmt, ap) == 0) {
-        fprintf(stderr, "Error while reading variables from file with fscanf.");
+    if (vfscanf(fp, fmt, ap) == EOF) {
+        fprintf(stderr, "Error while reading variables from file with fscanf.\n");
         exit(-1);
     }
     va_end(ap);
