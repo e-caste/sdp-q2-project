@@ -30,8 +30,6 @@
     #define KB_IN_GB 1048576  // = 1024 * 1024
     #define KB_IN_MB 1024
 
-    #define _GNU_SOURCE  // allow usage of asprintf on GNU/Linux
-
     // see https://iq.opengenus.org/detect-operating-system-in-c/
     // used to print the used memory correctly on macOS and GNU/Linux
     #ifdef __APPLE__
