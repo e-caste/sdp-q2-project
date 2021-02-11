@@ -154,14 +154,17 @@ Suffixes:
 
 |DAG | SLT | PLT | SQT | PQT | STT | PTT | SMEM | PMEM | Better time | Better RAM |
 |:---|:----|:----|:----|:----|:----|:----|:-----|:-----|:-----|:-----|
+| LARGE REAL |
 | cit-Patents.scc.gra | 18451 | 20248 | 1131 | 11222 | 19582 | 32788 | 435 | 1082 |  |  |
 | uniprotenc_22m.scc.gra | 6239 | 3897 | 38 | 95 | 6277 | 4712 | 178 | 487 | X |  |
 | uniprotenc_100m.scc.gra | 86279 | 45807 | 60 | 2208 | 86339 | 53888 | 1761 | 4736 | X |  |
+| SMALL DENSE REAL |
 | arXiv_sub_6000-1.gra | 14 | 47 | 124 | 170 | 138 | 246 | 3 | 6.9 |  |  |
 | citeseer_sub_10720.gra | 17 | 38 | 13 | 26 | 30 | 97 | 3.1 | 7.9 |  |  |
 | go_sub_6793.gra | 7 | 11 | 7 | 22 | 14 | 66 | 2.5 | 6.5 |  |  |
 | pubmed_sub_9000-1.gra | 14 | 33 | 14 | 27 | 28 | 103 | 2.9 | 7.3 |  |  |
 | yago_sub_6642.gra | 12 | 34 | 8 | 22 | 20 | 90 | 2.7 | 7 |  |  |
+| SMALL SPARSE REAL |
 | agrocyc_dag_uniq.gra | 11 | 12 | 8 | 19 | 19 | 62 | 3.2 | 8 |  |  |
 | amaze_dag_uniq.gra | 4 | 3 | 307 | 46 | 311 | 78 | 2.4 | 5.8 | X |  |
 | anthra_dag_uniq.gra | 11 | 11 | 7 | 19 | 18 | 61 | 3.2 | 8 |  |  |
