@@ -46,13 +46,13 @@ void *scanFile(void *args) {
 
         i=0;
 
-        fscanf(fp, "%lu", &sup);
+        sf_fscanf(fp, "%lu", &sup);
     }
 
     //Definition of inferiror limit
     if (my_data->id == 0) {
         fseek(fp, 0L, SEEK_SET);
-        fscanf(fp, "%*[^\n]\n");    // avoid first row which contains the vertex number
+        sf_fscanf(fp, "%*[^\n]\n");    // avoid first row which contains the vertex number
         inf = 0;
     } else {
         // random position inside a row
@@ -65,7 +65,7 @@ void *scanFile(void *args) {
         
         pos = ftell(fp);            // save the initial offset of the row
 
-        fscanf(fp, "%lu", &inf);     // read row index number
+        sf_fscanf(fp, "%lu", &inf);     // read row index number
 
         fseek(fp, pos, SEEK_SET);   //return at the begin of the row
     }    
@@ -75,7 +75,7 @@ void *scanFile(void *args) {
     k = 0;
     
     for(j=inf; j<sup; j++) {        //row format example: "2: 8 7 3 #"
-        fscanf(fp, "%lu: ", &i);     // remove row number and ': '
+        sf_fscanf(fp, "%lu: ", &i);     // remove row number and ': '
 
         i=0;
 

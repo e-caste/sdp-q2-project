@@ -81,6 +81,9 @@
     // safe asprintf used for printing statistics
     void sf_asprintf(char **strp, const char *fmt, ...);
 
+    // safe fscanf checks for return value
+    void sf_fscanf(FILE* fp, const char *fmt, ...);
+
     //function for statistics
     long long unsigned compute_delta_microseconds(struct timespec start, struct timespec end);
     char* get_human_readable_time(long long unsigned microseconds);
