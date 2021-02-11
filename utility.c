@@ -1,5 +1,16 @@
-#define _GNU_SOURCE 1  // allow usage of asprintf on GNU/Linux
 #include "utility.h"
+
+// safe asprintf checks for memory allocation errors
+// removes -Wunused-result gcc warnings
+void sf_asprintf(char **strp, const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    if (vasprintf(strp, fmt, ap) < 0) {
+        fprintf(stderr, "Error while allocating memory for asprintf.");
+        exit(-1);
+    }
+    va_end(ap);
+}
 
 // see https://stackoverflow.com/a/10192994
 long long unsigned compute_delta_microseconds(struct timespec start, struct timespec end) {
@@ -16,17 +27,17 @@ char* get_human_readable_time(long long unsigned microseconds) {
     ms = (long long unsigned) (microseconds - (h * US_IN_H + m * US_IN_M + s * US_IN_S)) / US_IN_MS;
     us = (long long unsigned) microseconds - (h * US_IN_H + m * US_IN_M + s * US_IN_S + ms * US_IN_MS);
     if (microseconds <= 0)
-        asprintf(&result, "less than 1 microsecond");
+        sf_asprintf(&result, "less than 1 microsecond");
     else if (microseconds > 0 && microseconds < US_IN_MS)
-        asprintf(&result, "%llu microseconds", microseconds);
+        sf_asprintf(&result, "%llu microseconds", microseconds);
     else if (microseconds >= US_IN_MS && microseconds < US_IN_S)
-        asprintf(&result, "%llu milliseconds, %llu microseconds", ms, us);
+        sf_asprintf(&result, "%llu milliseconds, %llu microseconds", ms, us);
     else if (microseconds >= US_IN_S && microseconds < US_IN_M)
-        asprintf(&result, "%llu seconds, %llu milliseconds, %llu microseconds", s, ms, us);
+        sf_asprintf(&result, "%llu seconds, %llu milliseconds, %llu microseconds", s, ms, us);
     else if (microseconds >= US_IN_M && microseconds < US_IN_H)
-        asprintf(&result, "%llu minutes, %llu seconds, %llu milliseconds, %llu microseconds", m, s, ms, us);
+        sf_asprintf(&result, "%llu minutes, %llu seconds, %llu milliseconds, %llu microseconds", m, s, ms, us);
     else
-        asprintf(&result, "%llu hours, %llu minutes, %llu seconds, %llu milliseconds, %llu microseconds", h, m, s, ms, us);
+        sf_asprintf(&result, "%llu hours, %llu minutes, %llu seconds, %llu milliseconds, %llu microseconds", h, m, s, ms, us);
     return result;
 }
 
@@ -38,13 +49,13 @@ char* get_human_readable_memory_usage(long unsigned kilobytes) {
     mb = (long unsigned) (kilobytes - (gb * KB_IN_GB)) / KB_IN_MB;
     kb = (long unsigned) kilobytes - (gb * KB_IN_GB + mb * KB_IN_MB);
     if (kilobytes <= 0)
-        asprintf(&result, "less than 1 KB");
+        sf_asprintf(&result, "less than 1 KB");
     else if (kilobytes > 0 && kilobytes < KB_IN_MB)
-        asprintf(&result, "%lu KB", kilobytes);
+        sf_asprintf(&result, "%lu KB", kilobytes);
     else if (kilobytes >= KB_IN_MB && kilobytes < KB_IN_GB)
-        asprintf(&result, "%lu MB %lu KB", mb, kb);
+        sf_asprintf(&result, "%lu MB %lu KB", mb, kb);
     else
-        asprintf(&result, "%lu GB %lu MB %lu KB", gb, mb, kb);
+        sf_asprintf(&result, "%lu GB %lu MB %lu KB", gb, mb, kb);
     return result;
 }
 
@@ -66,11 +77,11 @@ char* get_rss_virt_mem(void) {
     fclose(stat);
     virt = (long unsigned) virt / 1024;
     rss = (long unsigned) rss * sysconf(_SC_PAGESIZE) / 1024;
-    asprintf(&result,
-             "Currently used memory (RAM): %s\n"
-             "Currently used virtual memory (included pages): %s\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n",
-             get_human_readable_memory_usage(rss),
-             get_human_readable_memory_usage(virt));
+    sf_asprintf(&result,
+                "Currently used memory (RAM): %s\n"
+                 "Currently used virtual memory (included pages): %s\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n",
+                 get_human_readable_memory_usage(rss),
+                 get_human_readable_memory_usage(virt));
     return result;
 }
 

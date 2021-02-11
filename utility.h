@@ -9,6 +9,7 @@
     #include <time.h>
     #include <string.h>
     #include <sys/resource.h>
+    #include <stdarg.h>
     
     #define NUM_THREADS sysconf(_SC_NPROCESSORS_ONLN)
 
@@ -76,6 +77,9 @@
         int num_labels;
         row_l *array_labels;
     } t_args;
+
+    // safe asprintf used for printing statistics
+    void sf_asprintf(char **strp, const char *fmt, ...);
 
     //function for statistics
     long long unsigned compute_delta_microseconds(struct timespec start, struct timespec end);

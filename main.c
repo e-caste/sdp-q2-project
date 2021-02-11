@@ -1,4 +1,3 @@
-#define _GNU_SOURCE 1  // allow usage of asprintf on GNU/Linux
 #include "buildLabels.h"
 #include "utility.h"
 
@@ -144,8 +143,8 @@ int main(int argc, char *argv[]) {
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &file1_read);
     delta_microseconds = compute_delta_microseconds(section_start, file1_read);
-    asprintf(&stats, "Read input file %s (file1) in %s.\n", argv[1], get_human_readable_time(delta_microseconds));
-    asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
+    sf_asprintf(&stats, "Read input file %s (file1) in %s.\n", argv[1], get_human_readable_time(delta_microseconds));
+    sf_asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
     fprintf(stdout, "End of DAG file reading...\n");
 
     // Test of Graph print
@@ -192,10 +191,10 @@ int main(int argc, char *argv[]) {
     if (d == 0) {
         clock_gettime(CLOCK_MONOTONIC_RAW, &program_finished);
         delta_microseconds = compute_delta_microseconds(program_start, program_finished);
-        asprintf(&stats, "%sTotal program duration: %s.\n", stats, get_human_readable_time(delta_microseconds));
-        asprintf(&stats, "%sThreads used: %u.\n", stats, num_threads);
+        sf_asprintf(&stats, "%sTotal program duration: %s.\n", stats, get_human_readable_time(delta_microseconds));
+        sf_asprintf(&stats, "%sThreads used: %u.\n", stats, num_threads);
         getrusage(RUSAGE_SELF, &memory);
-        asprintf(&stats, "%sMaximum memory usage: %s\n", stats, get_human_readable_memory_usage(memory.ru_maxrss));
+        sf_asprintf(&stats, "%sMaximum memory usage: %s\n", stats, get_human_readable_memory_usage(memory.ru_maxrss));
         fprintf(stdout, "\n\n------------STATISTICS------------\n%s", stats);
         exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
     }
@@ -253,8 +252,8 @@ int main(int argc, char *argv[]) {
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &labels_generation_finished);
     delta_microseconds = compute_delta_microseconds(section_start, labels_generation_finished);
-    asprintf(&stats, "%sGenerated %s labels in %s.\n", stats, argv[2], get_human_readable_time(delta_microseconds));
-    asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
+    sf_asprintf(&stats, "%sGenerated %s labels in %s.\n", stats, argv[2], get_human_readable_time(delta_microseconds));
+    sf_asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
 
     //Test labels print
     // for(i=0; i<num_vertex; i++){
@@ -323,8 +322,8 @@ int main(int argc, char *argv[]) {
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &file2_read);
     delta_microseconds = compute_delta_microseconds(section_start, file2_read);
-    asprintf(&stats, "%sRead query file %s (file2) in %s.\n", stats, argv[3], get_human_readable_time(delta_microseconds));
-    asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
+    sf_asprintf(&stats, "%sRead query file %s (file2) in %s.\n", stats, argv[3], get_human_readable_time(delta_microseconds));
+    sf_asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
 
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
@@ -374,8 +373,8 @@ int main(int argc, char *argv[]) {
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &reachability_queries_finished);
     delta_microseconds = compute_delta_microseconds(section_start, reachability_queries_finished);
-    asprintf(&stats, "%sTested %d reachability queries in %s.\n", stats, num_query, get_human_readable_time(delta_microseconds));
-    asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
+    sf_asprintf(&stats, "%sTested %d reachability queries in %s.\n", stats, num_query, get_human_readable_time(delta_microseconds));
+    sf_asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
 
     // Resource deallocation
 
@@ -383,12 +382,12 @@ int main(int argc, char *argv[]) {
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &program_finished);
     delta_microseconds = compute_delta_microseconds(program_start, program_finished);
-    asprintf(&stats, "%sTotal program duration: %s.\n", stats, get_human_readable_time(delta_microseconds));
+    sf_asprintf(&stats, "%sTotal program duration: %s.\n", stats, get_human_readable_time(delta_microseconds));
 
-    asprintf(&stats, "%sThreads used: %u.\n", stats, num_threads);
+    sf_asprintf(&stats, "%sThreads used: %u.\n", stats, num_threads);
 
     getrusage(RUSAGE_SELF, &memory);
-    asprintf(&stats, "%sMaximum memory usage: %s\n", stats, get_human_readable_memory_usage(memory.ru_maxrss));
+    sf_asprintf(&stats, "%sMaximum memory usage: %s\n", stats, get_human_readable_memory_usage(memory.ru_maxrss));
 
     fprintf(stdout, "\n\n------------STATISTICS------------\n%s", stats);
 
