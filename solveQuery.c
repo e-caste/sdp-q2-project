@@ -10,7 +10,7 @@ bool contains(int node1, int node2, int num_labels, row_l *array_labels) {
     return true;
 }
 
-bool dfs_search(row_g *graph, unsigned long node1, unsigned long node2, bool *visited, int num_labels, row_l *array_labels, int query_num) {
+bool dfs_search(row_g *graph, unsigned long node1, unsigned long node2, int *visited, int num_labels, row_l *array_labels, int query_num) {
     if(node1 == node2)
         return true;
     if(visited[node1] == query_num)
