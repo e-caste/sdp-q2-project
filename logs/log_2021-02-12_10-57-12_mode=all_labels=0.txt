@@ -1,0 +1,497 @@
+Set number of labels to 0
+make: Nothing to be done for 'all'.
+Run mode set to all: running ./main against all benchmark and test DAGs
+Number of labels: 0
+
+Running ./main data/grail-dags/agrocyc_dag_uniq.gra 0 data/grail-dags/agrocyc.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/agrocyc_dag_uniq.gra (file1) in 2 milliseconds, 869 microseconds.
+Currently used memory (RAM): 1 MB 708 KB
+Currently used virtual memory (included pages): 2 GB 259 MB 112 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 3 milliseconds, 610 microseconds.
+Threads used: 32.
+Maximum memory usage: 3 MB 72 KB
+Deallocation (with error) successful!
+
+Running ./main data/grail-dags/amaze_dag_uniq.gra 0 data/grail-dags/amaze.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/amaze_dag_uniq.gra (file1) in 1 milliseconds, 619 microseconds.
+Currently used memory (RAM): 1 MB 740 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 868 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 2 milliseconds, 307 microseconds.
+Threads used: 32.
+Maximum memory usage: 2 MB 772 KB
+Deallocation (with error) successful!
+
+Running ./main data/grail-dags/anthra_dag_uniq.gra 0 data/grail-dags/anthra.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/anthra_dag_uniq.gra (file1) in 2 milliseconds, 512 microseconds.
+Currently used memory (RAM): 1 MB 736 KB
+Currently used virtual memory (included pages): 2 GB 259 MB 104 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 3 milliseconds, 539 microseconds.
+Threads used: 32.
+Maximum memory usage: 3 MB 92 KB
+Deallocation (with error) successful!
+
+Running ./main data/grail-dags/arXiv_sub_6000-1.gra 0 data/grail-dags/arxiv.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/arXiv_sub_6000-1.gra (file1) in 1 milliseconds, 934 microseconds.
+Currently used memory (RAM): 1 MB 732 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 924 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 2 milliseconds, 608 microseconds.
+Threads used: 32.
+Maximum memory usage: 3 MB 232 KB
+Deallocation (with error) successful!
+
+Running ./main data/grail-dags/cit-Patents.scc.gra 0 data/grail-dags/cit-Patents.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/cit-Patents.scc.gra (file1) in 165 milliseconds, 90 microseconds.
+Currently used memory (RAM): 264 MB 548 KB
+Currently used virtual memory (included pages): 2 GB 373 MB 940 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 398 milliseconds, 328 microseconds.
+Threads used: 32.
+Maximum memory usage: 273 MB 140 KB
+Deallocation (with error) successful!
+
+Running ./main data/grail-dags/citeseer_sub_10720.gra 0 data/grail-dags/citeseer.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/citeseer_sub_10720.gra (file1) in 2 milliseconds, 194 microseconds.
+Currently used memory (RAM): 1 MB 788 KB
+Currently used virtual memory (included pages): 2 GB 259 MB 48 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 3 milliseconds, 538 microseconds.
+Threads used: 32.
+Maximum memory usage: 3 MB 248 KB
+Deallocation (with error) successful!
+
+Running ./main data/grail-dags/ecoo_dag_uniq.gra 0 data/grail-dags/ecoo.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/ecoo_dag_uniq.gra (file1) in 2 milliseconds, 334 microseconds.
+Currently used memory (RAM): 1 MB 820 KB
+Currently used virtual memory (included pages): 2 GB 259 MB 108 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 3 milliseconds, 963 microseconds.
+Threads used: 32.
+Maximum memory usage: 2 MB 972 KB
+Deallocation (with error) successful!
+
+Running ./main data/grail-dags/go_sub_6793.gra 0 data/grail-dags/go.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/go_sub_6793.gra (file1) in 1 milliseconds, 797 microseconds.
+Currently used memory (RAM): 1 MB 876 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 952 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 2 milliseconds, 334 microseconds.
+Threads used: 32.
+Maximum memory usage: 2 MB 932 KB
+Deallocation (with error) successful!
+
+Running ./main data/grail-dags/human_dag_uniq.gra 0 data/grail-dags/human.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/human_dag_uniq.gra (file1) in 7 milliseconds, 646 microseconds.
+Currently used memory (RAM): 2 MB 88 KB
+Currently used virtual memory (included pages): 2 GB 260 MB 128 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 8 milliseconds, 556 microseconds.
+Threads used: 32.
+Maximum memory usage: 4 MB 192 KB
+Deallocation (with error) successful!
+
+Running ./main data/grail-dags/kegg_dag_uniq.gra 0 data/grail-dags/kegg.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/kegg_dag_uniq.gra (file1) in 1 milliseconds, 784 microseconds.
+Currently used memory (RAM): 1 MB 860 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 868 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 2 milliseconds, 375 microseconds.
+Threads used: 32.
+Maximum memory usage: 2 MB 780 KB
+Deallocation (with error) successful!
+
+Running ./main data/grail-dags/mtbrv_dag_uniq.gra 0 data/grail-dags/mtbrv.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/mtbrv_dag_uniq.gra (file1) in 1 milliseconds, 756 microseconds.
+Currently used memory (RAM): 1 MB 800 KB
+Currently used virtual memory (included pages): 2 GB 259 MB 16 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 2 milliseconds, 263 microseconds.
+Threads used: 32.
+Maximum memory usage: 2 MB 852 KB
+Deallocation (with error) successful!
+
+Running ./main data/grail-dags/nasa_dag_uniq.gra 0 data/grail-dags/nasa.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/nasa_dag_uniq.gra (file1) in 1 milliseconds, 496 microseconds.
+Currently used memory (RAM): 1 MB 820 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 912 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 2 milliseconds, 5 microseconds.
+Threads used: 32.
+Maximum memory usage: 2 MB 692 KB
+Deallocation (with error) successful!
+
+Running ./main data/grail-dags/pubmed_sub_9000-1.gra 0 data/grail-dags/pubmed.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/pubmed_sub_9000-1.gra (file1) in 1 milliseconds, 994 microseconds.
+Currently used memory (RAM): 1 MB 728 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 1020 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 3 milliseconds, 527 microseconds.
+Threads used: 32.
+Maximum memory usage: 3 MB 104 KB
+Deallocation (with error) successful!
+
+Running ./main data/grail-dags/uniprotenc_100m.scc.gra 0 data/grail-dags/uniprotenc_100m.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/uniprotenc_100m.scc.gra (file1) in 758 milliseconds, 16 microseconds.
+Currently used memory (RAM): 979 MB 568 KB
+Currently used virtual memory (included pages): 2 GB 749 MB 680 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 7 seconds, 1 milliseconds, 948 microseconds.
+Threads used: 32.
+Maximum memory usage: 1 GB 71 MB 644 KB
+Deallocation (with error) successful!
+
+Running ./main data/grail-dags/uniprotenc_22m.scc.gra 0 data/grail-dags/uniprotenc_22m.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/uniprotenc_22m.scc.gra (file1) in 83 milliseconds, 890 microseconds.
+Currently used memory (RAM): 95 MB 384 KB
+Currently used virtual memory (included pages): 2 GB 307 MB 420 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 691 milliseconds, 202 microseconds.
+Threads used: 32.
+Maximum memory usage: 111 MB 700 KB
+Deallocation (with error) successful!
+
+Running ./main data/grail-dags/vchocyc_dag_uniq.gra 0 data/grail-dags/vchocyc.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/vchocyc_dag_uniq.gra (file1) in 2 milliseconds, 341 microseconds.
+Currently used memory (RAM): 1 MB 656 KB
+Currently used virtual memory (included pages): 2 GB 259 MB 12 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 3 milliseconds, 610 microseconds.
+Threads used: 32.
+Maximum memory usage: 2 MB 832 KB
+Deallocation (with error) successful!
+
+Running ./main data/grail-dags/xmark_dag_uniq.gra 0 data/grail-dags/xmark.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/xmark_dag_uniq.gra (file1) in 1 milliseconds, 582 microseconds.
+Currently used memory (RAM): 1 MB 820 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 928 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 2 milliseconds, 285 microseconds.
+Threads used: 32.
+Maximum memory usage: 2 MB 808 KB
+Deallocation (with error) successful!
+
+Running ./main data/grail-dags/yago_sub_6642.gra 0 data/grail-dags/yago.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/yago_sub_6642.gra (file1) in 1 milliseconds, 860 microseconds.
+Currently used memory (RAM): 1 MB 732 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 944 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 3 milliseconds, 235 microseconds.
+Threads used: 32.
+Maximum memory usage: 3 MB 184 KB
+Deallocation (with error) successful!
+
+Running ./main data/gen-dags/v1000000e100.gra 0 data/gen-dags/v1000000e100.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v1000000e100.gra (file1) in 356 milliseconds, 935 microseconds.
+Currently used memory (RAM): 420 MB 768 KB
+Currently used virtual memory (included pages): 2 GB 289 MB 244 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 360 milliseconds, 206 microseconds.
+Threads used: 32.
+Maximum memory usage: 425 MB 928 KB
+Deallocation (with error) successful!
+
+Running ./main data/gen-dags/v1000000e200.gra 0 data/gen-dags/v1000000e200.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v1000000e200.gra (file1) in 700 milliseconds, 615 microseconds.
+Currently used memory (RAM): 801 MB 636 KB
+Currently used virtual memory (included pages): 2 GB 289 MB 244 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 703 milliseconds, 583 microseconds.
+Threads used: 32.
+Maximum memory usage: 808 MB 532 KB
+Deallocation (with error) successful!
+
+Running ./main data/gen-dags/v100000e100.gra 0 data/gen-dags/v100000e100.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v100000e100.gra (file1) in 41 milliseconds, 90 microseconds.
+Currently used memory (RAM): 38 MB 236 KB
+Currently used virtual memory (included pages): 2 GB 261 MB 792 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 43 milliseconds, 396 microseconds.
+Threads used: 32.
+Maximum memory usage: 44 MB 992 KB
+Deallocation (with error) successful!
+
+Running ./main data/gen-dags/v1000e30.gra 0 data/gen-dags/v1000e30.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v1000e30.gra (file1) in 2 milliseconds, 69 microseconds.
+Currently used memory (RAM): 1 MB 796 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 2 milliseconds, 918 microseconds.
+Threads used: 32.
+Maximum memory usage: 2 MB 612 KB
+Deallocation (with error) successful!
+
+Running ./main data/gen-dags/v100e10.gra 0 data/gen-dags/v100e10.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v100e10.gra (file1) in 1 milliseconds, 438 microseconds.
+Currently used memory (RAM): 1 MB 708 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 2 milliseconds, 115 microseconds.
+Threads used: 32.
+Maximum memory usage: 2 MB 496 KB
+Deallocation (with error) successful!
+
+Running ./main data/gen-dags/v10e3.gra 0 data/gen-dags/v10e3.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v10e3.gra (file1) in 611 microseconds.
+Currently used memory (RAM): 688 KB
+Currently used virtual memory (included pages): 722 MB 648 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 866 microseconds.
+Threads used: 10.
+Maximum memory usage: 2 MB 144 KB
+Deallocation (with error) successful!
+
+Running ./main data/gen-dags/v200e20.gra 0 data/gen-dags/v200e20.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v200e20.gra (file1) in 1 milliseconds, 507 microseconds.
+Currently used memory (RAM): 1 MB 820 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 2 milliseconds, 351 microseconds.
+Threads used: 32.
+Maximum memory usage: 2 MB 548 KB
+Deallocation (with error) successful!
+
+Running ./main data/gen-dags/v500000e1000.gra 0 data/gen-dags/v500000e1000.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v500000e1000.gra (file1) in 1 seconds, 392 milliseconds, 77 microseconds.
+Currently used memory (RAM): 1 GB 903 MB 392 KB
+Currently used virtual memory (included pages): 2 GB 273 MB 1004 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 1 seconds, 394 milliseconds, 172 microseconds.
+Threads used: 32.
+Maximum memory usage: 1 GB 907 MB 528 KB
+Deallocation (with error) successful!
+
+Running ./main data/gen-dags/v500000e50.gra 0 data/gen-dags/v500000e50.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v500000e50.gra (file1) in 113 milliseconds, 322 microseconds.
+Currently used memory (RAM): 116 MB 156 KB
+Currently used virtual memory (included pages): 2 GB 273 MB 1004 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 116 milliseconds, 839 microseconds.
+Threads used: 32.
+Maximum memory usage: 119 MB 236 KB
+Deallocation (with error) successful!
+
+Running ./main data/gen-dags/v5000e50.gra 0 data/gen-dags/v5000e50.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v5000e50.gra (file1) in 2 milliseconds, 115 microseconds.
+Currently used memory (RAM): 1 MB 732 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 896 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 3 milliseconds, 126 microseconds.
+Threads used: 32.
+Maximum memory usage: 3 MB 636 KB
+Deallocation (with error) successful!
+
+Running ./main data/gen-dags/v500e10.gra 0 data/gen-dags/v500e10.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v500e10.gra (file1) in 2 milliseconds, 559 microseconds.
+Currently used memory (RAM): 1 MB 692 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 3 milliseconds, 323 microseconds.
+Threads used: 32.
+Maximum memory usage: 2 MB 592 KB
+Deallocation (with error) successful!

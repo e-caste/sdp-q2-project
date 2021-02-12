@@ -1,0 +1,580 @@
+Set number of labels to 5
+Run mode set to benchmark only
+make: Nothing to be done for 'all'.
+Number of labels: 5
+
+Running ./main data/grail-dags/agrocyc_dag_uniq.gra 5 data/grail-dags/agrocyc.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+Starting label creation...
+End Label creation...
+Query Number: 100000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/agrocyc_dag_uniq.gra (file1) in 2 milliseconds, 861 microseconds.
+Currently used memory (RAM): 1 MB 820 KB
+Currently used virtual memory (included pages): 2 GB 259 MB 112 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 9 milliseconds, 990 microseconds.
+Currently used memory (RAM): 5 MB 328 KB
+Currently used virtual memory (included pages): 2 GB 37 MB 472 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/grail-dags/agrocyc.que (file2) in 27 milliseconds, 46 microseconds.
+Currently used memory (RAM): 7 MB 388 KB
+Currently used virtual memory (included pages): 2 GB 39 MB 768 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 100000 reachability queries in 21 milliseconds, 495 microseconds.
+Currently used memory (RAM): 7 MB 816 KB
+Currently used virtual memory (included pages): 2 GB 41 MB 348 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 62 milliseconds, 678 microseconds.
+Threads used: 32.
+Maximum memory usage: 8 MB 44 KB
+
+Running ./main data/grail-dags/amaze_dag_uniq.gra 5 data/grail-dags/amaze.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+Starting label creation...
+End Label creation...
+Query Number: 100000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/amaze_dag_uniq.gra (file1) in 1 milliseconds, 917 microseconds.
+Currently used memory (RAM): 1 MB 836 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 868 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 3 milliseconds, 446 microseconds.
+Currently used memory (RAM): 3 MB 364 KB
+Currently used virtual memory (included pages): 2 GB 35 MB 500 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/grail-dags/amaze.que (file2) in 26 milliseconds, 173 microseconds.
+Currently used memory (RAM): 5 MB 424 KB
+Currently used virtual memory (included pages): 2 GB 37 MB 796 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 100000 reachability queries in 30 milliseconds, 925 microseconds.
+Currently used memory (RAM): 6 MB 36 KB
+Currently used virtual memory (included pages): 2 GB 38 MB 192 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 63 milliseconds, 498 microseconds.
+Threads used: 32.
+Maximum memory usage: 6 MB 144 KB
+
+Running ./main data/grail-dags/anthra_dag_uniq.gra 5 data/grail-dags/anthra.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+Starting label creation...
+End Label creation...
+Query Number: 100000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/anthra_dag_uniq.gra (file1) in 2 milliseconds, 510 microseconds.
+Currently used memory (RAM): 1 MB 788 KB
+Currently used virtual memory (included pages): 2 GB 259 MB 104 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 10 milliseconds, 402 microseconds.
+Currently used memory (RAM): 5 MB 252 KB
+Currently used virtual memory (included pages): 2 GB 37 MB 460 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/grail-dags/anthra.que (file2) in 26 milliseconds, 652 microseconds.
+Currently used memory (RAM): 7 MB 312 KB
+Currently used virtual memory (included pages): 2 GB 39 MB 756 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 100000 reachability queries in 21 milliseconds, 222 microseconds.
+Currently used memory (RAM): 7 MB 740 KB
+Currently used virtual memory (included pages): 2 GB 41 MB 332 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 62 milliseconds, 41 microseconds.
+Threads used: 32.
+Maximum memory usage: 7 MB 984 KB
+
+Running ./main data/grail-dags/arXiv_sub_6000-1.gra 5 data/grail-dags/arxiv.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+Starting label creation...
+End Label creation...
+Query Number: 100000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/arXiv_sub_6000-1.gra (file1) in 2 milliseconds, 21 microseconds.
+Currently used memory (RAM): 1 MB 796 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 924 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 39 milliseconds, 378 microseconds.
+Currently used memory (RAM): 4 MB 272 KB
+Currently used virtual memory (included pages): 2 GB 36 MB 76 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/grail-dags/arxiv.que (file2) in 25 milliseconds, 852 microseconds.
+Currently used memory (RAM): 6 MB 332 KB
+Currently used virtual memory (included pages): 2 GB 38 MB 372 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 100000 reachability queries in 28 milliseconds, 46 microseconds.
+Currently used memory (RAM): 7 MB 264 KB
+Currently used virtual memory (included pages): 2 GB 39 MB 52 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 96 milliseconds, 188 microseconds.
+Threads used: 32.
+Maximum memory usage: 7 MB 332 KB
+
+Running ./main data/grail-dags/cit-Patents.scc.gra 5 data/grail-dags/cit-Patents.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+Starting label creation...
+End Label creation...
+Query Number: 100000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/cit-Patents.scc.gra (file1) in 168 milliseconds, 402 microseconds.
+Currently used memory (RAM): 264 MB 820 KB
+Currently used virtual memory (included pages): 2 GB 373 MB 940 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 20 seconds, 29 milliseconds, 522 microseconds.
+Currently used memory (RAM): 993 MB 152 KB
+Currently used virtual memory (included pages): 2 GB 873 MB 844 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/grail-dags/cit-Patents.que (file2) in 117 milliseconds, 932 microseconds.
+Currently used memory (RAM): 991 MB 264 KB
+Currently used virtual memory (included pages): 2 GB 872 MB 208 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 100000 reachability queries in 156 milliseconds, 572 microseconds.
+Currently used memory (RAM): 1 GB 290 MB 80 KB
+Currently used virtual memory (included pages): 3 GB 309 MB 80 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 21 seconds, 125 milliseconds, 543 microseconds.
+Threads used: 32.
+Maximum memory usage: 1 GB 290 MB 112 KB
+
+Running ./main data/grail-dags/citeseer_sub_10720.gra 5 data/grail-dags/citeseer.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+Starting label creation...
+End Label creation...
+Query Number: 100000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/citeseer_sub_10720.gra (file1) in 2 milliseconds, 422 microseconds.
+Currently used memory (RAM): 1 MB 732 KB
+Currently used virtual memory (included pages): 2 GB 259 MB 48 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 32 milliseconds, 361 microseconds.
+Currently used memory (RAM): 5 MB 360 KB
+Currently used virtual memory (included pages): 2 GB 37 MB 96 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/grail-dags/citeseer.que (file2) in 26 milliseconds, 419 microseconds.
+Currently used memory (RAM): 7 MB 420 KB
+Currently used virtual memory (included pages): 2 GB 39 MB 392 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 100000 reachability queries in 24 milliseconds, 715 microseconds.
+Currently used memory (RAM): 8 MB 972 KB
+Currently used virtual memory (included pages): 2 GB 40 MB 704 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 87 milliseconds, 553 microseconds.
+Threads used: 32.
+Maximum memory usage: 8 MB 1020 KB
+
+Running ./main data/grail-dags/ecoo_dag_uniq.gra 5 data/grail-dags/ecoo.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+Starting label creation...
+End Label creation...
+Query Number: 100000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/ecoo_dag_uniq.gra (file1) in 3 milliseconds, 408 microseconds.
+Currently used memory (RAM): 1 MB 836 KB
+Currently used virtual memory (included pages): 2 GB 259 MB 108 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 10 milliseconds, 306 microseconds.
+Currently used memory (RAM): 5 MB 324 KB
+Currently used virtual memory (included pages): 2 GB 37 MB 464 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/grail-dags/ecoo.que (file2) in 26 milliseconds, 742 microseconds.
+Currently used memory (RAM): 7 MB 384 KB
+Currently used virtual memory (included pages): 2 GB 39 MB 760 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 100000 reachability queries in 20 milliseconds, 965 microseconds.
+Currently used memory (RAM): 7 MB 804 KB
+Currently used virtual memory (included pages): 2 GB 41 MB 372 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 62 milliseconds, 604 microseconds.
+Threads used: 32.
+Maximum memory usage: 8 MB 32 KB
+
+Running ./main data/grail-dags/go_sub_6793.gra 5 data/grail-dags/go.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+Starting label creation...
+End Label creation...
+Query Number: 100000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/go_sub_6793.gra (file1) in 1 milliseconds, 826 microseconds.
+Currently used memory (RAM): 1 MB 832 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 952 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 10 milliseconds, 37 microseconds.
+Currently used memory (RAM): 4 MB 0 KB
+Currently used virtual memory (included pages): 2 GB 36 MB 116 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/grail-dags/go.que (file2) in 25 milliseconds, 881 microseconds.
+Currently used memory (RAM): 6 MB 304 KB
+Currently used virtual memory (included pages): 2 GB 38 MB 540 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 100000 reachability queries in 22 milliseconds, 603 microseconds.
+Currently used memory (RAM): 7 MB 132 KB
+Currently used virtual memory (included pages): 2 GB 39 MB 320 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 61 milliseconds, 272 microseconds.
+Threads used: 32.
+Maximum memory usage: 7 MB 240 KB
+
+Running ./main data/grail-dags/human_dag_uniq.gra 5 data/grail-dags/human.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+Starting label creation...
+End Label creation...
+Query Number: 100000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/human_dag_uniq.gra (file1) in 8 milliseconds, 964 microseconds.
+Currently used memory (RAM): 2 MB 20 KB
+Currently used virtual memory (included pages): 2 GB 260 MB 128 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 28 milliseconds, 716 microseconds.
+Currently used memory (RAM): 11 MB 384 KB
+Currently used virtual memory (included pages): 2 GB 43 MB 468 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/grail-dags/human.que (file2) in 27 milliseconds, 980 microseconds.
+Currently used memory (RAM): 13 MB 444 KB
+Currently used virtual memory (included pages): 2 GB 45 MB 764 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 100000 reachability queries in 21 milliseconds, 700 microseconds.
+Currently used memory (RAM): 13 MB 760 KB
+Currently used virtual memory (included pages): 2 GB 50 MB 588 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 90 milliseconds, 851 microseconds.
+Threads used: 32.
+Maximum memory usage: 13 MB 1020 KB
+
+Running ./main data/grail-dags/kegg_dag_uniq.gra 5 data/grail-dags/kegg.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+Starting label creation...
+End Label creation...
+Query Number: 100000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/kegg_dag_uniq.gra (file1) in 1 milliseconds, 858 microseconds.
+Currently used memory (RAM): 1 MB 788 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 868 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 3 milliseconds, 440 microseconds.
+Currently used memory (RAM): 3 MB 304 KB
+Currently used virtual memory (included pages): 2 GB 35 MB 500 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/grail-dags/kegg.que (file2) in 27 milliseconds, 279 microseconds.
+Currently used memory (RAM): 5 MB 364 KB
+Currently used virtual memory (included pages): 2 GB 37 MB 796 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 100000 reachability queries in 42 milliseconds, 421 microseconds.
+Currently used memory (RAM): 5 MB 988 KB
+Currently used virtual memory (included pages): 2 GB 38 MB 200 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 76 milliseconds, 31 microseconds.
+Threads used: 32.
+Maximum memory usage: 6 MB 44 KB
+
+Running ./main data/grail-dags/mtbrv_dag_uniq.gra 5 data/grail-dags/mtbrv.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+Starting label creation...
+End Label creation...
+Query Number: 100000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/mtbrv_dag_uniq.gra (file1) in 2 milliseconds, 269 microseconds.
+Currently used memory (RAM): 1 MB 704 KB
+Currently used virtual memory (included pages): 2 GB 259 MB 16 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 8 milliseconds, 24 microseconds.
+Currently used memory (RAM): 4 MB 632 KB
+Currently used virtual memory (included pages): 2 GB 36 MB 800 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/grail-dags/mtbrv.que (file2) in 25 milliseconds, 822 microseconds.
+Currently used memory (RAM): 6 MB 692 KB
+Currently used virtual memory (included pages): 2 GB 39 MB 72 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 100000 reachability queries in 20 milliseconds, 681 microseconds.
+Currently used memory (RAM): 7 MB 56 KB
+Currently used virtual memory (included pages): 2 GB 40 MB 264 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 57 milliseconds, 860 microseconds.
+Threads used: 32.
+Maximum memory usage: 7 MB 308 KB
+
+Running ./main data/grail-dags/nasa_dag_uniq.gra 5 data/grail-dags/nasa.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+Starting label creation...
+End Label creation...
+Query Number: 100000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/nasa_dag_uniq.gra (file1) in 1 milliseconds, 847 microseconds.
+Currently used memory (RAM): 1 MB 816 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 912 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 5 milliseconds, 726 microseconds.
+Currently used memory (RAM): 3 MB 656 KB
+Currently used virtual memory (included pages): 2 GB 35 MB 940 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/grail-dags/nasa.que (file2) in 25 milliseconds, 993 microseconds.
+Currently used memory (RAM): 5 MB 716 KB
+Currently used virtual memory (included pages): 2 GB 38 MB 212 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 100000 reachability queries in 20 milliseconds, 852 microseconds.
+Currently used memory (RAM): 6 MB 500 KB
+Currently used virtual memory (included pages): 2 GB 38 MB 888 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 55 milliseconds, 213 microseconds.
+Threads used: 32.
+Maximum memory usage: 6 MB 664 KB
+
+Running ./main data/grail-dags/pubmed_sub_9000-1.gra 5 data/grail-dags/pubmed.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+Starting label creation...
+End Label creation...
+Query Number: 100000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/pubmed_sub_9000-1.gra (file1) in 2 milliseconds, 615 microseconds.
+Currently used memory (RAM): 1 MB 656 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 1020 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 27 milliseconds, 490 microseconds.
+Currently used memory (RAM): 4 MB 768 KB
+Currently used virtual memory (included pages): 2 GB 36 MB 780 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/grail-dags/pubmed.que (file2) in 25 milliseconds, 843 microseconds.
+Currently used memory (RAM): 6 MB 828 KB
+Currently used virtual memory (included pages): 2 GB 39 MB 52 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 100000 reachability queries in 21 milliseconds, 903 microseconds.
+Currently used memory (RAM): 8 MB 140 KB
+Currently used virtual memory (included pages): 2 GB 40 MB 152 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 79 milliseconds, 317 microseconds.
+Threads used: 32.
+Maximum memory usage: 8 MB 156 KB
+
+Running ./main data/grail-dags/uniprotenc_100m.scc.gra 5 data/grail-dags/uniprotenc_100m.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+Starting label creation...
+End Label creation...
+Query Number: 100000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/uniprotenc_100m.scc.gra (file1) in 763 milliseconds, 100 microseconds.
+Currently used memory (RAM): 979 MB 688 KB
+Currently used virtual memory (included pages): 2 GB 749 MB 680 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 39 seconds, 86 milliseconds, 830 microseconds.
+Currently used memory (RAM): 4 GB 68 MB 20 KB
+Currently used virtual memory (included pages): 5 GB 633 MB 464 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/grail-dags/uniprotenc_100m.que (file2) in 482 milliseconds, 293 microseconds.
+Currently used memory (RAM): 3 GB 982 MB 696 KB
+Currently used virtual memory (included pages): 5 GB 524 MB 368 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 100000 reachability queries in 52 milliseconds, 922 microseconds.
+Currently used memory (RAM): 3 GB 997 MB 904 KB
+Currently used virtual memory (included pages): 7 GB 440 MB 240 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 44 seconds, 244 milliseconds, 158 microseconds.
+Threads used: 32.
+Maximum memory usage: 4 GB 736 MB 300 KB
+
+Running ./main data/grail-dags/uniprotenc_22m.scc.gra 5 data/grail-dags/uniprotenc_22m.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+Starting label creation...
+End Label creation...
+Query Number: 100000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/uniprotenc_22m.scc.gra (file1) in 77 milliseconds, 719 microseconds.
+Currently used memory (RAM): 95 MB 144 KB
+Currently used virtual memory (included pages): 2 GB 307 MB 420 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 3 seconds, 363 milliseconds, 576 microseconds.
+Currently used memory (RAM): 415 MB 844 KB
+Currently used virtual memory (included pages): 2 GB 399 MB 552 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/grail-dags/uniprotenc_22m.que (file2) in 64 milliseconds, 30 microseconds.
+Currently used memory (RAM): 406 MB 12 KB
+Currently used virtual memory (included pages): 2 GB 390 MB 24 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 100000 reachability queries in 42 milliseconds, 471 microseconds.
+Currently used memory (RAM): 419 MB 100 KB
+Currently used virtual memory (included pages): 2 GB 584 MB 808 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 4 seconds, 13 milliseconds, 58 microseconds.
+Threads used: 32.
+Maximum memory usage: 486 MB 996 KB
+
+Running ./main data/grail-dags/vchocyc_dag_uniq.gra 5 data/grail-dags/vchocyc.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+Starting label creation...
+End Label creation...
+Query Number: 100000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/vchocyc_dag_uniq.gra (file1) in 2 milliseconds, 552 microseconds.
+Currently used memory (RAM): 1 MB 736 KB
+Currently used virtual memory (included pages): 2 GB 259 MB 12 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 7 milliseconds, 973 microseconds.
+Currently used memory (RAM): 4 MB 560 KB
+Currently used virtual memory (included pages): 2 GB 36 MB 792 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/grail-dags/vchocyc.que (file2) in 26 milliseconds, 227 microseconds.
+Currently used memory (RAM): 6 MB 620 KB
+Currently used virtual memory (included pages): 2 GB 39 MB 64 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 100000 reachability queries in 21 milliseconds, 95 microseconds.
+Currently used memory (RAM): 7 MB 28 KB
+Currently used virtual memory (included pages): 2 GB 40 MB 224 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 59 milliseconds, 18 microseconds.
+Threads used: 32.
+Maximum memory usage: 7 MB 272 KB
+
+Running ./main data/grail-dags/xmark_dag_uniq.gra 5 data/grail-dags/xmark.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+Starting label creation...
+End Label creation...
+Query Number: 100000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/xmark_dag_uniq.gra (file1) in 1 milliseconds, 914 microseconds.
+Currently used memory (RAM): 1 MB 796 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 928 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 6 milliseconds, 326 microseconds.
+Currently used memory (RAM): 3 MB 756 KB
+Currently used virtual memory (included pages): 2 GB 36 MB 76 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/grail-dags/xmark.que (file2) in 26 milliseconds, 546 microseconds.
+Currently used memory (RAM): 5 MB 816 KB
+Currently used virtual memory (included pages): 2 GB 38 MB 372 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 100000 reachability queries in 21 milliseconds, 510 microseconds.
+Currently used memory (RAM): 6 MB 768 KB
+Currently used virtual memory (included pages): 2 GB 39 MB 72 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 57 milliseconds, 132 microseconds.
+Threads used: 32.
+Maximum memory usage: 6 MB 788 KB
+
+Running ./main data/grail-dags/yago_sub_6642.gra 5 data/grail-dags/yago.que
+Starting the reading of DAG file...
+End of DAG file reading...
+Starting roots search...
+End of root search...
+Starting label creation...
+End Label creation...
+Query Number: 100000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/grail-dags/yago_sub_6642.gra (file1) in 2 milliseconds, 165 microseconds.
+Currently used memory (RAM): 1 MB 708 KB
+Currently used virtual memory (included pages): 2 GB 258 MB 944 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 28 milliseconds, 983 microseconds.
+Currently used memory (RAM): 4 MB 528 KB
+Currently used virtual memory (included pages): 2 GB 36 MB 236 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/grail-dags/yago.que (file2) in 25 milliseconds, 817 microseconds.
+Currently used memory (RAM): 6 MB 588 KB
+Currently used virtual memory (included pages): 2 GB 38 MB 532 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 100000 reachability queries in 21 milliseconds, 219 microseconds.
+Currently used memory (RAM): 7 MB 576 KB
+Currently used virtual memory (included pages): 2 GB 39 MB 280 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 79 milliseconds, 477 microseconds.
+Threads used: 32.
+Maximum memory usage: 7 MB 684 KB
