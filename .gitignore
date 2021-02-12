@@ -3,7 +3,6 @@ grail/
 **/.DS_Store
 cmake-build-debug/
 **/.o
-logs/
 data/gen-dags/
 data/grail-dags/
 
