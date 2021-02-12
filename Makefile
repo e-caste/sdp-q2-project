@@ -24,4 +24,4 @@ utility.o: utility.c utility.h
 	$(CC) $(CFLAGS) utility.c -o utility.o
 
 clean:
-	-rm -f *.o main res_query_prova.txt
+	-rm -f *.o main res_query.txt
