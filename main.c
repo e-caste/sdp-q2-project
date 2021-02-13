@@ -141,12 +141,6 @@ int main(int argc, char *argv[]) {
     // Wait until all thread end
     pthread_barrier_wait(barrier);
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &file1_read);
-    delta_microseconds = compute_delta_microseconds(section_start, file1_read);
-    sf_asprintf(&stats, "Read input file %s (file1) in %s.\n", argv[1], get_human_readable_time(delta_microseconds));
-    sf_asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
-    fprintf(stdout, "End of DAG file reading...\n");
-
     // Test of Graph print
     /*for(i=0; i<num_vertex; i++) {
         printf("%i : ", i);
@@ -162,8 +156,7 @@ int main(int argc, char *argv[]) {
     // wait threads counts number of roots
     pthread_barrier_wait(barrier);
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
-    roots = (unsigned int *) malloc(roots_num * sizeof(unsigned int));
+    roots = (unsigned int *) malloc(roots_num * sizeof(unsigned long));
     if (roots == NULL ) {
         printf ("Error in creating roots struct\n" );
         exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
@@ -187,6 +180,12 @@ int main(int argc, char *argv[]) {
 
     fprintf(stdout, "End of root search...\n");
 
+    clock_gettime(CLOCK_MONOTONIC_RAW, &file1_read);
+    delta_microseconds = compute_delta_microseconds(section_start, file1_read);
+    sf_asprintf(&stats, "Read input file %s (file1) in %s.\n", argv[1], get_human_readable_time(delta_microseconds));
+    sf_asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
+    fprintf(stdout, "End of DAG file reading...\n");
+
     // ignore labels
     if (d == 0) {
         clock_gettime(CLOCK_MONOTONIC_RAW, &program_finished);
@@ -208,6 +207,8 @@ int main(int argc, char *argv[]) {
 
     // Label bulding
     // labels will follow the same index order of rows (node index).
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
 
     labels = (row_l *) malloc (num_vertex * sizeof (row_l));
     if (labels == NULL ) {
@@ -231,16 +232,16 @@ int main(int argc, char *argv[]) {
 
         //for parallelize 1 thread for each children (labels)
         // OR 1 thread for each label + some threads for roots
-        rows[i].node_mutex = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
-        if (rows[i].node_mutex  == NULL ) {
-            printf ("Error in creating mutex protection for node\n" );
-            exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
-        }
-
-        if(pthread_mutex_init(rows[i].node_mutex , NULL) != 0){
-            printf ("Error in initializing mutex protection for node\n" );
-            exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
-        }
+//        rows[i].node_mutex = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
+//        if (rows[i].node_mutex  == NULL ) {
+//            printf ("Error in creating mutex protection for node\n" );
+//            exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
+//        }
+//
+//        if(pthread_mutex_init(rows[i].node_mutex , NULL) != 0){
+//            printf ("Error in initializing mutex protection for node\n" );
+//            exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
+//        }
     }
 
     fprintf(stdout, "Starting label creation...\n");
@@ -357,6 +358,11 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    clock_gettime(CLOCK_MONOTONIC_RAW, &reachability_queries_finished);
+    delta_microseconds = compute_delta_microseconds(section_start, reachability_queries_finished);
+    sf_asprintf(&stats, "%sTested %d reachability queries in %s.\n", stats, num_query, get_human_readable_time(delta_microseconds));
+    sf_asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
+
     FILE *fp_res_query;
     fp_res_query = fopen("res_query.txt", "w");
 
@@ -370,11 +376,6 @@ int main(int argc, char *argv[]) {
     }
 
     fclose(fp_res_query);
-
-    clock_gettime(CLOCK_MONOTONIC_RAW, &reachability_queries_finished);
-    delta_microseconds = compute_delta_microseconds(section_start, reachability_queries_finished);
-    sf_asprintf(&stats, "%sTested %d reachability queries in %s.\n", stats, num_query, get_human_readable_time(delta_microseconds));
-    sf_asprintf(&stats, "%s%s", stats, get_rss_virt_mem());
 
     // Resource deallocation
 
