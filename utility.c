@@ -98,7 +98,7 @@ char* get_rss_virt_mem(void) {
 }
 
 
-void exitWithDealloc(bool error, unsigned long num_vertex, FILE * fp_dag, row_g *rows, pthread_t *threads, t_args *args, pthread_mutex_t *roots_mutex, unsigned long *roots, row_l *labels, FILE *fp_query, el_query *queries){
+void exitWithDealloc(bool error, unsigned int num_vertex, FILE * fp_dag, row_g *rows, pthread_t *threads, t_args *args, pthread_mutex_t *roots_mutex, unsigned int *roots, row_l *labels, FILE *fp_query, el_query *queries){
     //1. error in: rows = (row_g *) malloc (num_vertex * sizeof (row_g));
     if(fp_dag)
         fclose(fp_dag);
@@ -166,15 +166,15 @@ void exitWithDealloc(bool error, unsigned long num_vertex, FILE * fp_dag, row_g 
 }
 
 //Swap e randomize are utility functions used for randomize the roots
-void swap (unsigned long *a, unsigned long *b) {
-    unsigned long temp = *a;
+void swap (unsigned int *a, unsigned int *b) {
+    unsigned int temp = *a;
     *a = *b;
     *b = temp;
 }
 
-void randomize(unsigned long *array, unsigned long n) {
-    for(unsigned long i=n-1; i>0; i--) {
-        unsigned long j = rand() % (i+1);
+void randomize(unsigned int *array, unsigned int n) {
+    for(unsigned int i=n-1; i>0; i--) {
+        unsigned int j = rand() % (i+1);
         if (i != j)
             swap(&array[i], &array[j]);
     }

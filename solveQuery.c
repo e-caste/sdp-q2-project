@@ -10,15 +10,15 @@ bool contains(int node1, int node2, int num_labels, row_l *array_labels) {
     return true;
 }
 
-bool dfs_search(row_g *graph, unsigned long node1, unsigned long node2, int *visited, int num_labels, row_l *array_labels, int query_num) {
+bool dfs_search(row_g *graph, unsigned int node1, unsigned int node2, int *visited, int num_labels, row_l *array_labels, int query_num) {
     if(node1 == node2)
         return true;
     if(visited[node1] == query_num)
         return false;
 
-    unsigned long children_num = graph[node1].edge_num;
+    unsigned int children_num = graph[node1].edge_num;
     bool reachable = false;
-    unsigned long i;
+    unsigned int i;
     
     if(children_num > 0) {
 
@@ -45,7 +45,7 @@ void *solveQuery (void *args) {
     my_data = (t_args *) args;
     unsigned int num_threads = my_data->total_threads;
 
-    unsigned long i, j, inf, sup, node1, node2;
+    unsigned int i, j, inf, sup, node1, node2;
     bool dfs;
 
     if (my_data->id == num_threads-1)
