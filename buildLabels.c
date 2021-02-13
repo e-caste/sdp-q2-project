@@ -31,7 +31,6 @@ void RandomizedLabelingSequential(row_g * graph, row_l * labels, int num_label, 
 
 void RandomizedVisitSequentialRecursive(unsigned int node_num, int lbl_num, row_l* labels, row_g* graph, unsigned int* rank_root, unsigned int num_vertex){
     unsigned int rank_children_min = num_vertex, i, j, children_num = graph[node_num].edge_num;
-    //unsigned int* indexes = (unsigned int *)malloc(children_num*sizeof(unsigned int));
     unsigned int indexes[children_num];
 
     if(labels[node_num].visited[lbl_num])
@@ -67,9 +66,6 @@ void RandomizedVisitSequentialRecursive(unsigned int node_num, int lbl_num, row_
     labels[node_num].lbl_end[lbl_num] = *rank_root;
 
     *rank_root = *rank_root + 1 ;
-
-    //if(indexes)
-    //    free(indexes);
 }
 
 //PARALLEL FUNCTION
@@ -80,13 +76,6 @@ void RandomizedLabelingParallelInit(row_g * graph, row_l * labels, int label_num
     unsigned int i;
     pthread_t threads_lbl[label_num];   //1 thread for each label
     t_lbl_args args_lbl[label_num];
-    unsigned int* indexes = (unsigned int *)malloc(roots_num*sizeof(unsigned int));
-
-    // Scan Roots it once here.
-    // In threads code use a shadow created with memcpy -> should be faster
-    for(i=0; i<roots_num; i++){
-        indexes[i] = i;
-    }
 
     //Inizializzation random value for roots randomization
     srand(time(NULL));
@@ -100,7 +89,6 @@ void RandomizedLabelingParallelInit(row_g * graph, row_l * labels, int label_num
         args_lbl[i].vertex_num = vertex_num;
         args_lbl[i].roots = roots;
         args_lbl[i].roots_num = roots_num;
-        args_lbl[i].indexes = indexes;  //*shared* structure -> no protection because work in a shadow copy
         args_lbl[i].threads_available = (num_threads/label_num); //todo some test for decide if let scheduler decide is better
 
         //MODIFIED VERSION: 3 THREAD FOR EACH LABELS + SOME SUB-THREADS SPLITTING ROOTS
@@ -121,9 +109,6 @@ void RandomizedLabelingParallelInit(row_g * graph, row_l * labels, int label_num
             exit(1);
         }
     }
-
-    if(indexes)
-        free(indexes);
 }
 
 // RandomizedLabelingParallel is the PARALLEL version used for creating N Labels
@@ -134,8 +119,10 @@ void* RandomizedLabelingParallel(void* args) {
 
     // roots randomization (each thread its own)
     // roots are provided by the main
-    // here we work in a shadow copy of original roots
-    memcpy(indexes, my_data->indexes, my_data->roots_num*sizeof(unsigned int));
+    for(unsigned int i=0; i<my_data->roots_num; i++){
+        indexes[i] = i;
+    }
+
     randomize(indexes, my_data->roots_num);
 
     for(int j=0; j< my_data->roots_num; j++) {

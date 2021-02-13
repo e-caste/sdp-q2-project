@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
     // wait threads counts number of roots
     pthread_barrier_wait(barrier);
 
-    roots = (unsigned int *) malloc(roots_num * sizeof(unsigned long));
+    roots = (unsigned int *) malloc(roots_num * sizeof(unsigned int));
     if (roots == NULL ) {
         printf ("Error in creating roots struct\n" );
         exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
