@@ -178,6 +178,7 @@ Suffixes:
 
 Note: the sequential version total time (STT) is the sum of SLT and SQT, while for our program we have implemented a more granular time detection, which allows us to precisely identify the labeling and query resolution time spans, ignoring the file reads (that are accounted for in the total time as PTT = PLT + PQT + X).
 
+Note: to reproduce the results stored in the `logs` directory, simply run `./complete_benchmark`. The table above is the most significant part of the benchmark; its results come from `logs/log_2021-01-12_11-19-31_mode=benchmark_labels=5.txt`.
 
 ## How to run
 
