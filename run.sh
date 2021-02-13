@@ -22,6 +22,7 @@ DAGS=(
 #  "citeseerx.gra.gz"
 )
 LABELS=5
+THREADS=0
 RUN_MODE="all"  # benchmark -> DAGs from $GRAIL_DATA_PATH | test -> DAGs from $GEN_DATA_PATH | all -> both | specific -> only given graph path
 SPECIFIC_DAG_PATH=""
 CLEAN_EXE="clean_query_file"
@@ -60,7 +61,7 @@ function print_usage {
   echo ""
   echo "Use -h or --help to show this help."
   echo "Usage:"
-  echo "$0 ([-d|--download] [-g|--generate] [-r|--run [-l|--labels <number of labels>] [benchmark|test|<path to graph file>]])"
+  echo "$0 ([-d|--download] [-g|--generate] [-r|--run [-l|--labels <number of labels>] [-t|--threads <number of threads>] [benchmark|test|<path to graph file>]])"
   echo "[] mean an argument is optional"
   echo "() mean an argument is mandatory"
   echo "| means the argument on its left is equivalent to the argument on its right"
@@ -73,6 +74,7 @@ function print_usage {
   echo "- 'all': it will run our program against all the DAGs in $GEN_DATA_PATH and $GRAIL_DATA_PATH. It is equivalent to running both modes above."
   echo "The default run mode is '$RUN_MODE'."
   echo "The default number of labels is $LABELS, but it can be specified with the -l|--labels <num> option."
+  echo "The default number of threads is the maximum number of threads of your CPU."
   echo ""
   echo "You need the following packages to run this script:"
   echo "wget gzip tar make gcc"
@@ -187,7 +189,11 @@ function generate_graphs {
 }
 
 function run_cmd {
-  cmd="$EXE $1 $LABELS $2"
+  if [[ "$THREADS" = 0 ]]; then
+    cmd="$EXE $1 $LABELS $2"
+  else
+    cmd="$EXE $1 $LABELS $2 $THREADS"
+  fi
   if [[ -f "$1" ]] && [[ -f "$2" ]]; then
     echo ""
     echo "Running $cmd"
@@ -208,6 +214,15 @@ function run_benchmark {
         LABELS=$2
       else
         echo "Unexpected number of labels: $2, using default $LABELS..."
+      fi
+      shift 2
+      ;;
+      -t|--threads)
+      if [[ $2 =~ $number_regex ]]; then
+        echo "Set number of threads to $2"
+        THREADS=$2
+      else
+        echo "Unexpected number of threads: $2, using default..."
       fi
       shift 2
       ;;
@@ -238,14 +253,13 @@ function run_benchmark {
   done
 
   # compile our program
+  make clean
   make
-  # make clean
 
   if [[ "$RUN_MODE" = "all" ]]; then
     echo "Run mode set to all: running $EXE against all benchmark and test DAGs"
   fi
 
-  echo "Number of labels: $LABELS"
   if [[ "$RUN_MODE" = "specific" ]]; then
       run_cmd "$SPECIFIC_DAG_PATH".gra "$SPECIFIC_DAG_PATH".que
   else
