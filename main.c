@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 
     // Take vertex number to alloc correct memory
 
-    sf_fscanf(fp,"%lu\n", &num_vertex);
+    sf_fscanf(fp,"%u\n", &num_vertex);
 
     rows = (row_g *) malloc (num_vertex * sizeof (row_g));  //array of lists
     if (rows == NULL ) {
@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
         args[i].id = i;
         err_code = pthread_create(&threads[i], NULL, scanFile, (void *)&args[i]);
         if(err_code) {
-            printf ("Error number %i in thread %lu creation.\n", err_code, i);
+            printf ("Error number %i in thread %u creation.\n", err_code, i);
             exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
         }
     }
@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
     for(j=0; j < num_threads; j++) {
         err_code = pthread_join(threads[j], NULL);
         if(err_code) {
-            printf ("Error number %i in thread %lu joining.\n", err_code, j);
+            printf ("Error number %i in thread %u joining.\n", err_code, j);
             exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
         }
     }
@@ -297,7 +297,7 @@ int main(int argc, char *argv[]) {
         num_query++;
     }
 
-    printf("Query Number: %lu\n", num_query);
+    printf("Query Number: %u\n", num_query);
 
     queries = malloc(sizeof(el_query)*num_query);
     if(queries == NULL){
@@ -308,7 +308,7 @@ int main(int argc, char *argv[]) {
     fseek(fp_query, 0L, SEEK_SET);
 
     for(i=0; i<num_query; i++) {
-        sf_fscanf(fp_query, "%lu %lu  \n", &a, &b);
+        sf_fscanf(fp_query, "%u %u  \n", &a, &b);
         queries[i].num[0] = a;
         queries[i].num[1] = b;
     }
@@ -344,7 +344,7 @@ int main(int argc, char *argv[]) {
         args[j].array_labels = labels;
         err_code = pthread_create(&threads[j], NULL, solveQuery, (void *)&args[j]);
         if(err_code) {
-            printf ("Error number %i in thread %lu creation.\n", err_code, j);
+            printf ("Error number %i in thread %u creation.\n", err_code, j);
             exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, NULL, queries);
         }
     }
@@ -352,7 +352,7 @@ int main(int argc, char *argv[]) {
     for(j=0; j < num_threads; j++) {
         err_code = pthread_join(threads[j], NULL);
         if(err_code) {
-            printf ("Error number %i in thread %lu joining.\n", err_code, j);
+            printf ("Error number %i in thread %u joining.\n", err_code, j);
             exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, NULL, queries);
         }
     }
@@ -366,7 +366,7 @@ int main(int argc, char *argv[]) {
     }
 
     for(i=0; i<num_query; i++) {
-        fprintf(fp_res_query, "%lu %lu %d\n", queries[i].num[0], queries[i].num[1], queries[i].can_reach ? 1 : 0);
+        fprintf(fp_res_query, "%u %u %d\n", queries[i].num[0], queries[i].num[1], queries[i].can_reach ? 1 : 0);
     }
 
     fclose(fp_res_query);
