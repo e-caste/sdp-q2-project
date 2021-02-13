@@ -73,7 +73,7 @@ So we will have something like:
 typedef struct row_label {
 	int* lbl_start;
 	int* lbl_end;
-	bool* visited;
+	int* visited;
 } row_l;
 ```
 So we will have something like:
