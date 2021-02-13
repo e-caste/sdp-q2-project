@@ -7,15 +7,15 @@
 int main(int argc, char *argv[]) {
     FILE *fp = NULL, *fp_query = NULL;
     unsigned int num_threads;
-    unsigned long num_vertex;
-    unsigned long i, j, size;
+    unsigned int num_vertex;
+    unsigned int i, j, size;
     int err_code=0, d;
     row_g *rows = NULL;
     pthread_t *threads = NULL;
     t_args *args = NULL;
     // needed for labels generation
-    unsigned long *roots = NULL;
-    unsigned long roots_num, root_index;
+    unsigned int *roots = NULL;
+    unsigned int roots_num, root_index;
     pthread_mutex_t *roots_mutex = NULL;
     pthread_barrier_t *barrier = NULL;
     row_l *labels = NULL;
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     // needed for reachability query
     int **visited = NULL;
     el_query *queries = NULL;
-    unsigned long a, b, num_query=0;
+    unsigned int a, b, num_query=0;
 
     // Checks on arguments
 
@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
     pthread_barrier_wait(barrier);
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &section_start);
-    roots = (unsigned long *) malloc(roots_num * sizeof(unsigned long));
+    roots = (unsigned int *) malloc(roots_num * sizeof(unsigned int));
     if (roots == NULL ) {
         printf ("Error in creating roots struct\n" );
         exitWithDealloc(true, num_vertex, NULL, rows, threads, args, roots_mutex, roots, labels, fp_query, queries);
@@ -216,8 +216,8 @@ int main(int argc, char *argv[]) {
     }
 
     for(i=0; i<num_vertex; i++){
-        labels[i].lbl_start = (unsigned long *) malloc (d * sizeof (unsigned long));
-        labels[i].lbl_end = (unsigned long *) malloc (d * sizeof (unsigned long));
+        labels[i].lbl_start = (unsigned int *) malloc (d * sizeof (unsigned int));
+        labels[i].lbl_end = (unsigned int *) malloc (d * sizeof (unsigned int));
         labels[i].visited = (bool *) malloc (d * sizeof (bool));
         if ((labels[i].lbl_start == NULL ) || (labels[i].lbl_end == NULL ) || (labels[i].visited == NULL )) {
             printf ("Not enough room for this size labels\n" );
@@ -225,8 +225,8 @@ int main(int argc, char *argv[]) {
         }
 
         //It's not always true that these values are resetted
-        memset(labels[i].lbl_start, 0, d * sizeof(unsigned long));
-        memset(labels[i].lbl_end, 0, d * sizeof(unsigned long));
+        memset(labels[i].lbl_start, 0, d * sizeof(unsigned int));
+        memset(labels[i].lbl_end, 0, d * sizeof(unsigned int));
         memset(labels[i].visited, false, d * sizeof(bool));
 
         //for parallelize 1 thread for each children (labels)

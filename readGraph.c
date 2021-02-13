@@ -10,8 +10,8 @@ void *scanFile(void *args) {
     t_args *my_data;
     my_data = (t_args *) args;
     FILE *fp;
-    unsigned long j, i, k, pos;
-    unsigned long sup, inf;
+    unsigned int j, i, k, pos;
+    unsigned int sup, inf;
     unsigned int num_threads = my_data->total_threads;
     char *line_buf = NULL;
     ssize_t line_size;
@@ -91,7 +91,7 @@ void *scanFile(void *args) {
                 offset++;
             }
 
-            my_data -> graph[j].edges = malloc(k*sizeof(unsigned long));
+            my_data -> graph[j].edges = malloc(k*sizeof(unsigned int));
             if(my_data -> graph[j].edges == NULL) {
                 printf ("Not enough room for array of edges size\n" );
                 exit(1);
