@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
 
     // Checks on arguments
 
-    if (argc != 4) {
+    if (argc != 4 && argc != 5) {
         fprintf(stderr, "Enter only 'file1', 'n' and 'file2' as arguments!\n");
         exit(1);
     }
@@ -67,6 +67,11 @@ int main(int argc, char *argv[]) {
     // this is needed to prevent an infinite wait
     // when using very small graphs (e.g. 10 vertices) on heavily multithreaded CPUs (e.g. 24 threads)
     num_threads = NUM_THREADS > num_vertex ? num_vertex : NUM_THREADS;
+    if (argc == 5) {
+        // the number of threads is set from the command line
+        i = atoi(argv[4]);
+        num_threads = i > num_vertex ? num_vertex : i;
+    }
 
     // only now we know the correct size of these arrays
     threads = (pthread_t *) malloc(num_threads * sizeof(pthread_t));
