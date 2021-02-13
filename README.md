@@ -150,31 +150,31 @@ Suffixes:
 - LT = labeling time (ms)
 - QT = query resolution time (ms)
 - TT = total time (ms)
-- MEM = maximum memory usage (MB)
+- MEM = maximum memory usage (MiB)
 
 |DAG | SLT | PLT | SQT | PQT | STT | PTT | SMEM | PMEM | Better time (PTT<STT) | Better RAM (PMEM<SMEM) |
 |:---|:----|:----|:----|:----|:----|:----|:-----|:-----|:-----|:-----|
 | **LARGE REAL** |
-| cit-Patents.scc.gra | 18451 | 20248 | 1131 | 11222 | 19582 | 32788 | 435 | 1082 |  |  |
-| uniprotenc_22m.scc.gra | 6239 | 3897 | 38 | 95 | 6277 | 4712 | 178 | 487 | X |  |
-| uniprotenc_100m.scc.gra | 86279 | 45807 | 60 | 2208 | 86339 | 53888 | 1761 | 4736 | X |  |
+| cit-Patents.scc.gra | 18451 | 20029 | 1131 | 156 | 19582 | 21125 | 435 | 1314 |  |  |
+| uniprotenc_22m.scc.gra | 6239 | 3363 | 38 | 42 | 6277 | 4013 | 178 | 487 | X |  |
+| uniprotenc_100m.scc.gra | 86279 | 39086 | 60 | 53 | 86339 | 44244 | 1761 | 4832 | X |  |
 | **SMALL DENSE REAL** |
-| arXiv_sub_6000-1.gra | 14 | 47 | 124 | 170 | 138 | 246 | 3 | 6.9 |  |  |
-| citeseer_sub_10720.gra | 17 | 38 | 13 | 26 | 30 | 97 | 3.1 | 7.9 |  |  |
-| go_sub_6793.gra | 7 | 11 | 7 | 22 | 14 | 66 | 2.5 | 6.5 |  |  |
-| pubmed_sub_9000-1.gra | 14 | 33 | 14 | 27 | 28 | 103 | 2.9 | 7.3 |  |  |
-| yago_sub_6642.gra | 12 | 34 | 8 | 22 | 20 | 90 | 2.7 | 7 |  |  |
+| arXiv_sub_6000-1.gra | 14 | 39 | 124 | 28 | 138 | 96 | 3 | 7.3 | X |  |
+| citeseer_sub_10720.gra | 17 | 32 | 13 | 25 | 30 | 87 | 3.1 | 9 |  |  |
+| go_sub_6793.gra | 7 | 10 | 7 | 22 | 14 | 61 | 2.5 | 7.2 |  |  |
+| pubmed_sub_9000-1.gra | 14 | 27 | 14 | 22 | 28 | 79 | 2.9 | 8.1 |  |  |
+| yago_sub_6642.gra | 12 | 29 | 8 | 21 | 20 | 79 | 2.7 | 7.6 |  |  |
 | **SMALL SPARSE REAL** |
-| agrocyc_dag_uniq.gra | 11 | 12 | 8 | 19 | 19 | 62 | 3.2 | 8 |  |  |
-| amaze_dag_uniq.gra | 4 | 3 | 307 | 46 | 311 | 78 | 2.4 | 5.8 | X |  |
-| anthra_dag_uniq.gra | 11 | 11 | 7 | 19 | 18 | 61 | 3.2 | 8 |  |  |
-| ecoo_dag_uniq.gra | 11 | 11 | 7 | 22 | 18 | 68 | 3.3 | 8 |  |  |
-| human_dag_uniq.gra | 40 | 33 | 10 | 22 | 50 | 114 | 6.1 | 14.2 |  |  |
-| kegg_dag_uniq.gra | 4 | 4 | 415 | 51 | 419 | 87 | 2.2 | 5.9 | X |  |
-| mtbrv_dag_uniq.gra | 8 | 8 | 7 | 23 | 15 | 66 | 2.9 | 7.2 |  |  |
-| nasa_dag_uniq.gra | 5 | 5 | 6 | 23 | 11 | 60 | 2.4 | 6.2 |  |  |
-| vchocyc_dag_uniq.gra | 8 | 9 | 7 | 22 | 15 | 67 | 2.8 | 7.2 |  |  |
-| xmark_dag_uniq.gra | 5 | 6 | 20 | 28 | 25 | 67 | 2.5 | 6.4 |  |  |
+| agrocyc_dag_uniq.gra | 11 | 10 | 8 | 21 | 19 | 63 | 3.2 | 8 |  |  |
+| amaze_dag_uniq.gra | 4 | 3 | 307 | 31 | 311 | 63 | 2.4 | 6.1 | X |  |
+| anthra_dag_uniq.gra | 11 | 10 | 7 | 21 | 18 | 62 | 3.2 | 8 |  |  |
+| ecoo_dag_uniq.gra | 11 | 10 | 7 | 21 | 18 | 63 | 3.3 | 8 |  |  |
+| human_dag_uniq.gra | 40 | 29 | 10 | 22 | 50 | 91 | 6.1 | 13 |  |  |
+| kegg_dag_uniq.gra | 4 | 3 | 415 | 42 | 419 | 76 | 2.2 | 6 | X |  |
+| mtbrv_dag_uniq.gra | 8 | 8 | 7 | 21 | 15 | 58 | 2.9 | 7.3 |  |  |
+| nasa_dag_uniq.gra | 5 | 6 | 6 | 21 | 11 | 55 | 2.4 | 6.6 |  |  |
+| vchocyc_dag_uniq.gra | 8 | 8 | 7 | 21 | 15 | 59 | 2.8 | 7.2 |  |  |
+| xmark_dag_uniq.gra | 5 | 6 | 20 | 26 | 25 | 57 | 2.5 | 6.7 |  |  |
 
 Note: the sequential version total time (STT) is the sum of SLT and SQT, while for our program we have implemented a more granular time detection, which allows us to precisely identify the labeling and query resolution time spans, ignoring the file reads (that are accounted for in the total time as PTT = PLT + PQT + X).
 
