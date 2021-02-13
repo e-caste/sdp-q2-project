@@ -81,7 +81,7 @@ void RandomizedLabelingParallelInit(row_g * graph, row_l * labels, int label_num
     pthread_t threads_lbl[label_num];   //1 thread for each label
     t_lbl_args args_lbl[label_num];
     //unsigned int* indexes = (unsigned int *)malloc(roots_num*sizeof(unsigned int));
-    unsigned int indexes[num_roots];
+    unsigned int indexes[roots_num];
 
     // Scan Roots it once here.
     // In threads code use a shadow created with memcpy -> should be faster
