@@ -42,36 +42,36 @@
     //STRUCTURES used in common phase (readGraph, Label, Queries)
 
     typedef struct row_label {
-        unsigned long* lbl_start;
-        unsigned long* lbl_end;
+        unsigned int* lbl_start;
+        unsigned int* lbl_end;
         bool* visited;
     } row_l;
 
     typedef struct row_graph {
-        unsigned long edge_num;   //total number of vertex in this direction
+        unsigned int edge_num;   //total number of vertex in this direction
         bool not_root;
-        unsigned long *edges;
+        unsigned int *edges;
         pthread_mutex_t *node_mutex;  //for parallelize 1 thread for each children in labels
     } row_g;
 
     typedef struct el_list_query {
-        unsigned long num[2];
+        unsigned int num[2];
         bool can_reach;
     } el_query;
 
     typedef struct thread_args {
-        unsigned long id;
-        unsigned long total_vertex;
+        unsigned int id;
+        unsigned int total_vertex;
         unsigned int total_threads;
-        unsigned long size_file;
+        unsigned int size_file;
         char *filename;
         row_g *graph;
-        unsigned long **roots;
-        unsigned long *roots_num;             //During DAG reading we count the number of roots (with protection)
-        unsigned long *root_index;            //Shared Index to initialize roots array in parallel way
+        unsigned int **roots;
+        unsigned int *roots_num;             //During DAG reading we count the number of roots (with protection)
+        unsigned int *root_index;            //Shared Index to initialize roots array in parallel way
         pthread_mutex_t *roots_mutex;
         pthread_barrier_t *barrier;
-        unsigned long queries_num;
+        unsigned int queries_num;
         el_query * array_queries;
         int *node_visited;
         int num_labels;
@@ -94,14 +94,14 @@
     void *scanFile(void *args);
 
     //function from solveQuery
-    bool dfs_search(row_g *graph, unsigned long node1, unsigned long node2, int *visited, int num_labels, row_l *array_labels, int query_num);
+    bool dfs_search(row_g *graph, unsigned int node1, unsigned int node2, int *visited, int num_labels, row_l *array_labels, int query_num);
     void *solveQuery (void *args);
     bool contains(int node1, int node2, int num_labels, row_l *array_labels);
 
     //utilities functions for build and randomize an array of roots
-    void swap (unsigned long *a, unsigned long *b);
-    void randomize(unsigned long *array, unsigned long n);
+    void swap (unsigned int *a, unsigned int *b);
+    void randomize(unsigned int *array, unsigned int n);
 
     //function for correct program exits
-    void exitWithDealloc(bool error, unsigned long num_vertex, FILE * fp_dag, row_g *rows, pthread_t *threads, t_args *args, pthread_mutex_t *roots_mutex, unsigned long *roots, row_l *labels, FILE *fp_query, el_query *queries);
+    void exitWithDealloc(bool error, unsigned int num_vertex, FILE * fp_dag, row_g *rows, pthread_t *threads, t_args *args, pthread_mutex_t *roots_mutex, unsigned int *roots, row_l *labels, FILE *fp_query, el_query *queries);
 #endif //UTILITY_H

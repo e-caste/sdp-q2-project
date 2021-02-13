@@ -10,8 +10,8 @@ void *scanFile(void *args) {
     t_args *my_data;
     my_data = (t_args *) args;
     FILE *fp;
-    unsigned long j, i, k, pos;
-    unsigned long sup, inf;
+    unsigned int j, i, k, pos;
+    unsigned int sup, inf;
     unsigned int num_threads = my_data->total_threads;
     char *line_buf = NULL;
     ssize_t line_size;
@@ -25,7 +25,7 @@ void *scanFile(void *args) {
 
     fp = fopen(my_data -> filename, "r");
     if (fp == NULL) {
-        fprintf(stderr, "Unable to open file %s for reading, thread number %lu.\n", my_data -> filename, my_data -> id );
+        fprintf(stderr, "Unable to open file %s for reading, thread number %u.\n", my_data -> filename, my_data -> id );
         exit(1);
     }
 
@@ -46,7 +46,7 @@ void *scanFile(void *args) {
 
         i=0;
 
-        sf_fscanf(fp, "%lu", &sup);
+        sf_fscanf(fp, "%u", &sup);
     }
 
     //Definition of inferiror limit
@@ -65,7 +65,7 @@ void *scanFile(void *args) {
         
         pos = ftell(fp);            // save the initial offset of the row
 
-        sf_fscanf(fp, "%lu", &inf);     // read row index number
+        sf_fscanf(fp, "%u", &inf);     // read row index number
 
         fseek(fp, pos, SEEK_SET);   //return at the begin of the row
     }    
@@ -75,7 +75,7 @@ void *scanFile(void *args) {
     k = 0;
     
     for(j=inf; j<sup; j++) {        //row format example: "2: 8 7 3 #"
-        sf_fscanf(fp, "%lu: ", &i);     // remove row number and ': '
+        sf_fscanf(fp, "%u: ", &i);     // remove row number and ': '
 
         i=0;
 
@@ -91,7 +91,7 @@ void *scanFile(void *args) {
                 offset++;
             }
 
-            my_data -> graph[j].edges = malloc(k*sizeof(unsigned long));
+            my_data -> graph[j].edges = malloc(k*sizeof(unsigned int));
             if(my_data -> graph[j].edges == NULL) {
                 printf ("Not enough room for array of edges size\n" );
                 exit(1);
