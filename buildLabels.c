@@ -109,7 +109,7 @@ void RandomizedLabelingParallelInit(row_g * graph, row_l * labels, int label_num
         //ORIGINAL VERSION: 1 THREAD FOR EACH LABELS
         err_code = pthread_create(&threads_lbl[i], NULL, RandomizedLabelingParallel, (void *)&args_lbl[i]);
         if(err_code) {
-            printf ("RandomizedLabelingInit: Error number %i in creating thread %lu.\n", err_code, i);
+            printf ("RandomizedLabelingInit: Error number %i in creating thread %u.\n", err_code, i);
             exit(1);
         }
     }
@@ -117,7 +117,7 @@ void RandomizedLabelingParallelInit(row_g * graph, row_l * labels, int label_num
     for(i=0; i<label_num; i++) {
         err_code = pthread_join(threads_lbl[i], NULL);
         if(err_code) {
-            printf ("RandomizedLabelingInit: Error number %i in joining thread for %lu.\n", err_code, i);
+            printf ("RandomizedLabelingInit: Error number %i in joining thread for %u.\n", err_code, i);
             exit(1);
         }
     }
@@ -183,7 +183,7 @@ void* RandomizedLabelingRootsParallelInit(void* args) {   //1 thread for each la
 
             err_code = pthread_create(&threads_lbl[i], NULL, RandomizedLabelingRootsParallel, (void *)&args_lbl[i]);
             if(err_code) {
-                printf ("RandomizedLabelingRootsParallelInit: Error number %i in creating thread %lu.\n", err_code, i);
+                printf ("RandomizedLabelingRootsParallelInit: Error number %i in creating thread %u.\n", err_code, i);
                 exit(1);
             }
         }
@@ -191,7 +191,7 @@ void* RandomizedLabelingRootsParallelInit(void* args) {   //1 thread for each la
         for(i=0; i<my_data->threads_available; i++) {
             err_code = pthread_join(threads_lbl[i], NULL);
             if(err_code) {
-                printf ("RandomizedLabelingRootsParallelInit: Error number %i in joining thread for  %lu.\n", err_code, i);
+                printf ("RandomizedLabelingRootsParallelInit: Error number %i in joining thread for  %u.\n", err_code, i);
                 exit(1);
             }
         }

@@ -84,7 +84,7 @@ char* get_rss_virt_mem(void) {
         return "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
     }
     sf_fscanf(stat,
-              "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %*u %*u %*d %*d %*d %*d %*d %*d %*u %lu %ld",
+              "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %*u %*u %*d %*d %*d %*d %*d %*d %*u %u %ld",
               &virt, &rss);
     fclose(stat);
     virt = (long unsigned) virt / 1024;
