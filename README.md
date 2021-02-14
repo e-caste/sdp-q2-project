@@ -166,7 +166,9 @@ Hardware configuration:
 | **SYNTHETIC SMALL** | ![](readme/test/small/v5000e50.png) | ![](readme/test/small/v1000e30.png) | ![](readme/test/small/v500e10.png) | ![](readme/test/small/v200e20.png) | ![](readme/test/small/v100e10.png) |
 | continues | ![](readme/test/small/v10e3.png) |
 
-Note: the sequential version does not keep track of the file read times (denoted as "Other" in gray for the parallel version). We can assume a similar or worse time with respect to the parallel version, so we can mostly safely ignore the gray part of the bar of the parallel version.
+From the histograms above, we can see that in most cases our program (the parallel implementation) achieves comparable or better results than its sequential counterpart. In very small DAGs, we can see that the overhead due to the creation of the threads and their data structures overcomes the advantage of the parallelization. But, as the DAGs grow in number of nodes and edges, we can see that the parallelization offers more and more a great improvement in time usage (e.g. with v1000000e200 the parallel version takes only 4.8% of the time taken by the sequential version). 
+
+Note: the sequential version does not keep track of the file read times (denoted as "Other" in gray for the parallel version). We can assume a similar or worse time with respect to the parallel version, so we can mostly safely ignore the gray part of the bar of the parallel version.  
 Note: to reproduce the results stored in the `logs` directory for the parallel version, simply run `./complete_benchmark`.
 
 ## How to run
