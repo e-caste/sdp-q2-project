@@ -186,6 +186,18 @@ From the tables above, it emerges that in our parallel version we almost always 
 Note: the results above have been obtained using the optimal number of labels (2 for small DAGs, 5 for large DAGs, as per the GRAIL paper).  
 Note: to reproduce the results stored in the `logs` directory for the parallel version, simply run `./complete_benchmark`.
 
+#### A brief analysis of the best number of labels
+
+| Small DAG | Large Real DAG | Large Synthetic DAG |
+|:---|:---|:---|
+| ![](readme/labels_comparison/agrocyc_dag_uniq-labels.png) | ![](readme/labels_comparison/cit-Patents-labels.png) | ![](readme/labels_comparison/v1000000e200-labels.png) |
+
+Having run these tests with 32 threads and 1, 5, and 10 labels, we can see that the best number of labels in terms of time differs based on the dimension of the DAG:  
+- if the DAG is small, we should prefer a small number of labels, such as 1 or 2
+- if the DAG is large, if every vertex has many edges the best number of labels is around 5
+
+These results confirm the contents of the paper.
+
 ## How to run
 
 We have created a Bash wrapper (`run.sh`) around our C program that allows for a quick execution of all of its parts and provides some added functionalities.
