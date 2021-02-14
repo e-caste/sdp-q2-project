@@ -2,38 +2,37 @@
 
 Authors: Enrico Alberti s279434, Enrico Castelli s280124, Benedetto Giulivi s269827  
 Date: 2021-02-14  
-Version: 2
 
 ## Contents
 
 - [Presentation Document](#presentation-document)
 - [Contents](#contents)
 - [Abstract](#abstract)
-- [Schema of the code](#code-schema)
-- [Main data Structures](#main-data-structures)
+- [Code schema](#code-schema)
+- [Main data structures](#main-data-structures)
 	- [```graph => row_g[vertex_num]```](#graph--row_gvertex_num)
 	- [```labels => row_l[vertex_num].field[labels_num]```](#labels--row_lvertex_numfieldlabels_num)
 	- [```queries => queries[queries_num].vertex[source, dest]```](#queries--queriesqueries_numvertexsource-dest)
-- [Time and Memory usage](#time-and-memory-usage)
+- [Time and memory usage](#time-and-memory-usage)
 - [How to run](#how-to-run)
 
 ## Abstract
 Our group developed the Q2 project which consists of implementing an algorithm named **GRAIL** used for Scalable Reachability Index for Large Graphs. The project could be divided in three main steps:
-- **Reading** the Directed Acyclic graph (**DAG**)
-- Generating the required **labels**
-- Testing the **query reachability** using the labels
+1. **Reading** the Directed Acyclic graph (**DAG**)
+2. Generating the required **labels**
+3. Testing the **query reachability** using the labels
 
 
 ## Code schema
 
 ### DAG read
-The main thread (**main.c**) prepares the thread's data structure for the **DAG** read. In particular, it reads the first line of the input file DAG which contains the vertex number size used for allocate the right memory. The DAG file is read (**readGraph.c**) by the maximum number of threads that the processor is able to support without scheduling. For instance if a processor is quad-core and it's able to support 8 threads, eight is the number of threads that we create. The idea is to split the file into `NUM_THREADS` equal parts and let each thread read (without protection because there are no problems in reading) and fill its own part of the *shared* DAG structure. Moreover, just after the building of the DAG structure, with some *synchronization*, each thread counts how many **roots** there are in its 'local' fragment and then all together (with some *protection*) fill a *shared* array containing all roots. These roots will be used later for label generation.
+The main thread (**main.c**) prepares the thread's data structure for the **DAG** read. In particular, it reads the first line of the input file DAG which contains the vertex number size used to allocate the right amount of memory. The DAG file is read (**readGraph.c**) by the maximum number of threads that the processor is able to support without scheduling. For instance if a processor is quad-core and it's able to support 8 threads, eight is the number of threads that we create. The idea is to split the file into `NUM_THREADS` equal parts and let each thread read (without protection because there are no problems in reading) and fill its own part of the *shared* DAG structure. Moreover, just after the building of the DAG structure, with some *synchronization*, each thread counts how many **roots** there are in its 'local' fragment and then all together (with some *protection*) fill a *shared* array containing all roots. These roots will be used later for label generation.
 
 ### DAG read - What and How
 - MAX threads allowed by processors without scheduling
 	- Each thread takes care of the number of vertexes between *inf* and *sup*. 
-	- Since the file is not homogeneous, we cannot divide it for the vertexes number. So each thread takes care of `FILE_SIZE/MAX_THREADS` bytes of the whole graph.	
-	- Each thread estimates the **inf** as `(FILE_SIZE*ThreadID)/MAX_THREADS` and **sup** as  `(FILE_SIZE*(ThreadID+1))/MAX_THREADS`
+	- Since the file is not homogeneous, we cannot divide it for the vertexes number. So each thread takes care of `FILE_SIZE/NUM_THREADS` bytes of the whole graph.	
+	- Each thread estimates the **inf** as `(FILE_SIZE*ThreadID)/NUM_THREADS` and **sup** as  `(FILE_SIZE*(ThreadID+1))/NUM_THREADS`
 	- But in this way the thread doesn't know in which offset of the line it is. So the thread has to read until it finds '\n' to estimate its 'inf' and 'sup' correctly.
 
 ### Roots initialization - What and How
@@ -44,48 +43,51 @@ The main thread (**main.c**) prepares the thread's data structure for the **DAG*
 
 ----
 
+### Label generation
 In the next step, the main thread re-initializes the threads data structure for the **labels** generation (**buildLabels.c**). In general, we follow the paper structure. Here, we run in parallel *one thread for each label*. Each of these threads *visits* in random order the *roots*, and recursively visits -in random order- their *children* as described by the GRAIL algorithm.<br>
 We tried to implement a parallel basic version in which each thread also generates one *thread for each child* and with the required protection, they explore the graph to generate the label. We removed this implementation due to the limit of the maximum number of threads we are able to create (`PTHREAD_THREADS_MAX`) which is easily reached in a very large graph. <br>
-Another attempt we did was to generate `NUM_THREAD-NUM_LABELS` threads that visit the DAG in parallel. Since the memory usage is greater because of the threads data structure and the time is greater as well since a protection for rank_root is required, we decided to not use this version.
+Another attempt we did was to generate `NUM_THREADS-NUM_LABELS` threads that visit the DAG in parallel, in addition to one thread per label. Since the memory usage is greater because of the threads data structure and the time is greater as well since a protection for `rank_root` is required, we decided to not use this version.  
+We also tried to split the label generation among `num_roots/NUM_THREADS` threads, but this solution did not provide any improvement in terms of memory and time as well.
 
-### Label build - What and How
+### Label generation - What and How
 - 1 thread for each label : current version
 	- each thread runs its own label generation - many labels at the same time
 - MAX threads allowed by processors without scheduling for each label
 	- divide the roots number by many threads - only 1 label at each time
 	- mutex for each node to protect many threads working on the same node
 	- mutex for shared rank_root
-- 1 thread for each child : limit of threads exceeded (20'000)
-	- mutex for each node to protect many thread working on the same node
+- 1 thread for each child : limit of threads exceeded (20,000)
+	- mutex for each node to protect multiple threads working on the same node
 	- mutex for shared rank_root
-- 1 thread for each label + some thread for roots visit : no improvement
- 	- mutex for each node to protect many thread working on the same node
+- 1 thread for each label + remaining threads without scheduling for roots visit : no improvement
+ 	- mutex for each node to protect multiple threads working on the same node
 	- mutex for shared rank_root
 
 ----
 
-Finally, in the last step the main thread re-initializes the threads data structure for the **query** reachability test. In particular, the main thread counts the number of queries to allocate the right amount of memory. Then the query resolution begins (**solveQuery.c**). The idea is to divide the queries in `NUM_THREADS` equal parts (so that all the cores work without scheduling) and let each thread solve its 'local' subset applying the logic described in the GRAIL paper algorithm (without the use of the exception list). At the end a log file is created to report the results. <br>
-As a reminder, given a query V1->V2, we have to check if the labels of V2 is NOT contained in the labels of V1, If so we can conclude that V1 cannot reach V2. Instead, if the labels of V2 are contained in the labels of V1 ([a, b] ⊆ [c, d]) we cannot claim that V1 can reach V2 but we have to do a DFS with pruning such that for each child C of V1 that doesn't contain V2's labels, we don't follow that path. Otherwise, we follow that path and verify the reachability.
+### Query resolution
+Finally, in the last step the main thread re-initializes the threads data structure for the **query** reachability test. In particular, the main thread counts the number of queries to allocate the right amount of memory. Then the query resolution begins (**solveQuery.c**). The idea is to divide the queries in `NUM_THREADS` equal parts (so that all the cores work without scheduling) and let each thread solve its 'local' subset applying the logic described in the GRAIL paper algorithm (without the use of the exception list). At the end a log file is created to report the results.  
+As a reminder, given a query V1->V2, we have to check if the labels of V2 are NOT contained in the labels of V1, if so we can conclude that V1 cannot reach V2. Instead, if the labels of V2 are contained in the labels of V1 ([a, b] ⊆ [c, d]) we cannot claim that V1 can reach V2 but we have to do a DFS with pruning such that for each child C of V1 that doesn't contain V2's labels, we don't follow that path. Otherwise, we follow that path and verify the reachability.
 
 ### Query resolution - What and How
 - MAX threads allowed by processors without scheduling
 	- Query file read by the main thread alone because of its limited size.
 	- Queries divided in equal parts (`NUM_QUERIES/NUM_THREADS`) within the number of threads 
-		- no protection because each thread writes in its local part (array_queries[j].can_reach)
+		- no protection because each thread writes in its local part (`array_queries[j].can_reach`)
 	- The reachability of the queries is written by the main thread alone because of its limited size.
 
 ----
 
-Overall in each of these main phases, the main thread evaluates the **time** and **memory usage** needed to execute the code.
+During each of these main phases, the main thread evaluates the **time** and **memory** usage needed to execute the code.
 
 ----
 
-## Main data Structures
+## Main data structures
 
 ### ```graph => row_g[vertex_num]```
 ```c
 typedef struct row_graph {
-	int edge_num;   //total number of vertex in this direction
+	int edge_num;
 	bool not_root;
 	int *edges;
 } row_g;
@@ -96,10 +98,10 @@ So we will have something like:
 
 | Structure  						| Description 				| 
 |:----------------------------------|:--------------------------|
-| row_g[0]   						|vertex number 0 			|
-| row_g[1]   						|vertex number 1 			|
-| row_g[0].edges[0]					|  children 'x' of vertex 0 |
-| row_g[0].edges[1]				 	| children 'y' of vertex 0 	| 
+| `row_g[0]`   						|vertex number 0 			|
+| `row_g[1]`   						|vertex number 1 			|
+| `row_g[0].edges[0]`					|  children 'x' of vertex 0 |
+| `row_g[0].edges[1]`				 	| children 'y' of vertex 0 	| 
 
 ---
 
@@ -109,7 +111,7 @@ So we will have something like:
 typedef struct row_label {
 	int* lbl_start;
 	int* lbl_end;
-	int* visited;
+	bool* visited;
 } row_l;
 ```
 So we will have something like:
@@ -118,15 +120,15 @@ So we will have something like:
 
 | Structure  						| Description 				| Interval		|
 |:----------------------------------|:--------------------------| :------------:|
-| row_l[0]   						| labelS of vertex number 0 |				|
-| row_l[0].lbl_start[0]				| begin label 0 of vertex 0	|	[x,			|
-| row_l[0].lbl_end[0]				| end label 0 of vertex 0	|	y]			|
-| row_l[0].lbl_start[1]				| begin label 1 of vertex 0	|	[h,			|
-| row_l[0].lbl_end[1]				| end label 1 of vertex 0	|	  k]		|
-| row_l[1].lbl_start[0]				| begin label 0 of vertex 1	|	[v,			|
-| row_l[1].lbl_end[0]				| end label 0 of vertex 1	|	  w]		|
-| row_l[1].lbl_start[1]				| begin label 1 of vertex 1	|	[z,			|
-| row_l[1].lbl_end[1]				| end label 1 of vertex 1	|	  a]		|
+| `row_l[0]`   						| labelS of vertex number 0 |				|
+| `row_l[0].lbl_start[0]`				| begin label 0 of vertex 0	|	[x,			|
+| `row_l[0].lbl_end[0]`				| end label 0 of vertex 0	|	y]			|
+| `row_l[0].lbl_start[1]`				| begin label 1 of vertex 0	|	[h,			|
+| `row_l[0].lbl_end[1]`				| end label 1 of vertex 0	|	  k]		|
+| `row_l[1].lbl_start[0]`				| begin label 0 of vertex 1	|	[v,			|
+| `row_l[1].lbl_end[0]`				| end label 0 of vertex 1	|	  w]		|
+| `row_l[1].lbl_start[1]`				| begin label 1 of vertex 1	|	[z,			|
+| `row_l[1].lbl_end[1]`				| end label 1 of vertex 1	|	  a]		|
 
 ---
 
@@ -138,11 +140,11 @@ typedef struct el_list_query {
 } el_query;
 ```
 So if we have 2 vertex (v1, v2) and two queries, we will have something like:
-- el_query[0] = Query 1 for V1 -> V2 
-- el_query[1] = Query 2 for V3 -> V4
-- el_query[0].num[0] = V1 in Query 1
-- el_query[0].num[1] = V2 in Query 1
-- el_query[0].can_reach = true/false based of V1 -> V2
+- `el_query[0]` = Query 1 for V1 -> V2 
+- `el_query[1]` = Query 2 for V3 -> V4
+- `el_query[0].num[0]` = V1 in Query 1
+- `el_query[0].num[1]` = V2 in Query 1
+- `el_query[0].can_reach` = true/false based on V1 -> V2
 
 ---
 
@@ -184,7 +186,7 @@ Note: the sequential version does not keep track of the file read times (denoted
 From the tables above, it emerges that in our parallel version we almost always use more memory than the sequential version. This is most likely due to the additional data structures we need to store thread arguments, indexes, roots, mutexes and barriers. 
 
 Note: the results above have been obtained using the optimal number of labels (2 for small DAGs, 5 for large DAGs, as per the GRAIL paper).  
-Note: to reproduce the results stored in the `logs` directory for the parallel version, simply run `./complete_benchmark`.
+Note: to reproduce the results stored in the `logs` directory for the parallel version, simply run `./complete_benchmark.sh`.
 
 #### A brief analysis of the best number of labels
 
@@ -196,7 +198,7 @@ Having run these tests with 32 threads and 1, 5, and 10 labels, we can see that 
 - if the DAG is small, we should prefer a small number of labels, such as 1 or 2
 - if the DAG is large, if every vertex has many edges the best number of labels is around 5
 
-These results confirm the contents of the paper.
+These results confirm the contents of the GRAIL paper.
 
 ## How to run
 
@@ -237,4 +239,4 @@ If you want to do everything in one line:
 
 See the help message above for all the other options.
 
-Note: this script always recompiles the code if `make` detects a change.
+Note: this script always re-compiles the code if `make` detects a change.
