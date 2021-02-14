@@ -26,8 +26,6 @@ Our group developed the Q2 project which consists of implementing an algorithm n
 
 ## Code schema
 
-### TODO: more specific schema, following GRAIL paper
-
 ### DAG read
 The main thread (**main.c**) prepares the thread's data structure for the **DAG** read. In particular, it reads the first line of the input file DAG which contains the vertex number size used for allocate the right memory. The DAG file is read (**readGraph.c**) by the maximum number of threads that the processor is able to support without scheduling. For instance if a processor is quad-core and it's able to support 8 threads, eight is the number of threads that we create. The idea is to split the file into `NUM_THREADS` equal parts and let each thread read (without protection because there are no problems in reading) and fill its own part of the *shared* DAG structure. Moreover, just after the building of the DAG structure, with some *synchronization*, each thread counts how many **roots** there are in its 'local' fragment and then all together (with some *protection*) fill a *shared* array containing all roots. These roots will be used later for label generation.
 
