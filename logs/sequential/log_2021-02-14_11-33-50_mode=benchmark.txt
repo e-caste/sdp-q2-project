@@ -1,0 +1,404 @@
+../grail cit-Patents.scc.gra -test cit-Patents.test -dim 5
+#vertex size:3774768	#edges size:16518947
+merging strongly connected component...
+merging time:4540.42 (ms)
+#DAG vertex size:3774768	#DAG edges size:16518947
+preparing queries...
+queries are ready
+Graph Size = 3774768
+Graph Size = 3774768
+Labeling 0 is completed
+Labeling 1 is completed
+Labeling 2 is completed
+Labeling 3 is completed
+Labeling 4 is completed
+#construction time:18551.2 (ms)
+process queries...
+Success Rate 100001/100001
+#total query running time:1138.45 (ms)
+GRAIL REPORT 
+filename = cit-Patents.scc.gra	 testfilename = cit-Patents.test	 DIM = 5
+Labeling_time = 18551.22	 Query_Time = 1138.45	 Index_Size = 37747680	 Mem_Usage = 435.4668 MB mem used
+435.4668 MB
+COMPAR: GRAIL5	18551.2246	1138.4500	37747680	435.4668 MB mem used
+435.4668	0	1	0	100001	 AvgCut:0
+
+../grail uniprotenc_22m.scc.gra -test uniprotenc_22m.test -dim 5
+#vertex size:1595444	#edges size:1595442
+merging strongly connected component...
+merging time:1180.3 (ms)
+#DAG vertex size:1595444	#DAG edges size:1595442
+preparing queries...
+queries are ready
+Graph Size = 1595444
+Graph Size = 1595444
+Labeling 0 is completed
+Labeling 1 is completed
+Labeling 2 is completed
+Labeling 3 is completed
+Labeling 4 is completed
+#construction time:6248.59 (ms)
+process queries...
+Success Rate 0/100001
+#total query running time:38.324 (ms)
+GRAIL REPORT 
+filename = uniprotenc_22m.scc.gra	 testfilename = uniprotenc_22m.test	 DIM = 5
+Labeling_time = 6248.59	 Query_Time = 38.32	 Index_Size = 15954440	 Mem_Usage = 178.0742 MB mem used
+178.0742 MB
+COMPAR: GRAIL5	6248.5879	38.3240	15954440	178.0742 MB mem used
+178.0742	0	1	0	0	 AvgCut:0
+
+../grail uniprotenc_100m.scc.gra -test uniprotenc_100m.test -dim 5
+#vertex size:16087295	#edges size:16087293
+merging strongly connected component...
+merging time:14934.1 (ms)
+#DAG vertex size:16087295	#DAG edges size:16087293
+preparing queries...
+queries are ready
+Graph Size = 16087295
+Graph Size = 16087295
+Labeling 0 is completed
+Labeling 1 is completed
+Labeling 2 is completed
+Labeling 3 is completed
+Labeling 4 is completed
+#construction time:87541.5 (ms)
+process queries...
+Success Rate 0/100001
+#total query running time:59.465 (ms)
+GRAIL REPORT 
+filename = uniprotenc_100m.scc.gra	 testfilename = uniprotenc_100m.test	 DIM = 5
+Labeling_time = 87541.49	 Query_Time = 59.47	 Index_Size = 160872950	 Mem_Usage = 1761.4639 MB mem used
+1761.4639 MB
+COMPAR: GRAIL5	87541.4922	59.4650	160872950	1761.4639 MB mem used
+1761.4639	0	1	0	0	 AvgCut:0
+
+../grail arXiv_sub_6000-1.gra -test arxiv.test -dim 2
+#vertex size:6000	#edges size:66707
+merging strongly connected component...
+merging time:4.095 (ms)
+#DAG vertex size:6000	#DAG edges size:66707
+preparing queries...
+queries are ready
+Graph Size = 6000
+Graph Size = 6000
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:5.803 (ms)
+process queries...
+Success Rate 15459/100001
+#total query running time:187.636 (ms)
+GRAIL REPORT 
+filename = arXiv_sub_6000-1.gra	 testfilename = arxiv.test	 DIM = 2
+Labeling_time = 5.80	 Query_Time = 187.64	 Index_Size = 24000	 Mem_Usage = 2.7363 MB mem used
+2.7363 MB
+COMPAR: GRAIL2	5.8030	187.6360	24000	2.7363 MB mem used
+2.7363	0	1	0	15459	 AvgCut:0
+
+../grail citeseer_sub_10720.gra -test citeseer.test -dim 2
+#vertex size:10720	#edges size:44258
+merging strongly connected component...
+merging time:6.247 (ms)
+#DAG vertex size:10720	#DAG edges size:44258
+preparing queries...
+queries are ready
+Graph Size = 10720
+Graph Size = 10720
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:6.65 (ms)
+process queries...
+Success Rate 388/100001
+#total query running time:17.632 (ms)
+GRAIL REPORT 
+filename = citeseer_sub_10720.gra	 testfilename = citeseer.test	 DIM = 2
+Labeling_time = 6.65	 Query_Time = 17.63	 Index_Size = 42880	 Mem_Usage = 2.9521 MB mem used
+2.9521 MB
+COMPAR: GRAIL2	6.6500	17.6320	42880	2.9521 MB mem used
+2.9521	0	1	0	388	 AvgCut:0
+
+../grail go_sub_6793.gra -test go.test -dim 2
+#vertex size:6793	#edges size:13361
+merging strongly connected component...
+merging time:4.573 (ms)
+#DAG vertex size:6793	#DAG edges size:13361
+preparing queries...
+queries are ready
+Graph Size = 6793
+Graph Size = 6793
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:3.046 (ms)
+process queries...
+Success Rate 241/100001
+#total query running time:11.951 (ms)
+GRAIL REPORT 
+filename = go_sub_6793.gra	 testfilename = go.test	 DIM = 2
+Labeling_time = 3.05	 Query_Time = 11.95	 Index_Size = 27172	 Mem_Usage = 2.5586 MB mem used
+2.5586 MB
+COMPAR: GRAIL2	3.0460	11.9510	27172	2.5586 MB mem used
+2.5586	0	1	0	241	 AvgCut:0
+
+../grail pubmed_sub_9000-1.gra -test pubmed.test -dim 2
+#vertex size:9000	#edges size:40028
+merging strongly connected component...
+merging time:4.7 (ms)
+#DAG vertex size:9000	#DAG edges size:40028
+preparing queries...
+queries are ready
+Graph Size = 9000
+Graph Size = 9000
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:5.577 (ms)
+process queries...
+Success Rate 690/100001
+#total query running time:19.951 (ms)
+GRAIL REPORT 
+filename = pubmed_sub_9000-1.gra	 testfilename = pubmed.test	 DIM = 2
+Labeling_time = 5.58	 Query_Time = 19.95	 Index_Size = 36000	 Mem_Usage = 2.7617 MB mem used
+2.7617 MB
+COMPAR: GRAIL2	5.5770	19.9510	36000	2.7617 MB mem used
+2.7617	0	1	0	690	 AvgCut:0
+
+../grail yago_sub_6642.gra -test yago.test -dim 2
+#vertex size:6642	#edges size:42392
+merging strongly connected component...
+merging time:3.443 (ms)
+#DAG vertex size:6642	#DAG edges size:42392
+preparing queries...
+queries are ready
+Graph Size = 6642
+Graph Size = 6642
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:4.643 (ms)
+process queries...
+Success Rate 171/100001
+#total query running time:10.443 (ms)
+GRAIL REPORT 
+filename = yago_sub_6642.gra	 testfilename = yago.test	 DIM = 2
+Labeling_time = 4.64	 Query_Time = 10.44	 Index_Size = 26568	 Mem_Usage = 2.6162 MB mem used
+2.6162 MB
+COMPAR: GRAIL2	4.6430	10.4430	26568	2.6162 MB mem used
+2.6162	0	1	0	171	 AvgCut:0
+
+../grail agrocyc_dag_uniq.gra -test agrocyc.test -dim 2
+#vertex size:12684	#edges size:13657
+merging strongly connected component...
+merging time:5.325 (ms)
+#DAG vertex size:12684	#DAG edges size:13657
+preparing queries...
+queries are ready
+Graph Size = 12684
+Graph Size = 12684
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:4.954 (ms)
+process queries...
+Success Rate 133/100001
+#total query running time:7.505 (ms)
+GRAIL REPORT 
+filename = agrocyc_dag_uniq.gra	 testfilename = agrocyc.test	 DIM = 2
+Labeling_time = 4.95	 Query_Time = 7.51	 Index_Size = 50736	 Mem_Usage = 3.0225 MB mem used
+3.0225 MB
+COMPAR: GRAIL2	4.9540	7.5050	50736	3.0225 MB mem used
+3.0225	0	1	0	133	 AvgCut:0
+
+../grail amaze_dag_uniq.gra -test amaze.test -dim 2
+#vertex size:3710	#edges size:3947
+merging strongly connected component...
+merging time:1.583 (ms)
+#DAG vertex size:3710	#DAG edges size:3947
+preparing queries...
+queries are ready
+Graph Size = 3710
+Graph Size = 3710
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:1.514 (ms)
+process queries...
+Success Rate 17259/100001
+#total query running time:298.851 (ms)
+GRAIL REPORT 
+filename = amaze_dag_uniq.gra	 testfilename = amaze.test	 DIM = 2
+Labeling_time = 1.51	 Query_Time = 298.85	 Index_Size = 14840	 Mem_Usage = 2.2461 MB mem used
+2.2461 MB
+COMPAR: GRAIL2	1.5140	298.8510	14840	2.2461 MB mem used
+2.2461	0	1	0	17259	 AvgCut:0
+
+../grail anthra_dag_uniq.gra -test anthra.test -dim 2
+#vertex size:12499	#edges size:13327
+merging strongly connected component...
+merging time:5.353 (ms)
+#DAG vertex size:12499	#DAG edges size:13327
+preparing queries...
+queries are ready
+Graph Size = 12499
+Graph Size = 12499
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:4.751 (ms)
+process queries...
+Success Rate 97/100001
+#total query running time:6.611 (ms)
+GRAIL REPORT 
+filename = anthra_dag_uniq.gra	 testfilename = anthra.test	 DIM = 2
+Labeling_time = 4.75	 Query_Time = 6.61	 Index_Size = 49996	 Mem_Usage = 3.0049 MB mem used
+3.0049 MB
+COMPAR: GRAIL2	4.7510	6.6110	49996	3.0049 MB mem used
+3.0049	0	1	0	97	 AvgCut:0
+
+../grail ecoo_dag_uniq.gra -test ecoo.test -dim 2
+#vertex size:12620	#edges size:13575
+merging strongly connected component...
+merging time:5.289 (ms)
+#DAG vertex size:12620	#DAG edges size:13575
+preparing queries...
+queries are ready
+Graph Size = 12620
+Graph Size = 12620
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:4.87 (ms)
+process queries...
+Success Rate 129/100001
+#total query running time:7.797 (ms)
+GRAIL REPORT 
+filename = ecoo_dag_uniq.gra	 testfilename = ecoo.test	 DIM = 2
+Labeling_time = 4.87	 Query_Time = 7.80	 Index_Size = 50480	 Mem_Usage = 3.0195 MB mem used
+3.0195 MB
+COMPAR: GRAIL2	4.8700	7.7970	50480	3.0195 MB mem used
+3.0195	0	1	0	129	 AvgCut:0
+
+../grail human_dag_uniq.gra -test human.test -dim 2
+#vertex size:38811	#edges size:39816
+merging strongly connected component...
+merging time:17.852 (ms)
+#DAG vertex size:38811	#DAG edges size:39816
+preparing queries...
+queries are ready
+Graph Size = 38811
+Graph Size = 38811
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:16.134 (ms)
+process queries...
+Success Rate 12/100001
+#total query running time:8.783 (ms)
+GRAIL REPORT 
+filename = human_dag_uniq.gra	 testfilename = human.test	 DIM = 2
+Labeling_time = 16.13	 Query_Time = 8.78	 Index_Size = 155244	 Mem_Usage = 5.4482 MB mem used
+5.4482 MB
+COMPAR: GRAIL2	16.1340	8.7830	155244	5.4482 MB mem used
+5.4482	0	1	0	12	 AvgCut:0
+
+../grail kegg_dag_uniq.gra -test kegg.test -dim 2
+#vertex size:3617	#edges size:4395
+merging strongly connected component...
+merging time:1.642 (ms)
+#DAG vertex size:3617	#DAG edges size:4395
+preparing queries...
+queries are ready
+Graph Size = 3617
+Graph Size = 3617
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:1.487 (ms)
+process queries...
+Success Rate 20133/100001
+#total query running time:406.462 (ms)
+GRAIL REPORT 
+filename = kegg_dag_uniq.gra	 testfilename = kegg.test	 DIM = 2
+Labeling_time = 1.49	 Query_Time = 406.46	 Index_Size = 14468	 Mem_Usage = 2.2529 MB mem used
+2.2529 MB
+COMPAR: GRAIL2	1.4870	406.4620	14468	2.2529 MB mem used
+2.2529	0	1	0	20133	 AvgCut:0
+
+../grail mtbrv_dag_uniq.gra -test mtbrv.test -dim 2
+#vertex size:9602	#edges size:10438
+merging strongly connected component...
+merging time:4.168 (ms)
+#DAG vertex size:9602	#DAG edges size:10438
+preparing queries...
+queries are ready
+Graph Size = 9602
+Graph Size = 9602
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:3.765 (ms)
+process queries...
+Success Rate 175/100001
+#total query running time:7.823 (ms)
+GRAIL REPORT 
+filename = mtbrv_dag_uniq.gra	 testfilename = mtbrv.test	 DIM = 2
+Labeling_time = 3.77	 Query_Time = 7.82	 Index_Size = 38408	 Mem_Usage = 2.7549 MB mem used
+2.7549 MB
+COMPAR: GRAIL2	3.7650	7.8230	38408	2.7549 MB mem used
+2.7549	0	1	0	175	 AvgCut:0
+
+../grail nasa_dag_uniq.gra -test nasa.test -dim 2
+#vertex size:5605	#edges size:6538
+merging strongly connected component...
+merging time:2.491 (ms)
+#DAG vertex size:5605	#DAG edges size:6538
+preparing queries...
+queries are ready
+Graph Size = 5605
+Graph Size = 5605
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:2.058 (ms)
+process queries...
+Success Rate 562/100001
+#total query running time:7.252 (ms)
+GRAIL REPORT 
+filename = nasa_dag_uniq.gra	 testfilename = nasa.test	 DIM = 2
+Labeling_time = 2.06	 Query_Time = 7.25	 Index_Size = 22420	 Mem_Usage = 2.4434 MB mem used
+2.4434 MB
+COMPAR: GRAIL2	2.0580	7.2520	22420	2.4434 MB mem used
+2.4434	0	1	0	562	 AvgCut:0
+
+../grail vchocyc_dag_uniq.gra -test vchocyc.test -dim 2
+#vertex size:9491	#edges size:10345
+merging strongly connected component...
+merging time:3.936 (ms)
+#DAG vertex size:9491	#DAG edges size:10345
+preparing queries...
+queries are ready
+Graph Size = 9491
+Graph Size = 9491
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:3.354 (ms)
+process queries...
+Success Rate 169/100001
+#total query running time:7.578 (ms)
+GRAIL REPORT 
+filename = vchocyc_dag_uniq.gra	 testfilename = vchocyc.test	 DIM = 2
+Labeling_time = 3.35	 Query_Time = 7.58	 Index_Size = 37964	 Mem_Usage = 2.7441 MB mem used
+2.7441 MB
+COMPAR: GRAIL2	3.3540	7.5780	37964	2.7441 MB mem used
+2.7441	0	1	0	169	 AvgCut:0
+
+../grail xmark_dag_uniq.gra -test xmark.test -dim 2
+#vertex size:6080	#edges size:7051
+merging strongly connected component...
+merging time:2.58 (ms)
+#DAG vertex size:6080	#DAG edges size:7051
+preparing queries...
+queries are ready
+Graph Size = 6080
+Graph Size = 6080
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:2.245 (ms)
+process queries...
+Success Rate 1482/100001
+#total query running time:24.961 (ms)
+GRAIL REPORT 
+filename = xmark_dag_uniq.gra	 testfilename = xmark.test	 DIM = 2
+Labeling_time = 2.24	 Query_Time = 24.96	 Index_Size = 24320	 Mem_Usage = 2.4766 MB mem used
+2.4766 MB
+COMPAR: GRAIL2	2.2450	24.9610	24320	2.4766 MB mem used
+2.4766	0	1	0	1482	 AvgCut:0

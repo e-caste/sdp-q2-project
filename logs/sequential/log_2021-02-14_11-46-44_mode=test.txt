@@ -1,0 +1,257 @@
+../grail v1000000e100.gra -test v1000000e100.que -dim 5
+#vertex size:1000000	#edges size:49966695
+merging strongly connected component...
+merging time:3632.76 (ms)
+#DAG vertex size:1000000	#DAG edges size:49966695
+preparing queries...
+queries are ready
+Graph Size = 1000000
+Graph Size = 1000000
+Labeling 0 is completed
+Labeling 1 is completed
+Labeling 2 is completed
+Labeling 3 is completed
+Labeling 4 is completed
+#construction time:23608 (ms)
+process queries...
+Success Rate 78776/100001
+#total query running time:741675 (ms)
+GRAIL REPORT 
+filename = v1000000e100.gra	 testfilename = v1000000e100.que	 DIM = 5
+Labeling_time = 23607.95	 Query_Time = 741674.75	 Index_Size = 10000000	 Mem_Usage = 307.6797 MB mem used
+307.6797 MB
+COMPAR: GRAIL5	23607.9512	741674.7500	10000000	307.6797 MB mem used
+307.6797	0	1	0	78776	 AvgCut:0
+
+../grail v1000000e200.gra -test v1000000e200.que -dim 5
+#vertex size:1000000	#edges size:100125965
+merging strongly connected component...
+merging time:5785.79 (ms)
+#DAG vertex size:1000000	#DAG edges size:100125965
+preparing queries...
+queries are ready
+Graph Size = 1000000
+Graph Size = 1000000
+Labeling 0 is completed
+Labeling 1 is completed
+Labeling 2 is completed
+Labeling 3 is completed
+Labeling 4 is completed
+#construction time:45104.4 (ms)
+process queries...
+Success Rate 178109/200001
+#total query running time:1.93353e+06 (ms)
+GRAIL REPORT 
+filename = v1000000e200.gra	 testfilename = v1000000e200.que	 DIM = 5
+Labeling_time = 45104.36	 Query_Time = 1933525.62	 Index_Size = 10000000	 Mem_Usage = 542.3242 MB mem used
+542.3242 MB
+COMPAR: GRAIL5	45104.3555	1933525.6250	10000000	542.3242 MB mem used
+542.3242	0	1	0	178109	 AvgCut:0
+
+../grail v100000e100.gra -test v100000e100.que -dim 5
+#vertex size:100000	#edges size:5007916
+merging strongly connected component...
+merging time:222.293 (ms)
+#DAG vertex size:100000	#DAG edges size:5007916
+preparing queries...
+queries are ready
+Graph Size = 100000
+Graph Size = 100000
+Labeling 0 is completed
+Labeling 1 is completed
+Labeling 2 is completed
+Labeling 3 is completed
+Labeling 4 is completed
+#construction time:1318.97 (ms)
+process queries...
+Success Rate 8259/10001
+#total query running time:3339.96 (ms)
+GRAIL REPORT 
+filename = v100000e100.gra	 testfilename = v100000e100.que	 DIM = 5
+Labeling_time = 1318.97	 Query_Time = 3339.96	 Index_Size = 1000000	 Mem_Usage = 32.2480 MB mem used
+32.2480 MB
+COMPAR: GRAIL5	1318.9690	3339.9600	1000000	32.2480 MB mem used
+32.2480	0	1	0	8259	 AvgCut:0
+
+../grail v1000e30.gra -test v1000e30.que -dim 2
+#vertex size:1000	#edges size:14950
+merging strongly connected component...
+merging time:0.784 (ms)
+#DAG vertex size:1000	#DAG edges size:14950
+preparing queries...
+queries are ready
+Graph Size = 1000
+Graph Size = 1000
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:1.222 (ms)
+process queries...
+Success Rate 724/1001
+#total query running time:2.24 (ms)
+GRAIL REPORT 
+filename = v1000e30.gra	 testfilename = v1000e30.que	 DIM = 2
+Labeling_time = 1.22	 Query_Time = 2.24	 Index_Size = 4000	 Mem_Usage = 1.6436 MB mem used
+1.6436 MB
+COMPAR: GRAIL2	1.2220	2.2400	4000	1.6436 MB mem used
+1.6436	0	1	0	724	 AvgCut:0
+
+../grail v100e10.gra -test v100e10.que -dim 2
+#vertex size:100	#edges size:536
+merging strongly connected component...
+merging time:0.074 (ms)
+#DAG vertex size:100	#DAG edges size:536
+preparing queries...
+queries are ready
+Graph Size = 100
+Graph Size = 100
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:0.084 (ms)
+process queries...
+Success Rate 55/101
+#total query running time:0.044 (ms)
+GRAIL REPORT 
+filename = v100e10.gra	 testfilename = v100e10.que	 DIM = 2
+Labeling_time = 0.08	 Query_Time = 0.04	 Index_Size = 400	 Mem_Usage = 1.5059 MB mem used
+1.5059 MB
+COMPAR: GRAIL2	0.0840	0.0440	400	1.5059 MB mem used
+1.5059	0	1	0	55	 AvgCut:0
+
+../grail v10e3.gra -test v10e3.que -dim 2
+#vertex size:10	#edges size:8
+merging strongly connected component...
+merging time:0.009 (ms)
+#DAG vertex size:10	#DAG edges size:8
+preparing queries...
+queries are ready
+Graph Size = 10
+Graph Size = 10
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:0.01 (ms)
+process queries...
+Success Rate 4/11
+#total query running time:0.002 (ms)
+GRAIL REPORT 
+filename = v10e3.gra	 testfilename = v10e3.que	 DIM = 2
+Labeling_time = 0.01	 Query_Time = 0.00	 Index_Size = 40	 Mem_Usage = 1.4727 MB mem used
+1.4727 MB
+COMPAR: GRAIL2	0.0100	0.0020	40	1.4727 MB mem used
+1.4727	0	1	0	4	 AvgCut:0
+
+../grail v200e20.gra -test v200e20.que -dim 2
+#vertex size:200	#edges size:2064
+merging strongly connected component...
+merging time:0.14 (ms)
+#DAG vertex size:200	#DAG edges size:2064
+preparing queries...
+queries are ready
+Graph Size = 200
+Graph Size = 200
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:0.201 (ms)
+process queries...
+Success Rate 136/201
+#total query running time:0.129 (ms)
+GRAIL REPORT 
+filename = v200e20.gra	 testfilename = v200e20.que	 DIM = 2
+Labeling_time = 0.20	 Query_Time = 0.13	 Index_Size = 800	 Mem_Usage = 1.5049 MB mem used
+1.5049 MB
+COMPAR: GRAIL2	0.2010	0.1290	800	1.5049 MB mem used
+1.5049	0	1	0	136	 AvgCut:0
+
+../grail v500000e1000.gra -test v500000e1000.que -dim 5
+#vertex size:500000	#edges size:250041100
+merging strongly connected component...
+merging time:7819.52 (ms)
+#DAG vertex size:500000	#DAG edges size:250041100
+preparing queries...
+queries are ready
+Graph Size = 500000
+Graph Size = 500000
+Labeling 0 is completed
+Labeling 1 is completed
+Labeling 2 is completed
+Labeling 3 is completed
+Labeling 4 is completed
+#construction time:95722.9 (ms)
+process queries...
+Success Rate 73516/75001
+#total query running time:397616 (ms)
+GRAIL REPORT 
+filename = v500000e1000.gra	 testfilename = v500000e1000.que	 DIM = 5
+Labeling_time = 95722.90	 Query_Time = 397616.22	 Index_Size = 5000000	 Mem_Usage = 1180.0156 MB mem used
+1180.0156 MB
+COMPAR: GRAIL5	95722.8984	397616.2188	5000000	1180.0156 MB mem used
+1180.0156	0	1	0	73516	 AvgCut:0
+
+../grail v500000e50.gra -test v500000e50.que -dim 5
+#vertex size:500000	#edges size:12514757
+merging strongly connected component...
+merging time:1087.18 (ms)
+#DAG vertex size:500000	#DAG edges size:12514757
+preparing queries...
+queries are ready
+Graph Size = 500000
+Graph Size = 500000
+Labeling 0 is completed
+Labeling 1 is completed
+Labeling 2 is completed
+Labeling 3 is completed
+Labeling 4 is completed
+#construction time:6189.83 (ms)
+process queries...
+Success Rate 31517/50001
+#total query running time:113783 (ms)
+GRAIL REPORT 
+filename = v500000e50.gra	 testfilename = v500000e50.que	 DIM = 5
+Labeling_time = 6189.83	 Query_Time = 113783.23	 Index_Size = 5000000	 Mem_Usage = 96.1650 MB mem used
+96.1650 MB
+COMPAR: GRAIL5	6189.8301	113783.2266	5000000	96.1650 MB mem used
+96.1650	0	1	0	31517	 AvgCut:0
+
+../grail v5000e50.gra -test v5000e50.que -dim 2
+#vertex size:5000	#edges size:124046
+merging strongly connected component...
+merging time:4.787 (ms)
+#DAG vertex size:5000	#DAG edges size:124046
+preparing queries...
+queries are ready
+Graph Size = 5000
+Graph Size = 5000
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:8.467 (ms)
+process queries...
+Success Rate 3826/5001
+#total query running time:74.733 (ms)
+GRAIL REPORT 
+filename = v5000e50.gra	 testfilename = v5000e50.que	 DIM = 2
+Labeling_time = 8.47	 Query_Time = 74.73	 Index_Size = 20000	 Mem_Usage = 2.4385 MB mem used
+2.4385 MB
+COMPAR: GRAIL2	8.4670	74.7330	20000	2.4385 MB mem used
+2.4385	0	1	0	3826	 AvgCut:0
+
+../grail v500e10.gra -test v500e10.que -dim 2
+#vertex size:500	#edges size:2487
+merging strongly connected component...
+merging time:0.339 (ms)
+#DAG vertex size:500	#DAG edges size:2487
+preparing queries...
+queries are ready
+Graph Size = 500
+Graph Size = 500
+Labeling 0 is completed
+Labeling 1 is completed
+#construction time:0.332 (ms)
+process queries...
+Success Rate 170/501
+#total query running time:0.374 (ms)
+GRAIL REPORT 
+filename = v500e10.gra	 testfilename = v500e10.que	 DIM = 2
+Labeling_time = 0.33	 Query_Time = 0.37	 Index_Size = 2000	 Mem_Usage = 1.5410 MB mem used
+1.5410 MB
+COMPAR: GRAIL2	0.3320	0.3740	2000	1.5410 MB mem used
+1.5410	0	1	0	170	 AvgCut:0
+
