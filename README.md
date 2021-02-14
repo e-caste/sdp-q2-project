@@ -156,49 +156,18 @@ Hardware configuration:
 - CPUs: 2x 8-core Xeon E5-2690 (32 threads)
 - RAM: 32GB 1333MHz DDR3 ECC
 
-Parameter configuration:
-- labels: 5
+| DAG Category | | | | | |
+|:---|:---|:---|:---|:---|:---|
+| **LARGE REAL** | ![](readme/benchmark/large/cit-Patents.scc.png) | ![](readme/benchmark/large/uniprotenc_22m.png) | ![](readme/benchmark/large/uniprotenc_100m.png) |
+| **SMALL DENSE REAL** | ![](readme/benchmark/small/dense_real/arXiv_sub_6000-1.png) | ![](readme/benchmark/small/dense_real/citeseer_sub_10720.png) | ![](readme/benchmark/small/dense_real/go_sub_6793.png) | ![](readme/benchmark/small/dense_real/pubmed_sub_9000-1.png) | ![](readme/benchmark/small/dense_real/yago_sub_6642.png) |
+| **SMALL SPARSE REAL** | ![](readme/benchmark/small/sparse_real/agrocyc_dag_uniq.png) | ![](readme/benchmark/small/sparse_real/amaze_dag_uniq.png) | ![](readme/benchmark/small/sparse_real/anthra_dag_uniq.png) | ![](readme/benchmark/small/sparse_real/ecoo_dag_uniq.png) | ![](readme/benchmark/small/sparse_real/human_dag_uniq.png) |
+| continues | ![](readme/benchmark/small/sparse_real/kegg_dag_uniq.png) | ![](readme/benchmark/small/sparse_real/mtbrv_dag_uniq.png) | ![](readme/benchmark/small/sparse_real/nasa_dag_uniq.png) | ![](readme/benchmark/small/sparse_real/vchocyc_dag_uniq.png) | ![](readme/benchmark/small/sparse_real/xmark_dag_uniq.png) |
+| **SYNTHETIC LARGE** | ![](readme/test/large/v1000000e200.png) | ![](readme/test/large/v1000000e100.png) | ![](readme/test/large/v500000e1000.png) | ![](readme/test/large/v500000e50.png) | ![](readme/test/large/v100000e100.png) |
+| **SYNTHETIC SMALL** | ![](readme/test/small/v5000e50.png) | ![](readme/test/small/v1000e30.png) | ![](readme/test/small/v500e10.png) | ![](readme/test/small/v200e20.png) | ![](readme/test/small/v100e10.png) |
+| continues | ![](readme/test/small/v10e3.png) |
 
-Prefixes:
-- S = sequential version (GRAIL paper repository)
-- P = parallel version (our program)
-
-Suffixes:
-- LT = labeling time (ms)
-- QT = query resolution time (ms)
-- TT = total time (ms)
-- MEM = maximum memory usage (MiB)
-
-|DAG | SLT | PLT | SQT | PQT | STT | PTT | SMEM | PMEM | Better time (PTT<STT) | Better RAM (PMEM<SMEM) |
-|:---|:----|:----|:----|:----|:----|:----|:-----|:-----|:-----|:-----|
-| **LARGE REAL** |
-| cit-Patents.scc.gra | 18451 | 20029 | 1131 | 156 | 19582 | 21125 | 435 | 1314 |  |  |
-| uniprotenc_22m.scc.gra | 6239 | 3363 | 38 | 42 | 6277 | 4013 | 178 | 487 | X |  |
-| uniprotenc_100m.scc.gra | 86279 | 39086 | 60 | 53 | 86339 | 44244 | 1761 | 4832 | X |  |
-| **SMALL DENSE REAL** |
-| arXiv_sub_6000-1.gra | 14 | 39 | 124 | 28 | 138 | 96 | 3 | 7.3 | X |  |
-| citeseer_sub_10720.gra | 17 | 32 | 13 | 25 | 30 | 87 | 3.1 | 9 |  |  |
-| go_sub_6793.gra | 7 | 10 | 7 | 22 | 14 | 61 | 2.5 | 7.2 |  |  |
-| pubmed_sub_9000-1.gra | 14 | 27 | 14 | 22 | 28 | 79 | 2.9 | 8.1 |  |  |
-| yago_sub_6642.gra | 12 | 29 | 8 | 21 | 20 | 79 | 2.7 | 7.6 |  |  |
-| **SMALL SPARSE REAL** |
-| agrocyc_dag_uniq.gra | 11 | 10 | 8 | 21 | 19 | 63 | 3.2 | 8 |  |  |
-| amaze_dag_uniq.gra | 4 | 3 | 307 | 31 | 311 | 63 | 2.4 | 6.1 | X |  |
-| anthra_dag_uniq.gra | 11 | 10 | 7 | 21 | 18 | 62 | 3.2 | 8 |  |  |
-| ecoo_dag_uniq.gra | 11 | 10 | 7 | 21 | 18 | 63 | 3.3 | 8 |  |  |
-| human_dag_uniq.gra | 40 | 29 | 10 | 22 | 50 | 91 | 6.1 | 13 |  |  |
-| kegg_dag_uniq.gra | 4 | 3 | 415 | 42 | 419 | 76 | 2.2 | 6 | X |  |
-| mtbrv_dag_uniq.gra | 8 | 8 | 7 | 21 | 15 | 58 | 2.9 | 7.3 |  |  |
-| nasa_dag_uniq.gra | 5 | 6 | 6 | 21 | 11 | 55 | 2.4 | 6.6 |  |  |
-| vchocyc_dag_uniq.gra | 8 | 8 | 7 | 21 | 15 | 59 | 2.8 | 7.2 |  |  |
-| xmark_dag_uniq.gra | 5 | 6 | 20 | 26 | 25 | 57 | 2.5 | 6.7 |  |  |
-
-### TODO: ADD Quer graph, 
-### TODO: ADD LARGE: go_uniprot.gra.gz, citeseer.scc.gra.gz, uniprotenc_150m.scc.gra.gz, citeseerx.gra.gz
-
-Note: the sequential version total time (STT) is the sum of SLT and SQT, while for our program we have implemented a more granular time detection, which allows us to precisely identify the labeling and query resolution time spans, ignoring the file reads (that are accounted for in the total time as PTT = PLT + PQT + X).
-
-Note: to reproduce the results stored in the `logs` directory, simply run `./complete_benchmark`. The table above is the most significant part of the benchmark; its results come from `logs/log_2021-01-12_11-19-31_mode=benchmark_labels=5.txt`.
+Note: the sequential version does not keep track of the file read times (denoted as "Other" in gray for the parallel version). We can assume a similar or worse time with respect to the parallel version, so we can mostly safely ignore the gray part of the bar of the parallel version.
+Note: to reproduce the results stored in the `logs` directory for the parallel version, simply run `./complete_benchmark`.
 
 ## How to run
 
