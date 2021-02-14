@@ -22,8 +22,8 @@ Version: 1
 ## Abstract
 Our group developed the Q2 project which consists of implementing an algorithm named **GRAIL** used for Scalable Reachability Index for Large Graphs. The project could be divided in three main steps:
 - **Reading** the Directed Acyclic graph (**DAG**)
-- Generation of the **labels** required
-- Test **query reachability** by means of labels
+- Generating the required **labels**
+- Testing the **query reachability** using the labels
 
 
 ## Code schema
@@ -31,52 +31,52 @@ Our group developed the Q2 project which consists of implementing an algorithm n
 ### TODO: more specific schema, following GRAIL paper
 
 ### DAG read
-The main thread (**main.c**) prepares the thread's data structure for **DAG** reading. In particular, it reads the first line of the input file DAG which contains the vertex number size used for allocate the right memory. The DAG files, is read (**readGraph.c**) from the maximum number of threads that the processor is able to support avoiding the scheduling of them. For instance if a processor is quad core and it's able to support 8 threads, eight is the number of threads that we create. The idea is to split the file into `NUM_THREAD` equal parts and let each thread read (without protection because there are no problems in reading) and fill its own part of the *shared* dag structure. Moreover, just after the building of the DAG structure, with some *synchronization*, each thread counts how many **roots** there are in its 'local' fragment and then all together (with some *protection*) fill a *shared* array containing all roots. These roots will be used later for label generation.
+The main thread (**main.c**) prepares the thread's data structure for the **DAG** read. In particular, it reads the first line of the input file DAG which contains the vertex number size used for allocate the right memory. The DAG file is read (**readGraph.c**) by the maximum number of threads that the processor is able to support without scheduling. For instance if a processor is quad-core and it's able to support 8 threads, eight is the number of threads that we create. The idea is to split the file into `NUM_THREADS` equal parts and let each thread read (without protection because there are no problems in reading) and fill its own part of the *shared* DAG structure. Moreover, just after the building of the DAG structure, with some *synchronization*, each thread counts how many **roots** there are in its 'local' fragment and then all together (with some *protection*) fill a *shared* array containing all roots. These roots will be used later for label generation.
 
 ### DAG read - What and How
 - MAX threads allowed by processors without scheduling
-	- Each thread takes care of the number vertexes between *inf* and *sup*. 
-	- Since the file is not homogeneous, we cannot divide it for vertex number. So each thread takes care of `FILE_SIZE/MAX_THREADS` bytes of the whole graph.	
-	- Each thread estimate the **inf** as `(FILE_SIZE*ThreadID)/MAX_THREADS` and **sup** as  `(FILE_SIZE*(ThreadID+1))/MAX_THREADS`
+	- Each thread takes care of the number of vertexes between *inf* and *sup*. 
+	- Since the file is not homogeneous, we cannot divide it for the vertexes number. So each thread takes care of `FILE_SIZE/MAX_THREADS` bytes of the whole graph.	
+	- Each thread estimates the **inf** as `(FILE_SIZE*ThreadID)/MAX_THREADS` and **sup** as  `(FILE_SIZE*(ThreadID+1))/MAX_THREADS`
 	- But in this way the thread doesn't know in which offset of the line it is. So the thread has to read until it finds '\n' to estimate its 'inf' and 'sup' correctly.
 
-### Roots initializzation - What and How
-- A first barrier is used to wait the end of the DAG read.
-- A second barrier is used to wait the counting of the roots.
-- A third barrier is used to wait for the main thread to allocate the memory for roots array.
+### Roots initialization - What and How
+- A first barrier is used to wait for the end of the DAG read.
+- A second barrier is used to wait for the count of the roots.
+- A third barrier is used to wait for the main thread to allocate the memory for the roots array.
 - A mutex is used to protect the insertion of the roots in the *shared* array.
 
 ----
 
-In the next step, the main thread re-initializes the threads data structure for **labels** generation (**buildLabels.c**). In general, we simply follow the paper structure. To be more specific, we run in parallel *one thread for each label* to generate. Each of these threads *visits* in random order the *roots*, and recursively visits -in random order- their *children* as described by the GRAIL algorithm.<br>
-We tried to implement a parallel basic version in which each thread(label) also generates one *thread for each child* and with the required protection, they explore the graph to generate the label.  We removed this implementation due to the limit of the maximum number of threads we are able to create (`PTHREAD_THREADS_MAX`) which is easily reached in a very large graph. <br>
-An other attempt we did is to generate `NUM_THREAD-NUM_LABELS` thread that in parallel exploit the visit; Since the memory usage is greater because of thread structure and the time is greater too since it's required the protection for rank_root, we decided to not use this version anymore.
+In the next step, the main thread re-initializes the threads data structure for the **labels** generation (**buildLabels.c**). In general, we follow the paper structure. Here, we run in parallel *one thread for each label*. Each of these threads *visits* in random order the *roots*, and recursively visits -in random order- their *children* as described by the GRAIL algorithm.<br>
+We tried to implement a parallel basic version in which each thread also generates one *thread for each child* and with the required protection, they explore the graph to generate the label. We removed this implementation due to the limit of the maximum number of threads we are able to create (`PTHREAD_THREADS_MAX`) which is easily reached in a very large graph. <br>
+Another attempt we did was to generate `NUM_THREAD-NUM_LABELS` threads that visit the DAG in parallel. Since the memory usage is greater because of the threads data structure and the time is greater as well since a protection for rank_root is required, we decided to not use this version.
 
 ### Label build - What and How
-- 1 thread for each label		: current version
-	- each thread runs its own label generation. Many labels at the time
+- 1 thread for each label : current version
+	- each thread runs its own label generation - many labels at the same time
 - MAX threads allowed by processors without scheduling for each label
-	- divide the roots number by many threads. 1 label at time.
+	- divide the roots number by many threads - only 1 label at each time
+	- mutex for each node to protect many threads working on the same node
+	- mutex for shared rank_root
+- 1 thread for each child : limit of threads exceeded (20'000)
 	- mutex for each node to protect many thread working on the same node
-	- mutex for shared rank_root.
-- 1 thread for each child	: limit of threads exceeded (20'000)
-	- mutex for each node to protect many thread working on the same node
-	- mutex for shared rank_root.
-- 1 thread for each label + some thread for roots visit  : no improvement
+	- mutex for shared rank_root
+- 1 thread for each label + some thread for roots visit : no improvement
  	- mutex for each node to protect many thread working on the same node
-	- mutex for shared rank_root.
+	- mutex for shared rank_root
 
 ----
 
-Finally, in the last step the main thread re-initializes the threads data structure for the **query** reachability test. In particular, the main thread counts the number of queries to allocate the right memory. Then the query resolution begins (**solveQuery.c**). The idea is to divide the queries in `NUM_THREADS` equal parts (so that all the cores work without scheduling) and let each thread solve its 'local' subset applying the logic described in the GRAIL paper algorithm (without the use of the exception list). At the end a log file is created to report the results. <br>
-As a reminder, given a query V1->V2, we have to check if the labels of V2 is NOT contained in the labels of V1, If so we can conclude that V1 cannot reach V2. Instead, if the labels of V2 is contained in the labels of V1 ([a, b] ⊆ [c, d]) we cannot claim that V1 can reach V2 but we have to do a DFS with pruning such that for each children C of V1 that doesn't contain V2's labels, we don't follow that path, Instead if the labels are contained we follow that path and verify the reachability.
+Finally, in the last step the main thread re-initializes the threads data structure for the **query** reachability test. In particular, the main thread counts the number of queries to allocate the right amount of memory. Then the query resolution begins (**solveQuery.c**). The idea is to divide the queries in `NUM_THREADS` equal parts (so that all the cores work without scheduling) and let each thread solve its 'local' subset applying the logic described in the GRAIL paper algorithm (without the use of the exception list). At the end a log file is created to report the results. <br>
+As a reminder, given a query V1->V2, we have to check if the labels of V2 is NOT contained in the labels of V1, If so we can conclude that V1 cannot reach V2. Instead, if the labels of V2 are contained in the labels of V1 ([a, b] ⊆ [c, d]) we cannot claim that V1 can reach V2 but we have to do a DFS with pruning such that for each child C of V1 that doesn't contain V2's labels, we don't follow that path. Otherwise, we follow that path and verify the reachability.
 
 ### Query resolution - What and How
 - MAX threads allowed by processors without scheduling
-	- Query file read with main thread only because of its limited size.
+	- Query file read by the main thread alone because of its limited size.
 	- Queries divided in equal parts (`NUM_QUERIES/NUM_THREADS`) within the number of threads 
-		- no protection because each thread write in its local part (array_queries[j].can_reach)
-	- The reachability of the queries is written by the main thread only because of its limited size.
+		- no protection because each thread writes in its local part (array_queries[j].can_reach)
+	- The reachability of the queries is written by the main thread alone because of its limited size.
 
 ----
 
@@ -207,7 +207,7 @@ We have created a Bash wrapper (`run.sh`) around our C program that allows for a
 ```
 Use -h or --help to show this help.
 Usage:
-./run.sh ([-d|--download] [-g|--generate] [-r|--run [-l|--labels <number of labels>] [benchmark|test|<path to graph file>]])
+./run.sh ([-d|--download] [-g|--generate] [-r|--run [-l|--labels <number of labels>] [-t|--threads <number of threads>] [benchmark|test|<path to graph file>]])
 [] mean an argument is optional
 () mean an argument is mandatory
 | means the argument on its left is equivalent to the argument on its right
@@ -220,6 +220,7 @@ There are 4 run modes available in this script:
 - 'all': it will run our program against all the DAGs in data/gen-dags and data/grail-dags. It is equivalent to running both modes above.
 The default run mode is 'all'.
 The default number of labels is 5, but it can be specified with the -l|--labels <num> option.
+The default number of threads is the maximum number of threads of your CPU.
 
 You need the following packages to run this script:
 wget gzip tar make gcc
