@@ -1,11 +1,11 @@
-# Presentation Document 
+# Q2 Project - POSIX C 
 
 Authors: Enrico Alberti s279434, Enrico Castelli s280124, Benedetto Giulivi s269827  
 Date: 2021-02-14  
 
 ## Contents
 
-- [Presentation Document](#presentation-document)
+- [Q2 Project - POSIX C](#q2-project---posix-c)
 - [Contents](#contents)
 - [Abstract](#abstract)
 - [Code schema](#code-schema)
