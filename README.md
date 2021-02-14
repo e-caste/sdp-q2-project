@@ -1,10 +1,8 @@
 # Presentation Document 
 
-Authors: Enrico Alberti, Enrico Castelli, Benedetto Giulivi
-
-Date: 2021-01-30
-
-Version: 1
+Authors: Enrico Alberti, Enrico Castelli, Benedetto Giulivi  
+Date: 2021-02-14  
+Version: 2
 
 ## Contents
 
