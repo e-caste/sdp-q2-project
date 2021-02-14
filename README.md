@@ -1,6 +1,6 @@
 # Presentation Document 
 
-Authors: Enrico Alberti, Enrico Castelli, Benedetto Giulivi  
+Authors: Enrico Alberti s279434, Enrico Castelli s280124, Benedetto Giulivi s269827  
 Date: 2021-02-14  
 Version: 2
 
