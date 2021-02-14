@@ -166,10 +166,15 @@ From the histograms above, we can see that in most cases our program (the parall
 
 Note: the sequential version does not keep track of the file read times (denoted as "Other" in gray for the parallel version). We can assume a similar or worse time with respect to the parallel version, so we can mostly safely ignore the gray part of the bar of the parallel version.  
 
-| Memory (MiB) / Real DAG | cit-Patents.scc | uniprotenc_22m.scc | uniprotenc_100m.scc | arXiv_sub_6000-1 | citeseer_sub_10720 | go_sub_6793 | pubmed_sub_9000-1 | yago_sub_6642 | agrocyc_dag_uniq | amaze_dag_uniq | anthra_dag_uniq | ecoo_dag_uniq | human_dag_uniq | kegg_dag_uniq | mtbrv_dag_uniq | nasa_dag_uniq | vchocyc_dag_uniq | xmark_dag_uniq |
-|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
-| **Sequential** | 435 | 178 | 1761 | 2.7 | 2.9 | 2.6 | 2.8 | 2.6 | 3 | 2.2 | 3 | 3 | 5.5 | 2.2 | 2.8 | 2.5 | 2.7 | 2.5 |
-| **Parallel (32 threads)** | 940 | 305 | 3036 | 5.5 | 6.6 | 5.4 | 6 | 5.6 | 5.9 | 4.5 | 5.8 | 5.8 | 9.4 | 4.6 | 5.4 | 5 | 5.4 | 5.2 |
+| Memory (MiB) / Real DAG | cit-Patents.scc | uniprotenc_22m.scc | uniprotenc_100m.scc | arXiv_sub_6000-1 | citeseer_sub_10720 | go_sub_6793 | pubmed_sub_9000-1 | yago_sub_6642 |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| **Sequential** | 435 | 178 | 1761 | 2.7 | 2.9 | 2.6 | 2.8 | 2.6 |
+| **Parallel (32 threads)** | 940 | 305 | 3036 | 5.5 | 6.6 | 5.4 | 6 | 5.6 |
+
+| Memory (MiB) / Real DAG | agrocyc_dag_uniq | amaze_dag_uniq | anthra_dag_uniq | ecoo_dag_uniq | human_dag_uniq | kegg_dag_uniq | mtbrv_dag_uniq | nasa_dag_uniq | vchocyc_dag_uniq | xmark_dag_uniq |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| **Sequential** |  3 | 2.2 | 3 | 3 | 5.5 | 2.2 | 2.8 | 2.5 | 2.7 | 2.5 |
+| **Parallel (32 threads)** | 5.9 | 4.5 | 5.8 | 5.8 | 9.4 | 4.6 | 5.4 | 5 | 5.4 | 5.2 |
 
 | Memory (MiB) / Synthetic DAG | v1000000e100 | v1000000e200 | v100000e100 | v500000e1000 | v500000e50 | v1000e30 | v100e10 | v10e3 | v200e20 | v5000e50 | v500e10 |
 |:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
