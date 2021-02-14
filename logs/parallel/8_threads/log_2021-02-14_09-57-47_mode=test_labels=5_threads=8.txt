@@ -1,0 +1,362 @@
+Set number of labels to 5
+Set number of threads to 8
+Run mode set to test only
+rm -f *.o main res_query.txt
+gcc -Wall -O3 -c main.c -o main.o
+gcc -Wall -O3 -c readGraph.c -o readGraph.o
+gcc -Wall -O3 -c buildLabels.c -o buildLabels.o
+gcc -Wall -O3 -c solveQuery.c -o solveQuery.o
+gcc -Wall -O3 -c utility.c -o utility.o
+gcc main.o readGraph.o buildLabels.o solveQuery.o utility.o -o main -lpthread
+
+Running ./main data/gen-dags/v1000000e100.gra 5 data/gen-dags/v1000000e100.que 8
+Starting the reading of DAG file...
+Starting roots search...
+End of root search...
+End of DAG file reading...
+Starting label creation...
+End Label creation...
+Query Number: 100000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v1000000e100.gra (file1) in 585 milliseconds, 73 microseconds.
+Currently used memory (RAM): 228 MB 992 KB
+Currently used virtual memory (included pages): 569 MB 624 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 33 seconds, 410 milliseconds, 465 microseconds.
+Currently used memory (RAM): 344 MB 20 KB
+Currently used virtual memory (included pages): 684 MB 24 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/gen-dags/v1000000e100.que (file2) in 32 milliseconds, 31 microseconds.
+Currently used memory (RAM): 345 MB 28 KB
+Currently used virtual memory (included pages): 685 MB 172 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 100000 reachability queries in 27 seconds, 620 milliseconds, 77 microseconds.
+Currently used memory (RAM): 375 MB 680 KB
+Currently used virtual memory (included pages): 715 MB 716 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 1 minutes, 1 seconds, 807 milliseconds, 763 microseconds.
+Threads used: 8.
+Maximum memory usage: 375 MB 740 KB
+
+Running ./main data/gen-dags/v1000000e200.gra 5 data/gen-dags/v1000000e200.que 8
+Starting the reading of DAG file...
+Starting roots search...
+End of root search...
+End of DAG file reading...
+Starting label creation...
+End Label creation...
+Query Number: 200000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v1000000e200.gra (file1) in 1 seconds, 180 milliseconds, 473 microseconds.
+Currently used memory (RAM): 420 MB 376 KB
+Currently used virtual memory (included pages): 569 MB 624 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 57 seconds, 179 milliseconds, 486 microseconds.
+Currently used memory (RAM): 535 MB 128 KB
+Currently used virtual memory (included pages): 684 MB 24 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/gen-dags/v1000000e200.que (file2) in 54 milliseconds, 474 microseconds.
+Currently used memory (RAM): 537 MB 164 KB
+Currently used virtual memory (included pages): 686 MB 320 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 200000 reachability queries in 1 minutes, 3 seconds, 608 milliseconds, 470 microseconds.
+Currently used memory (RAM): 567 MB 924 KB
+Currently used virtual memory (included pages): 716 MB 864 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 2 minutes, 2 seconds, 231 milliseconds, 541 microseconds.
+Threads used: 8.
+Maximum memory usage: 567 MB 996 KB
+
+Running ./main data/gen-dags/v100000e100.gra 5 data/gen-dags/v100000e100.que 8
+Starting the reading of DAG file...
+Starting roots search...
+End of root search...
+End of DAG file reading...
+Starting label creation...
+End Label creation...
+Query Number: 10000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v100000e100.gra (file1) in 32 milliseconds, 154 microseconds.
+Currently used memory (RAM): 24 MB 808 KB
+Currently used virtual memory (included pages): 549 MB 8 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 4 seconds, 63 milliseconds, 783 microseconds.
+Currently used memory (RAM): 36 MB 368 KB
+Currently used virtual memory (included pages): 560 MB 460 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/gen-dags/v100000e100.que (file2) in 2 milliseconds, 773 microseconds.
+Currently used memory (RAM): 36 MB 368 KB
+Currently used virtual memory (included pages): 560 MB 600 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 10000 reachability queries in 109 milliseconds, 367 microseconds.
+Currently used memory (RAM): 39 MB 520 KB
+Currently used virtual memory (included pages): 563 MB 664 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 4 seconds, 226 milliseconds, 680 microseconds.
+Threads used: 8.
+Maximum memory usage: 39 MB 552 KB
+
+Running ./main data/gen-dags/v1000e30.gra 5 data/gen-dags/v1000e30.que 8
+Starting the reading of DAG file...
+Starting roots search...
+End of root search...
+End of DAG file reading...
+Starting label creation...
+End Label creation...
+Query Number: 1000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v1000e30.gra (file1) in 1 milliseconds, 861 microseconds.
+Currently used memory (RAM): 2 MB 104 KB
+Currently used virtual memory (included pages): 546 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 8 milliseconds, 302 microseconds.
+Currently used memory (RAM): 2 MB 292 KB
+Currently used virtual memory (included pages): 546 MB 868 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/gen-dags/v1000e30.que (file2) in 282 microseconds.
+Currently used memory (RAM): 2 MB 292 KB
+Currently used virtual memory (included pages): 546 MB 868 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 1000 reachability queries in 333 microseconds.
+Currently used memory (RAM): 2 MB 332 KB
+Currently used virtual memory (included pages): 546 MB 868 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 11 milliseconds, 397 microseconds.
+Threads used: 8.
+Maximum memory usage: 2 MB 364 KB
+
+Running ./main data/gen-dags/v100e10.gra 5 data/gen-dags/v100e10.que 8
+Starting the reading of DAG file...
+Starting roots search...
+End of root search...
+End of DAG file reading...
+Starting label creation...
+End Label creation...
+Query Number: 100
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v100e10.gra (file1) in 1 milliseconds, 289 microseconds.
+Currently used memory (RAM): 1 MB 940 KB
+Currently used virtual memory (included pages): 546 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 349 microseconds.
+Currently used memory (RAM): 2 MB 52 KB
+Currently used virtual memory (included pages): 546 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/gen-dags/v100e10.que (file2) in 41 microseconds.
+Currently used memory (RAM): 2 MB 52 KB
+Currently used virtual memory (included pages): 546 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 100 reachability queries in 315 microseconds.
+Currently used memory (RAM): 2 MB 60 KB
+Currently used virtual memory (included pages): 546 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 2 milliseconds, 285 microseconds.
+Threads used: 8.
+Maximum memory usage: 2 MB 84 KB
+
+Running ./main data/gen-dags/v10e3.gra 5 data/gen-dags/v10e3.que 8
+Starting the reading of DAG file...
+Starting roots search...
+End of root search...
+End of DAG file reading...
+Starting label creation...
+End Label creation...
+Query Number: 10
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v10e3.gra (file1) in 1 milliseconds, 297 microseconds.
+Currently used memory (RAM): 2 MB 20 KB
+Currently used virtual memory (included pages): 546 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 267 microseconds.
+Currently used memory (RAM): 2 MB 80 KB
+Currently used virtual memory (included pages): 546 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/gen-dags/v10e3.que (file2) in 20 microseconds.
+Currently used memory (RAM): 2 MB 80 KB
+Currently used virtual memory (included pages): 546 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 10 reachability queries in 223 microseconds.
+Currently used memory (RAM): 2 MB 84 KB
+Currently used virtual memory (included pages): 546 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 2 milliseconds, 119 microseconds.
+Threads used: 8.
+Maximum memory usage: 2 MB 112 KB
+
+Running ./main data/gen-dags/v200e20.gra 5 data/gen-dags/v200e20.que 8
+Starting the reading of DAG file...
+Starting roots search...
+End of root search...
+End of DAG file reading...
+Starting label creation...
+End Label creation...
+Query Number: 200
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v200e20.gra (file1) in 1 milliseconds, 224 microseconds.
+Currently used memory (RAM): 1 MB 956 KB
+Currently used virtual memory (included pages): 546 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 1 milliseconds, 182 microseconds.
+Currently used memory (RAM): 2 MB 140 KB
+Currently used virtual memory (included pages): 546 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/gen-dags/v200e20.que (file2) in 76 microseconds.
+Currently used memory (RAM): 2 MB 140 KB
+Currently used virtual memory (included pages): 546 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 200 reachability queries in 271 microseconds.
+Currently used memory (RAM): 2 MB 152 KB
+Currently used virtual memory (included pages): 546 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 3 milliseconds, 83 microseconds.
+Threads used: 8.
+Maximum memory usage: 2 MB 180 KB
+
+Running ./main data/gen-dags/v500000e1000.gra 5 data/gen-dags/v500000e1000.que 8
+Starting the reading of DAG file...
+Starting roots search...
+End of root search...
+End of DAG file reading...
+Starting label creation...
+End Label creation...
+Query Number: 75000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v500000e1000.gra (file1) in 2 seconds, 555 milliseconds, 673 microseconds.
+Currently used memory (RAM): 973 MB 904 KB
+Currently used virtual memory (included pages): 1 GB 46 MB 168 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 2 minutes, 26 seconds, 619 milliseconds, 845 microseconds.
+Currently used memory (RAM): 1 GB 7 MB 360 KB
+Currently used virtual memory (included pages): 1 GB 103 MB 380 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/gen-dags/v500000e1000.que (file2) in 20 milliseconds, 579 microseconds.
+Currently used memory (RAM): 1 GB 8 MB 104 KB
+Currently used virtual memory (included pages): 1 GB 104 MB 236 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 75000 reachability queries in 10 seconds, 900 milliseconds, 584 microseconds.
+Currently used memory (RAM): 1 GB 23 MB 376 KB
+Currently used virtual memory (included pages): 1 GB 119 MB 524 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 2 minutes, 40 seconds, 345 milliseconds, 996 microseconds.
+Threads used: 8.
+Maximum memory usage: 1 GB 23 MB 448 KB
+
+Running ./main data/gen-dags/v500000e50.gra 5 data/gen-dags/v500000e50.que 8
+Starting the reading of DAG file...
+Starting roots search...
+End of root search...
+End of DAG file reading...
+Starting label creation...
+End Label creation...
+Query Number: 50000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v500000e50.gra (file1) in 122 milliseconds, 14 microseconds.
+Currently used memory (RAM): 67 MB 912 KB
+Currently used virtual memory (included pages): 558 MB 168 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 10 seconds, 636 milliseconds, 656 microseconds.
+Currently used memory (RAM): 125 MB 712 KB
+Currently used virtual memory (included pages): 615 MB 380 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/gen-dags/v500000e50.que (file2) in 14 milliseconds, 103 microseconds.
+Currently used memory (RAM): 126 MB 188 KB
+Currently used virtual memory (included pages): 615 MB 968 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 50000 reachability queries in 4 seconds, 217 milliseconds, 808 microseconds.
+Currently used memory (RAM): 141 MB 544 KB
+Currently used virtual memory (included pages): 631 MB 232 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 15 seconds, 48 milliseconds, 807 microseconds.
+Threads used: 8.
+Maximum memory usage: 141 MB 592 KB
+
+Running ./main data/gen-dags/v5000e50.gra 5 data/gen-dags/v5000e50.que 8
+Starting the reading of DAG file...
+Starting roots search...
+End of root search...
+End of DAG file reading...
+Starting label creation...
+End Label creation...
+Query Number: 5000
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v5000e50.gra (file1) in 3 milliseconds, 48 microseconds.
+Currently used memory (RAM): 2 MB 668 KB
+Currently used virtual memory (included pages): 546 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 63 milliseconds, 78 microseconds.
+Currently used memory (RAM): 3 MB 308 KB
+Currently used virtual memory (included pages): 547 MB 352 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/gen-dags/v5000e50.que (file2) in 1 milliseconds, 301 microseconds.
+Currently used memory (RAM): 3 MB 308 KB
+Currently used virtual memory (included pages): 547 MB 488 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 5000 reachability queries in 2 milliseconds, 764 microseconds.
+Currently used memory (RAM): 3 MB 512 KB
+Currently used virtual memory (included pages): 547 MB 624 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 71 milliseconds, 902 microseconds.
+Threads used: 8.
+Maximum memory usage: 3 MB 524 KB
+
+Running ./main data/gen-dags/v500e10.gra 5 data/gen-dags/v500e10.que 8
+Starting the reading of DAG file...
+Starting roots search...
+End of root search...
+End of DAG file reading...
+Starting label creation...
+End Label creation...
+Query Number: 500
+Deallocation successful!
+
+
+------------STATISTICS------------
+Read input file data/gen-dags/v500e10.gra (file1) in 1 milliseconds, 152 microseconds.
+Currently used memory (RAM): 1 MB 908 KB
+Currently used virtual memory (included pages): 546 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Generated 5 labels in 1 milliseconds, 710 microseconds.
+Currently used memory (RAM): 2 MB 136 KB
+Currently used virtual memory (included pages): 546 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read query file data/gen-dags/v500e10.que (file2) in 157 microseconds.
+Currently used memory (RAM): 2 MB 136 KB
+Currently used virtual memory (included pages): 546 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tested 500 reachability queries in 266 microseconds.
+Currently used memory (RAM): 2 MB 160 KB
+Currently used virtual memory (included pages): 546 MB 736 KB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Total program duration: 3 milliseconds, 701 microseconds.
+Threads used: 8.
+Maximum memory usage: 2 MB 184 KB
