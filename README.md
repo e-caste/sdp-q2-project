@@ -182,6 +182,7 @@ Note: the sequential version does not keep track of the file read times (denoted
 
 From the tables above, it emerges that in our parallel version we almost always use more memory than the sequential version. This is most likely due to the additional data structures we need to store thread arguments, indexes, roots, mutexes and barriers. 
 
+Note: the results above have been obtained using the optimal number of labels (2 for small DAGs, 5 for large DAGs, as per the GRAIL paper).  
 Note: to reproduce the results stored in the `logs` directory for the parallel version, simply run `./complete_benchmark`.
 
 ## How to run
