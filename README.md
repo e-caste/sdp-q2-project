@@ -180,6 +180,8 @@ Note: the sequential version does not keep track of the file read times (denoted
 | **Sequential** | 308 | 542 | 32 | 1180 | 96 | 1.6 | 1.5 | 1.5 | 1.5 | 2.4 | 1.5 |
 | **Parallel (32 threads)** | 467 | 659 | 48 | 1093 | 187 | 2.8 | 2.5 | 2.1 | 2.5 | 4.3 | 2.6 |
 
+From the tables above, it emerges that in our parallel version we almost always use more memory than the sequential version. This is most likely due to the additional data structures we need to store thread arguments, indexes, roots, mutexes and barriers. 
+
 Note: to reproduce the results stored in the `logs` directory for the parallel version, simply run `./complete_benchmark`.
 
 ## How to run
